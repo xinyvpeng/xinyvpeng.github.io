@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html data-theme="day">
+<head>
+  <meta charset="UTF-8">
+  <title>森林粒子系统功能测试</title>
+  <style>
+    :root {
+      --bg-day: #f8f9fa;
+      --text-day: #212529;
+      --bg-night: #121a0f;
+      --text-night: #e8f1e1;
+      --particle-opacity: 0.6;
+    }
+    [data-theme="night"] {
+      background: var(--bg-night);
+      color: var(--text-night);
+      --particle-opacity: 0.3;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      background: var(--bg-day);
+      color: var(--text-day);
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+      position: relative;
+    }
+    .test-section {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      background: rgba(255,255,255,0.7);
+      position: relative;
+      z-index: 10;
+    }
+    [data-theme="night"] .test-section {
+      background: rgba(30,40,25,0.7);
+      border-color: #444;
+    }
+    button {
+      margin: 4px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #log {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 13px;
+      margin-top: 16px;
+    }
+    [data-theme="night"] #log {
+      background: #1a1a1a;
+      border-color: #444;
+      color: #ccc;
+    }
+    .log-entry {
+      margin: 4px 0;
+      padding: 4px;
+      border-left: 3px solid #007bff;
+    }
+    .log-entry.success { border-left-color: #28a745; }
+    .log-entry.error { border-left-color: #dc3545; }
+    .log-entry.info { border-left-color: #17a2b8; }
+    h2 { margin-top: 24px; }
+    .status { 
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    .status.day { background: #ffc107; color: #212529; }
+    .status.night { background: #343a40; color: white; }
+    .status.active { background: #28a745; color: white; }
+    .status.inactive { background: #6c757d; color: white; }
+    .control-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .stat-card {
+      background: rgba(0,0,0,0.05);
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+    }
+    [data-theme="night"] .stat-card {
+      background: rgba(255,255,255,0.05);
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    [data-theme="night"] .stat-value {
+      color: #6ea8fe;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    [data-theme="night"] .stat-label {
+      color: #aaa;
+    }
+    #particles-canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .canvas-overlay {
+      position: relative;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div class="canvas-overlay">
+    <h1>🍃 森林粒子系统功能测试</h1>
+    <p>测试 <code>ForestParticles</code> 模块的完整功能，包括粒子生成、动画、性能优化等。</p>
+    
+    <div class="test-section">
+      <h2>粒子系统状态 <span id="particle-system-status" class="status inactive">未激活</span></h2>
+      <div class="control-group">
+        <button id="init-particles">初始化粒子系统</button>
+        <button id="destroy-particles" disabled>销毁粒子系统</button>
+        <button id="pause-particles" disabled>暂停动画</button>
+        <button id="resume-particles" disabled>恢复动画</button>
+        <button id="reset-particles" disabled>重置粒子</button>
+      </div>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="particle-count">0</div>
+          <div class="stat-label">当前粒子数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="max-particles">50</div>
+          <div class="stat-label">最大粒子数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="system-status">未激活</div>
+          <div class="stat-label">系统状态</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="mobile-mode">否</div>
+          <div class="stat-label">移动端模式</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="reduced-motion">否</div>
+          <div class="stat-label">减少动画偏好</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="canvas-size">0×0</div>
+          <div class="stat-label">画布尺寸</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>粒子控制</h2>
+      <div class="control-group">
+        <button id="add-particles" disabled>添加10个粒子</button>
+        <button id="remove-particles" disabled>移除10个粒子</button>
+        <button id="change-wind" disabled>改变风向</button>
+        <button id="toggle-sway" disabled>切换摇摆运动</button>
+        <button id="change-opacity" disabled>调整透明度</button>
+      </div>
+      <p>鼠标在画布上移动可以扰动粒子（桌面端）。</p>
+    </div>
+    
+    <div class="test-section">
+      <h2>主题集成测试</h2>
+      <div class="control-group">
+        <button id="toggle-theme">切换主题</button>
+        <button id="set-day">设为日间模式</button>
+        <button id="set-night">设为夜间模式</button>
+      </div>
+      <p>当前主题: <span id="current-theme">day</span></p>
+      <p>粒子透明度CSS变量: <code id="opacity-value">0.6</code></p>
+    </div>
+    
+    <div class="test-section">
+      <h2>性能测试</h2>
+      <div class="control-group">
+        <button id="stress-test" disabled>压力测试（100粒子）</button>
+        <button id="clear-stress" disabled>清除压力测试</button>
+        <button id="check-performance" disabled>检查性能</button>
+      </div>
+      <p>帧率: <span id="fps-counter">0</span> FPS</p>
+      <p>最后更新时间: <span id="last-update">-</span></p>
+    </div>
+    
+    <div class="test-section">
+      <h2>测试日志</h2>
+      <div id="log"></div>
+      <button id="clear-log">清空日志</button>
+    </div>
+  </div>
+
+  <!-- 引入粒子系统模块 -->
+  <script src="/js/forest/forest-particles.js"></script>
+  
+  <script>
+    // 测试工具
+    const log = document.getElementById('log');
+    let fps = 0;
+    let frameCount = 0;
+    let lastFpsUpdate = performance.now();
+    let lastUpdateTime = performance.now();
+    
+    function addLog(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+    
+    function updateStats() {
+      if (!window.ForestParticles) return;
+      
+      const status = window.ForestParticles.getStatus();
+      document.getElementById('particle-count').textContent = status.particleCount;
+      document.getElementById('max-particles').textContent = status.maxParticles;
+      document.getElementById('system-status').textContent = status.active ? '激活' : '未激活';
+      document.getElementById('mobile-mode').textContent = status.isMobile ? '是' : '否';
+      document.getElementById('reduced-motion').textContent = status.prefersReducedMotion ? '是' : '否';
+      
+      const statusElement = document.getElementById('particle-system-status');
+      statusElement.textContent = status.active ? '激活' : '未激活';
+      statusElement.className = `status ${status.active ? 'active' : 'inactive'}`;
+      
+      if (window.ForestParticles.canvas) {
+        const canvas = window.ForestParticles.canvas;
+        document.getElementById('canvas-size').textContent = 
+          `${canvas.width}×${canvas.height}`;
+      }
+      
+      // 更新主题信息
+      const theme = document.documentElement.getAttribute('data-theme') || 'day';
+      document.getElementById('current-theme').textContent = theme;
+      const opacity = getComputedStyle(document.documentElement).getPropertyValue('--particle-opacity').trim();
+      document.getElementById('opacity-value').textContent = opacity || '0.6';
+    }
+    
+    function updateFPS() {
+      frameCount++;
+      const now = performance.now();
+      if (now >= lastFpsUpdate + 1000) {
+        fps = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
+        frameCount = 0;
+        lastFpsUpdate = now;
+        document.getElementById('fps-counter').textContent = fps;
+      }
+      document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+    }
+    
+    // 初始化事件监听
+    document.addEventListener('DOMContentLoaded', () => {
+      addLog('粒子系统测试页面已加载');
+      addLog(`当前窗口尺寸: ${window.innerWidth}×${window.innerHeight}`);
+      addLog(`设备像素比: ${window.devicePixelRatio}`);
+      
+      // 启动统计更新
+      setInterval(updateStats, 500);
+      setInterval(updateFPS, 100);
+      
+      // 主题切换功能
+      const themeToggle = document.getElementById('toggle-theme');
+      const setDay = document.getElementById('set-day');
+      const setNight = document.getElementById('set-night');
+      
+      function applyTheme(theme) {
+        const root = document.documentElement;
+        root.removeAttribute('data-theme');
+        if (theme === 'night') root.setAttribute('data-theme', 'night');
+        addLog(`主题已切换为: ${theme}`);
+        updateStats();
+      }
+      
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'day';
+        const newTheme = currentTheme === 'day' ? 'night' : 'day';
+        applyTheme(newTheme);
+      });
+      
+      setDay.addEventListener('click', () => applyTheme('day'));
+      setNight.addEventListener('click', () => applyTheme('night'));
+    });
+    
+    // 粒子系统控制
+    document.getElementById('init-particles').addEventListener('click', () => {
+      if (!window.ForestParticles) {
+        addLog('错误: ForestParticles 模块未加载', 'error');
+        return;
+      }
+      
+      try {
+        window.ForestParticles.init();
+        addLog('粒子系统初始化成功', 'success');
+        
+        // 更新按钮状态
+        document.getElementById('init-particles').disabled = true;
+        document.getElementById('destroy-particles').disabled = false;
+        document.getElementById('pause-particles').disabled = false;
+        document.getElementById('resume-particles').disabled = true;
+        document.getElementById('reset-particles').disabled = false;
+        document.getElementById('add-particles').disabled = false;
+        document.getElementById('remove-particles').disabled = false;
+        document.getElementById('change-wind').disabled = false;
+        document.getElementById('toggle-sway').disabled = false;
+        document.getElementById('change-opacity').disabled = false;
+        document.getElementById('stress-test').disabled = false;
+        document.getElementById('clear-stress').disabled = false;
+        document.getElementById('check-performance').disabled = false;
+      } catch (error) {
+        addLog(`初始化失败: ${error.message}`, 'error');
+      }
+    });
+    
+    document.getElementById('destroy-particles').addEventListener('click', () => {
+      if (window.ForestParticles) {
+        window.ForestParticles.destroy();
+        addLog('粒子系统已销毁', 'info');
+        
+        // 更新按钮状态
+        document.getElementById('init-particles').disabled = false;
+        document.getElementById('destroy-particles').disabled = true;
+        document.getElementById('pause-particles').disabled = true;
+        document.getElementById('resume-particles').disabled = true;
+        document.getElementById('reset-particles').disabled = true;
+        document.getElementById('add-particles').disabled = true;
+        document.getElementById('remove-particles').disabled = true;
+        document.getElementById('change-wind').disabled = true;
+        document.getElementById('toggle-sway').disabled = true;
+        document.getElementById('change-opacity').disabled = true;
+        document.getElementById('stress-test').disabled = true;
+        document.getElementById('clear-stress').disabled = true;
+        document.getElementById('check-performance').disabled = true;
+      }
+    });
+    
+    document.getElementById('pause-particles').addEventListener('click', () => {
+      if (window.ForestParticles) {
+        window.ForestParticles.pauseAnimation();
+        addLog('粒子动画已暂停', 'info');
+        document.getElementById('pause-particles').disabled = true;
+        document.getElementById('resume-particles').disabled = false;
+      }
+    });
+    
+    document.getElementById('resume-particles').addEventListener('click', () => {
+      if (window.ForestParticles) {
+        window.ForestParticles.resumeAnimation();
+        addLog('粒子动画已恢复', 'info');
+        document.getElementById('pause-particles').disabled = false;
+        document.getElementById('resume-particles').disabled = true;
+      }
+    });
+    
+    document.getElementById('reset-particles').addEventListener('click', () => {
+      if (window.ForestParticles) {
+        // 销毁并重新初始化
+        window.ForestParticles.destroy();
+        setTimeout(() => {
+          window.ForestParticles.init();
+          addLog('粒子系统已重置', 'info');
+        }, 100);
+      }
+    });
+    
+    document.getElementById('add-particles').addEventListener('click', () => {
+      if (window.ForestParticles) {
+        const before = window.ForestParticles.getParticleCount();
+        // 手动添加粒子
+        for (let i = 0; i < 10; i++) {
+          const particle = window.ForestParticles.createParticle();
+          if (particle && window.ForestParticles.particles) {
+            window.ForestParticles.particles.push(particle);
+          }
+        }
+        const after = window.ForestParticles.getParticleCount();
+        addLog(`添加了 ${after - before} 个新粒子`, 'info');
+      }
+    });
+    
+    document.getElementById('remove-particles').addEventListener('click', () => {
+      if (window.ForestParticles && window.ForestParticles.particles) {
+        const before = window.ForestParticles.particles.length;
+        window.ForestParticles.particles.splice(0, Math.min(10, before));
+        addLog(`移除了 ${before - window.ForestParticles.particles.length} 个粒子`, 'info');
+      }
+    });
+    
+    document.getElementById('change-wind').addEventListener('click', () => {
+      if (window.ForestParticles) {
+        const currentWind = window.ForestParticles.config.windStrength;
+        const newWind = currentWind > 0 ? -0.2 : 0.2;
+        window.ForestParticles.config.windStrength = newWind;
+        addLog(`风向已改变: ${newWind > 0 ? '向右' : '向左'} (强度: ${Math.abs(newWind)})`, 'info');
+      }
+    });
+    
+    document.getElementById('toggle-sway').addEventListener('click', () => {
+      if (window.ForestParticles) {
+        const currentAmplitude = window.ForestParticles.config.swayAmplitude;
+        window.ForestParticles.config.swayAmplitude = currentAmplitude > 0 ? 0 : 2;
+        addLog(`摇摆运动 ${currentAmplitude > 0 ? '禁用' : '启用'}`, 'info');
+      }
+    });
+    
+    document.getElementById('change-opacity').addEventListener('click', () => {
+      const root = document.documentElement;
+      const currentOpacity = parseFloat(getComputedStyle(root).getPropertyValue('--particle-opacity') || '0.6');
+      const newOpacity = currentOpacity > 0.5 ? 0.3 : 0.8;
+      root.style.setProperty('--particle-opacity', newOpacity.toString());
+      addLog(`粒子透明度已调整: ${newOpacity}`, 'info');
+    });
+    
+    document.getElementById('stress-test').addEventListener('click', () => {
+      if (window.ForestParticles && window.ForestParticles.particles) {
+        const before = window.ForestParticles.particles.length;
+        // 临时增加最大粒子数
+        const originalMax = window.ForestParticles.config.maxParticles;
+        window.ForestParticles.config.maxParticles = 100;
+        
+        // 添加粒子直到达到100
+        while (window.ForestParticles.particles.length < 100) {
+          const particle = window.ForestParticles.createParticle();
+          if (particle) {
+            window.ForestParticles.particles.push(particle);
+          } else {
+            break;
+          }
+        }
+        
+        window.ForestParticles.config.maxParticles = originalMax;
+        addLog(`压力测试: 粒子数从 ${before} 增加到 ${window.ForestParticles.particles.length}`, 'info');
+      }
+    });
+    
+    document.getElementById('clear-stress').addEventListener('click', () => {
+      if (window.ForestParticles && window.ForestParticles.particles) {
+        window.ForestParticles.particles = [];
+        addLog('压力测试粒子已清除', 'info');
+      }
+    });
+    
+    document.getElementById('check-performance').addEventListener('click', () => {
+      if (window.ForestParticles) {
+        const status = window.ForestParticles.getStatus();
+        addLog(`性能检查: 粒子数=${status.particleCount}, 最大=${status.maxParticles}, 移动端=${status.isMobile}, 减少动画=${status.prefersReducedMotion}`, 'info');
+        
+        // 简单性能测试
+        const start = performance.now();
+        let test = 0;
+        for (let i = 0; i < 1000000; i++) {
+          test += Math.random();
+        }
+        const end = performance.now();
+        addLog(`简单计算测试: ${(end - start).toFixed(2)}ms`, 'info');
+      }
+    });
+    
+    document.getElementById('clear-log').addEventListener('click', () => {
+      log.innerHTML = '';
+      addLog('日志已清空', 'info');
+    });
+    
+    // 初始日志
+    addLog('等待初始化粒子系统...');
+    addLog(`ForestParticles 模块: ${typeof window.ForestParticles !== 'undefined' ? '已加载' : '未找到'}`);
+    
+    // 自动初始化（可选）
+    // setTimeout(() => {
+    //   if (typeof window.ForestParticles !== 'undefined') {
+    //     document.getElementById('init-particles').click();
+    //   }
+    // }, 1000);
+  </script>
+</body>
+</html>
