@@ -354,12 +354,11 @@ a {
     opacity: 0.9 !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border-radius: 10px !important;
-    color: var(--text-secondary) !important;
+    color: var(--text-primary) !important;
     
     &:hover {
       color: var(--text-accent) !important;
-      background-color: rgba(var(--text-accent-rgb), 0.15) !important;
-      border-radius: 10px !important;
+      background-color: unquote('rgba(var(--text-accent-rgb), 0.15)') !important;
       opacity: 1 !important;
       transform: translateY(-2px) !important;
       box-shadow: 0 6px 20px rgba(13, 20, 10, 0.25) !important;
