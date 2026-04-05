@@ -12,6 +12,7 @@ scheme: Mist
 custom_file_path:
   style: source/_data/styles.styl
   font: source/_data/fonts.styl
+  bodyEnd: source/_data/body-end.njk
 
 # Color settings
 colors:
@@ -204,8 +205,13 @@ math:
     copy_tex: false
 
 # Forest Library Theme JavaScript
-# Note: This configuration may need manual integration with NexT theme's script loading system
+# Scripts will be automatically injected via body-end.njk
 forest_theme:
   enable: true
+  # List of JavaScript files to load (relative to site root)
   scripts:
     - /js/forest/forest-theme.js
+    # Future modules will be added here:
+    # - /js/forest/forest-particles.js
+    # - /js/forest/forest-audio.js
+    # - /js/forest/forest-interactions.js

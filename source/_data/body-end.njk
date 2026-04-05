@@ -1,0 +1,25 @@
+<!-- 森林图书馆主题脚本注入 -->
+{% if theme.forest_theme.enable %}
+  <!-- 森林主题核心脚本 -->
+  <script src="{{ url_for('/js/forest/forest-theme.js') }}" defer></script>
+  
+  {% if theme.forest_theme.scripts %}
+    {% for script in theme.forest_theme.scripts %}
+      {% if script != '/js/forest/forest-theme.js' %}
+        <script src="{{ url_for(script) }}" defer></script>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  
+  <!-- 主题初始化脚本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof window.ForestTheme !== 'undefined') {
+        // 主题管理器会自动初始化
+        console.log('🌲 森林主题加载完成');
+      } else {
+        console.warn('🌲 森林主题脚本未正确加载');
+      }
+    });
+  </script>
+{% endif %}
