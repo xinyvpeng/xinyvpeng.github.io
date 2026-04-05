@@ -386,7 +386,7 @@
 <li>目标是最大化对角线上的相似度（正确配对），最小化非对角线上的相似度（错误配对）</li>
 </ol>
 <p><strong>余弦相似度计算</strong>：<br>$$<br>\text{cosine_similarity}(u, v) &#x3D; \frac{u \cdot v}{|u| |v|}<br>$$</p>
-<p><strong>对比损失函数</strong>（InfoNCE损失）：<br>$$<br>\begin{aligned}<br>\mathcal{L}<em>{\text{contrastive}} &#x3D; &amp;-\frac{1}{N} \sum</em>{i&#x3D;1}^N \Bigg[ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ij}&#x2F;\tau)} \<br>&amp;+ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ji}&#x2F;\tau)} \Bigg]<br>\end{aligned}<br>$$</p>
+<p><strong>对比损失函数</strong>（InfoNCE损失）：<br>$$<br>\begin{aligned}<br>\mathcal{L}_{\text{contrastive}} &#x3D; &amp;-\frac{1}{N} \sum_{i&#x3D;1}^N \Bigg[ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ij}&#x2F;\tau)} \<br>&amp;+ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ji}&#x2F;\tau)} \Bigg]<br>\end{aligned}<br>$$</p>
 <p>其中$\tau$是温度参数，控制相似度分布的尖锐程度。</p>
 <h3 id="温度参数-tau-的作用"><a href="#温度参数-tau-的作用" class="headerlink" title="温度参数$\tau$的作用"></a>温度参数$\tau$的作用</h3><ul>
 <li><strong>小$\tau$</strong>：相似度分布更尖锐，模型更关注困难负样本</li>
@@ -645,7 +645,7 @@
 </tbody></table>
 <p> <strong>结论</strong>：CLIP在保持强大能力的同时，具有合理的计算开销。</p>
 <h2 id="面试问题集锦"><a href="#面试问题集锦" class="headerlink" title="面试问题集锦"></a>面试问题集锦</h2><h3 id="技术实现细节"><a href="#技术实现细节" class="headerlink" title="技术实现细节"></a>技术实现细节</h3><p><strong>Q1: CLIP的对比损失函数具体形式是什么？温度参数τ的作用？</strong></p>
-<p><strong>A1:</strong> CLIP使用对称的InfoNCE损失：<br>$$<br>\begin{aligned}<br>\mathcal{L}<em>{\text{contrastive}} &#x3D; &amp;-\frac{1}{N} \sum</em>{i&#x3D;1}^N \Bigg[ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ij}&#x2F;\tau)} \<br>&amp;+ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ji}&#x2F;\tau)} \Bigg]<br>\end{aligned}<br>$$<br>温度参数τ控制相似度分布的尖锐程度：小τ使分布尖锐，强调困难负样本；大τ使分布平滑，训练更稳定。CLIP将τ设为可学习参数，初始化为0.07。</p>
+<p><strong>A1:</strong> CLIP使用对称的InfoNCE损失：<br>$$<br>\begin{aligned}<br>\mathcal{L}_{\text{contrastive}} &#x3D; &amp;-\frac{1}{N} \sum_{i&#x3D;1}^N \Bigg[ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ij}&#x2F;\tau)} \<br>&amp;+ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ji}&#x2F;\tau)} \Bigg]<br>\end{aligned}<br>$$<br>温度参数τ控制相似度分布的尖锐程度：小τ使分布尖锐，强调困难负样本；大τ使分布平滑，训练更稳定。CLIP将τ设为可学习参数，初始化为0.07。</p>
 <p><strong>Q2: 图像编码器和文本编码器为什么采用独立参数而不是共享参数？</strong></p>
 <p><strong>A2:</strong> 独立参数的设计基于以下考虑：</p>
 <ol>
@@ -802,12 +802,12 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/" rel="tag"># 论文解读</a>
               <a href="/tags/CLIP/" rel="tag"># CLIP</a>
               <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%AD%A6%E4%B9%A0/" rel="tag"># 多模态学习</a>
               <a href="/tags/%E5%AF%B9%E6%AF%94%E5%AD%A6%E4%B9%A0/" rel="tag"># 对比学习</a>
               <a href="/tags/%E9%9B%B6%E6%A0%B7%E6%9C%AC%E5%AD%A6%E4%B9%A0/" rel="tag"># 零样本学习</a>
               <a href="/tags/OpenAI/" rel="tag"># OpenAI</a>
+              <a href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/" rel="tag"># 论文解读</a>
           </div>
 
         
