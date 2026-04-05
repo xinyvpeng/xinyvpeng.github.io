@@ -29,6 +29,13 @@ const ForestTheme = {
 
   // 加载用户偏好
   loadUserPreference() {
+    // 优先使用HTML中已设置的主题（支持服务器端渲染）
+    const htmlTheme = document.documentElement.getAttribute('data-theme');
+    if (htmlTheme === 'dark' || htmlTheme === 'night') {
+      this.currentTheme = 'night';
+      return;
+    }
+    
     const savedTheme = localStorage.getItem('forest-library-theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     

@@ -37,6 +37,7 @@ const ForestParticles = {
       speedThreshold: 100, // 像素/秒
       maxLights: 8,
       lightDuration: 1000, // 毫秒
+      // 颜色配置（当前未使用，通过CSS控制，保留供未来扩展）
       dayColor: 'rgba(244, 211, 94, 0.4)',
       nightColor: 'rgba(173, 216, 230, 0.3)'
     },
@@ -576,20 +577,25 @@ const ForestParticles = {
       this.ctx.rotate(p.rotation);
       
       // 绘制树叶图片或后备形状
-      if (this.images[p.type]) {
+      const img = this.images[p.type];
+      if (img && img.complete && img.naturalWidth !== 0) {
+        // 图片已成功加载，使用图片渲染
         this.ctx.drawImage(
-          this.images[p.type],
+          img,
           -p.size / 2,
           -p.size / 2,
           p.size,
           p.size
         );
       } else {
-        // 后备：绘制简单形状
+        // 后备：绘制简单形状（图片未加载、加载失败或仍在加载中）
         this.ctx.fillStyle = this.getLeafColor(p.type);
+        this.ctx.globalAlpha = opacity * 0.7; // 后备系统降低透明度
         this.ctx.beginPath();
-        this.ctx.ellipse(0, 0, p.size / 2, p.size / 4, 0, 0, Math.PI * 2);
+        // 更自然的树叶形状（椭圆带旋转）
+        this.ctx.ellipse(0, 0, p.size / 2, p.size / 3, p.rotation, 0, Math.PI * 2);
         this.ctx.fill();
+        this.ctx.globalAlpha = opacity; // 恢复透明度
       }
       
       this.ctx.restore();
@@ -694,9 +700,15 @@ const ForestParticles = {
 if (typeof window !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
     // 等待主题系统初始化
-    setTimeout(() => {
-      ForestParticles.init();
-    }, 1000);
+    const initParticles = () => {
+      if (typeof window.ForestTheme !== 'undefined' && 
+          typeof window.ForestTheme.getCurrentTheme === 'function') {
+        ForestParticles.init();
+      } else {
+        setTimeout(initParticles, 100);
+      }
+    };
+    setTimeout(initParticles, 100);
   });
 }
 
