@@ -76,7 +76,7 @@ const ForestParticles = {
 
   // 调整Canvas大小
   resizeCanvas() {
-    if (!this.canvas) return;
+    if (!this.canvas || !this.ctx) return;
     
     const dpr = window.devicePixelRatio || 1;
     const width = window.innerWidth;
@@ -87,41 +87,56 @@ const ForestParticles = {
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
     
-    this.ctx.scale(dpr, dpr);
+    // 使用 setTransform 避免缩放累积
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   },
 
   // 加载树叶图片
   loadImages() {
+    this._imageLoads = [];
+    
     this.config.particleTypes.forEach(type => {
       const img = new Image();
       img.src = `/images/forest/leaves/${type}-leaf.svg`;
+      
       img.onload = () => {
-        this.images[type] = img;
+        if (this.isActive) {
+          this.images[type] = img;
+        }
       };
+      
       img.onerror = () => {
-        console.warn(`🍃 无法加载树叶图片: ${type}-leaf.svg`);
-        this.images[type] = null;
+        if (this.isActive) {
+          console.warn(`🍃 无法加载树叶图片: ${type}-leaf.svg`);
+          this.images[type] = null;
+        }
       };
+      
+      this._imageLoads.push(img);
     });
   },
 
   // 设置事件监听器
   setupEventListeners() {
-    window.addEventListener('resize', () => this.resizeCanvas());
-    window.addEventListener('forest-theme-change', (e) => this.handleThemeChange(e.detail.theme));
-    
-    // 页面可见性API
-    document.addEventListener('visibilitychange', () => {
+    // 存储函数引用以便后续移除
+    this._handleResize = () => this.resizeCanvas();
+    this._handleThemeChange = (e) => this.handleThemeChange(e.detail.theme);
+    this._handleVisibilityChange = () => {
       if (document.hidden) {
         this.pauseAnimation();
       } else {
         this.resumeAnimation();
       }
-    });
+    };
+    this._handleMouseMove = (e) => this.handleMouseMove(e);
+    
+    window.addEventListener('resize', this._handleResize);
+    window.addEventListener('forest-theme-change', this._handleThemeChange);
+    document.addEventListener('visibilitychange', this._handleVisibilityChange);
     
     // 鼠标交互（可选）
-    if (!this.isMobile) {
-      this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+    if (!this.isMobile && this.canvas) {
+      this.canvas.addEventListener('mousemove', this._handleMouseMove);
     }
   },
 
@@ -346,6 +361,30 @@ const ForestParticles = {
   destroy() {
     this.pauseAnimation();
     this.isActive = false;
+    
+    // 移除事件监听器
+    if (this._handleResize) {
+      window.removeEventListener('resize', this._handleResize);
+    }
+    if (this._handleThemeChange) {
+      window.removeEventListener('forest-theme-change', this._handleThemeChange);
+    }
+    if (this._handleVisibilityChange) {
+      document.removeEventListener('visibilitychange', this._handleVisibilityChange);
+    }
+    if (this._handleMouseMove && this.canvas) {
+      this.canvas.removeEventListener('mousemove', this._handleMouseMove);
+    }
+    
+    // 取消图片加载
+    if (this._imageLoads) {
+      this._imageLoads.forEach(img => {
+        img.onload = null;
+        img.onerror = null;
+        img.src = '';
+      });
+      this._imageLoads = [];
+    }
     
     if (this.canvas && this.canvas.parentNode) {
       this.canvas.parentNode.removeChild(this.canvas);
