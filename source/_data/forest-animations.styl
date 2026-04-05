@@ -1,0 +1,87 @@
+// 森林图书馆主题动画定义
+// 树叶飘落动画
+@keyframes leaf-fall {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(calc(100vh + 100px)) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+// 阳光光斑动画
+@keyframes sunlight-glow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+// 涟漪扩散动画
+@keyframes ripple-effect {
+  0% {
+    transform: scale(0);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+// 悬停生长动画
+@keyframes gentle-grow {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+// 页面过渡动画
+@keyframes page-transition {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 动画应用类
+.leaf-fall {
+  animation: leaf-fall 15s linear infinite;
+  animation-play-state: running;
+}
+
+.sunlight-glow {
+  animation: sunlight-glow 4s ease-in-out infinite;
+}
+
+.ripple {
+  animation: ripple-effect 0.6s ease-out;
+}
+
+.gentle-grow {
+  animation: gentle-grow 0.2s ease-out;
+  animation-fill-mode: forwards;
+}
+
+.page-transition {
+  animation: page-transition 0.4s ease-out;
+}
