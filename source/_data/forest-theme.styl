@@ -80,12 +80,12 @@ body {
       var(--primary-forest-deep) 0%,
       var(--primary-forest-medium) 25%,
       var(--primary-forest-light) 50%,
-      rgba(var(--text-accent-rgb), 0.4) 75%,
-      rgba(var(--text-link-rgb), 0.2) 100%
+      unquote('rgba(var(--text-accent-rgb), 0.4)') 75%,
+      unquote('rgba(var(--text-link-rgb), 0.2)') 100%
     ),
     radial-gradient(
       circle at 80% 20%,
-      rgba(var(--text-accent-rgb), 0.15) 0%,
+      unquote('rgba(var(--text-accent-rgb), 0.15)') 0%,
       transparent 50%
     )
   );
@@ -119,8 +119,8 @@ body {
       linear-gradient(45deg,
         #0C1A2F 0%,                           // 深蓝夜空
         var(--bg-medium) 25%,
-        rgba(var(--text-link-rgb), 0.4) 50%,
-        rgba(var(--text-accent-rgb), 0.3) 75%,
+        unquote('rgba(var(--text-link-rgb), 0.4)') 50%,
+        unquote('rgba(var(--text-accent-rgb), 0.3)') 75%,
         transparent 100%
       ),
       radial-gradient(
@@ -399,43 +399,94 @@ a {
 
 // 侧边栏适配 - 覆盖Next主题的黑色背景
 .sidebar {
-  background: var(--bg-sidebar) !important;
-  backdrop-filter: blur(20px) !important;
-  border-right: 1px solid var(--border-color) !important;
+  background: rgba(232, 241, 233, 0.95) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  border-right: 1px solid rgba(94, 140, 49, 0.2) !important;
   box-shadow: 
-    4px 0 16px rgba(0, 0, 0, 0.2),
-    inset -1px 0 0 rgba(255, 255, 255, 0.05) !important;
+    4px 0 16px rgba(0, 0, 0, 0.15),
+    inset -1px 0 0 rgba(255, 255, 255, 0.1) !important;
+  
+  * {
+    font-size: 1.4rem !important;  // 显著放大至22px
+    font-weight: 500 !important;
+    line-height: 1.6 !important;
+  }
   
   a {
     color: var(--text-secondary) !important;
-    opacity: 0.8;
-    transition: all 0.3s ease;
+    opacity: 0.85 !important;
+    transition: all 0.3s ease !important;
+    padding: 0.5rem 0.8rem !important;
+    border-radius: 6px !important;
+    display: block !important;
     
     &:hover {
-      color: var(--text-accent) !important;
-      opacity: 1;
-      background-color: unquote('rgba(var(--text-accent-rgb), 0.1)') !important;
+      color: var(--primary-forest-medium) !important;
+      opacity: 1 !important;
+      background-color: rgba(94, 140, 49, 0.1) !important;
+      transform: translateX(4px) !important;
     }
   }
   
   .site-state-item {
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
+    font-size: 1.3rem !important;
     
     &:hover {
-      color: var(--text-accent);
+      color: var(--primary-forest-medium) !important;
     }
   }
   
   .sidebar-nav li {
-    border-bottom-color: var(--border-color) !important;
+    border-bottom-color: rgba(94, 140, 49, 0.15) !important;
+    padding: 0.6rem 0 !important;
   }
   
   .sidebar-toggle {
-    background-color: unquote('rgba(var(--bg-card), 0.5)') !important;
-    border: 1px solid var(--border-color) !important;
+    background-color: rgba(94, 140, 49, 0.15) !important;
+    border: 1px solid rgba(94, 140, 49, 0.3) !important;
+    color: var(--primary-forest-medium) !important;
     
     &:hover {
-      background-color: unquote('rgba(var(--text-accent-rgb), 0.2)') !important;
+      background-color: rgba(94, 140, 49, 0.25) !important;
+      transform: scale(1.05) !important;
+    }
+  }
+  
+  // 标题样式
+  .sidebar-title {
+    color: var(--primary-forest-medium) !important;
+    font-size: 1.6rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 1.5rem !important;
+    border-bottom: 2px solid rgba(94, 140, 49, 0.2) !important;
+    padding-bottom: 0.8rem !important;
+  }
+}
+
+// 夜间模式侧边栏调整
+[data-theme="dark"],
+[data-theme="night"] {
+  .sidebar {
+    background: rgba(28, 61, 46, 0.95) !important;
+    border-right-color: rgba(138, 127, 207, 0.2) !important;
+    
+    a {
+      &:hover {
+        color: var(--text-accent) !important;
+        background-color: rgba(212, 212, 220, 0.1) !important;
+      }
+    }
+    
+    .sidebar-toggle {
+      background-color: rgba(138, 127, 207, 0.15) !important;
+      border-color: rgba(138, 127, 207, 0.3) !important;
+      color: var(--text-accent) !important;
+    }
+    
+    .sidebar-title {
+      color: var(--text-accent) !important;
+      border-bottom-color: rgba(212, 212, 220, 0.2) !important;
     }
   }
 }
