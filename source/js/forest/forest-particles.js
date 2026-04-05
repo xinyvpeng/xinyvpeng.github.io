@@ -42,6 +42,7 @@ const ForestParticles = {
     },
     
     lights: [],
+    timeoutIds: new Set(),
     lastMousePosition: null,
     lastMouseTime: null,
     container: null,
@@ -60,9 +61,20 @@ const ForestParticles = {
     createContainer() {
       if (this.container) return;
       
-      this.container = document.createElement('div');
-      this.container.className = 'forest-light-effects';
-      document.body.appendChild(this.container);
+      // 检查document.body是否就绪
+      if (!document.body) {
+        console.warn('🍃 光线系统: document.body 未就绪，延迟容器创建');
+        setTimeout(() => this.createContainer(), 100);
+        return;
+      }
+      
+      try {
+        this.container = document.createElement('div');
+        this.container.className = 'forest-light-effects';
+        document.body.appendChild(this.container);
+      } catch (error) {
+        console.error('🍃 光线系统: 创建容器失败', error);
+      }
     },
     
     // 更新主题颜色
@@ -70,7 +82,10 @@ const ForestParticles = {
       const theme = document.documentElement.getAttribute('data-theme');
       const isNight = theme === 'dark' || theme === 'night';
       
-      // 这里可以动态更新光线颜色，如果需要
+      // 主题切换时，交互光线的颜色由CSS选择器自动处理
+      // [data-theme="dark"] .forest-light.interactive 等选择器会生效
+      // 配置中的dayColor和nightColor当前未被使用，保留以供未来扩展
+      console.log(`🍃 光线系统主题已更新: ${isNight ? '夜间' : '日间'}模式`);
     },
     
     // 处理鼠标交互
@@ -99,11 +114,35 @@ const ForestParticles = {
     
     // 创建交互光线
     createInteractiveLight(x, y) {
+      // 参数验证
+      if (typeof x !== 'number' || typeof y !== 'number' || isNaN(x) || isNaN(y)) {
+        console.warn('🍃 光线系统: 无效的坐标参数', {x, y});
+        return;
+      }
+      
+      // 检查系统状态
+      if (!this.isInitialized) {
+        console.warn('🍃 光线系统: 系统未初始化');
+        return;
+      }
+      
+      // 检查容器（如果容器不存在，尝试创建）
+      if (!this.container && document.body) {
+        this.createContainer();
+      }
+      
       if (this.lights.length >= this.config.maxLights) {
         // 移除最旧的光线
         const oldestLight = this.lights.shift();
         if (oldestLight && oldestLight.element && oldestLight.element.parentNode) {
           oldestLight.element.parentNode.removeChild(oldestLight.element);
+        }
+        // 清理旧光线的定时器
+        if (oldestLight && oldestLight.timeoutIds) {
+          oldestLight.timeoutIds.forEach(timeoutId => {
+            clearTimeout(timeoutId);
+            this.timeoutIds.delete(timeoutId);
+          });
         }
       }
       
@@ -131,16 +170,19 @@ const ForestParticles = {
       light.style.opacity = '0';
       
       // 添加到容器
-      if (this.container) {
-        this.container.appendChild(light);
-      } else {
-        document.body.appendChild(light);
+      try {
+        if (this.container) {
+          this.container.appendChild(light);
+        } else if (document.body) {
+          document.body.appendChild(light);
+        } else {
+          console.warn('🍃 光线系统: 无法添加光线，容器和document.body均不可用');
+          return;
+        }
+      } catch (error) {
+        console.error('🍃 光线系统: 添加光线到DOM失败', error);
+        return;
       }
-      
-      // 淡入
-      setTimeout(() => {
-        light.style.opacity = '0.7';
-      }, 10);
       
       // 创建光线对象
       const lightObj = {
@@ -149,34 +191,72 @@ const ForestParticles = {
         x,
         y,
         size,
-        pixelSize
+        pixelSize,
+        timeoutIds: []
       };
       
-      this.lights.push(lightObj);
+      // 淡入定时器
+      const fadeInTimeout = setTimeout(() => {
+        try {
+          light.style.opacity = '0.7';
+        } catch (error) {
+          // 光线元素可能已被移除，忽略错误
+        }
+      }, 10);
+      lightObj.timeoutIds.push(fadeInTimeout);
+      this.timeoutIds.add(fadeInTimeout);
       
-      // 自动淡出和移除
-      setTimeout(() => {
-        light.style.opacity = '0';
+      // 自动淡出和移除定时器
+      const fadeOutTimeout = setTimeout(() => {
+        try {
+          light.style.opacity = '0';
+        } catch (error) {
+          // 光线元素可能已被移除，忽略错误
+        }
         
-        setTimeout(() => {
-          if (light.parentNode) {
-            light.parentNode.removeChild(light);
-          }
-          
-          // 从数组中移除
-          const index = this.lights.indexOf(lightObj);
-          if (index > -1) {
-            this.lights.splice(index, 1);
+        const removeTimeout = setTimeout(() => {
+          try {
+            if (light.parentNode) {
+              light.parentNode.removeChild(light);
+            }
+            
+            // 从数组中移除
+            const index = this.lights.indexOf(lightObj);
+            if (index > -1) {
+              this.lights.splice(index, 1);
+            }
+            
+            // 清理当前光线的定时器ID
+            lightObj.timeoutIds.forEach(id => this.timeoutIds.delete(id));
+          } catch (error) {
+            // 清理过程中出错，忽略错误
           }
         }, 500); // 等待淡出完成
+        
+        lightObj.timeoutIds.push(removeTimeout);
+        this.timeoutIds.add(removeTimeout);
       }, this.config.lightDuration);
+      
+      lightObj.timeoutIds.push(fadeOutTimeout);
+      this.timeoutIds.add(fadeOutTimeout);
+      
+      this.lights.push(lightObj);
     },
     
     // 清理所有光线
     clearAllLights() {
+      // 取消所有定时器
+      this.timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
+      this.timeoutIds.clear();
+      
+      // 移除DOM元素
       this.lights.forEach(light => {
         if (light.element && light.element.parentNode) {
           light.element.parentNode.removeChild(light.element);
+        }
+        // 清理光线的定时器引用
+        if (light.timeoutIds) {
+          light.timeoutIds = [];
         }
       });
       this.lights = [];
