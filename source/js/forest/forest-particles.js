@@ -30,6 +30,172 @@ const ForestParticles = {
   isActive: false,
   isMobile: false,
   prefersReducedMotion: false,
+  
+  // 光线交互状态
+  lightInteraction: {
+    config: {
+      speedThreshold: 100, // 像素/秒
+      maxLights: 8,
+      lightDuration: 1000, // 毫秒
+      dayColor: 'rgba(244, 211, 94, 0.4)',
+      nightColor: 'rgba(173, 216, 230, 0.3)'
+    },
+    
+    lights: [],
+    lastMousePosition: null,
+    lastMouseTime: null,
+    container: null,
+    isInitialized: false,
+    
+    // 初始化光线交互
+    init() {
+      if (this.isInitialized) return;
+      
+      this.createContainer();
+      this.updateThemeColors();
+      this.isInitialized = true;
+    },
+    
+    // 创建光线容器
+    createContainer() {
+      if (this.container) return;
+      
+      this.container = document.createElement('div');
+      this.container.className = 'forest-light-effects';
+      document.body.appendChild(this.container);
+    },
+    
+    // 更新主题颜色
+    updateThemeColors() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      const isNight = theme === 'dark' || theme === 'night';
+      
+      // 这里可以动态更新光线颜色，如果需要
+    },
+    
+    // 处理鼠标交互
+    handleMouseInteraction(x, y, timestamp) {
+      if (!this.lastMousePosition) {
+        this.lastMousePosition = {x, y};
+        this.lastMouseTime = timestamp;
+        return;
+      }
+      
+      const deltaX = x - this.lastMousePosition.x;
+      const deltaY = y - this.lastMousePosition.y;
+      const deltaTime = timestamp - this.lastMouseTime;
+      
+      if (deltaTime > 0) {
+        const speed = Math.sqrt(deltaX*deltaX + deltaY*deltaY) / (deltaTime / 1000);
+        
+        if (speed > this.config.speedThreshold) {
+          this.createInteractiveLight(x, y);
+        }
+      }
+      
+      this.lastMousePosition = {x, y};
+      this.lastMouseTime = timestamp;
+    },
+    
+    // 创建交互光线
+    createInteractiveLight(x, y) {
+      if (this.lights.length >= this.config.maxLights) {
+        // 移除最旧的光线
+        const oldestLight = this.lights.shift();
+        if (oldestLight && oldestLight.element && oldestLight.element.parentNode) {
+          oldestLight.element.parentNode.removeChild(oldestLight.element);
+        }
+      }
+      
+      const light = document.createElement('div');
+      light.className = 'forest-light interactive';
+      
+      // 随机大小
+      const sizes = ['small', 'medium', 'large'];
+      const size = sizes[Math.floor(Math.random() * sizes.length)];
+      light.classList.add(size);
+      
+      // 大小到像素的映射（与CSS中的定义匹配）
+      const sizePixels = {
+        small: 60,
+        medium: 100,
+        large: 150
+      };
+      const pixelSize = sizePixels[size] || 100;
+      
+      // 设置位置
+      light.style.left = `${x - pixelSize / 2}px`;
+      light.style.top = `${y - pixelSize / 2}px`;
+      
+      // 初始透明
+      light.style.opacity = '0';
+      
+      // 添加到容器
+      if (this.container) {
+        this.container.appendChild(light);
+      } else {
+        document.body.appendChild(light);
+      }
+      
+      // 淡入
+      setTimeout(() => {
+        light.style.opacity = '0.7';
+      }, 10);
+      
+      // 创建光线对象
+      const lightObj = {
+        element: light,
+        createdAt: Date.now(),
+        x,
+        y,
+        size,
+        pixelSize
+      };
+      
+      this.lights.push(lightObj);
+      
+      // 自动淡出和移除
+      setTimeout(() => {
+        light.style.opacity = '0';
+        
+        setTimeout(() => {
+          if (light.parentNode) {
+            light.parentNode.removeChild(light);
+          }
+          
+          // 从数组中移除
+          const index = this.lights.indexOf(lightObj);
+          if (index > -1) {
+            this.lights.splice(index, 1);
+          }
+        }, 500); // 等待淡出完成
+      }, this.config.lightDuration);
+    },
+    
+    // 清理所有光线
+    clearAllLights() {
+      this.lights.forEach(light => {
+        if (light.element && light.element.parentNode) {
+          light.element.parentNode.removeChild(light.element);
+        }
+      });
+      this.lights = [];
+    },
+    
+    // 销毁光线系统
+    destroy() {
+      this.clearAllLights();
+      
+      if (this.container && this.container.parentNode) {
+        this.container.parentNode.removeChild(this.container);
+      }
+      
+      this.container = null;
+      this.lastMousePosition = null;
+      this.lastMouseTime = null;
+      this.isInitialized = false;
+    }
+  },
 
   // 初始化粒子系统
   init() {
@@ -39,6 +205,12 @@ const ForestParticles = {
     this.createCanvas();
     this.loadImages();
     this.setupEventListeners();
+    
+    // 初始化光线交互（如果不是移动端且没有减少动画偏好）
+    if (!this.isMobile && !this.prefersReducedMotion) {
+      this.lightInteraction.init();
+    }
+    
     this.startAnimation();
     
     this.isActive = true;
@@ -145,14 +317,27 @@ const ForestParticles = {
     // 主题变化时粒子系统会自动调整透明度
     // 实际透明度通过CSS变量控制
     console.log(`🍃 主题已切换为${theme}，粒子透明度将调整`);
+    
+    // 更新光线交互的主题颜色
+    if (this.lightInteraction.isInitialized) {
+      this.lightInteraction.updateThemeColors();
+    }
   },
 
   // 处理鼠标移动
   handleMouseMove(e) {
-    if (this.prefersReducedMotion || this.particles.length === 0) return;
-    
     const mouseX = e.clientX;
     const mouseY = e.clientY;
+    const timestamp = e.timeStamp || Date.now();
+    
+    // 处理光线交互（如果不是移动端且没有减少动画偏好）
+    if (!this.isMobile && !this.prefersReducedMotion && this.lightInteraction.isInitialized) {
+      this.lightInteraction.handleMouseInteraction(mouseX, mouseY, timestamp);
+    }
+    
+    // 处理粒子交互
+    if (this.prefersReducedMotion || this.particles.length === 0) return;
+    
     const influenceRadius = 100;
     
     this.particles.forEach(particle => {
@@ -362,6 +547,11 @@ const ForestParticles = {
     this.pauseAnimation();
     this.isActive = false;
     
+    // 销毁光线交互
+    if (this.lightInteraction.isInitialized) {
+      this.lightInteraction.destroy();
+    }
+    
     // 移除事件监听器
     if (this._handleResize) {
       window.removeEventListener('resize', this._handleResize);
@@ -410,7 +600,12 @@ const ForestParticles = {
       particleCount: this.particles.length,
       maxParticles: this.getMaxParticles(),
       isMobile: this.isMobile,
-      prefersReducedMotion: this.prefersReducedMotion
+      prefersReducedMotion: this.prefersReducedMotion,
+      lightInteraction: {
+        initialized: this.lightInteraction.isInitialized,
+        lightCount: this.lightInteraction.lights.length,
+        maxLights: this.lightInteraction.config.maxLights
+      }
     };
   }
 };
