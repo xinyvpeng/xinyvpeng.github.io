@@ -343,29 +343,58 @@ a {
 .site-nav,
 .navbar,
 .main-nav {
-  font-size: 1.1rem;
-  padding: 1rem 0;
+  font-size: 1.6rem !important;  // 显著放大至26px
+  padding: 1.2rem 0 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
   
   a {
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    opacity: 0.8;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600 !important;
+    padding: 0.6rem 1.2rem !important;
+    opacity: 0.9 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 10px !important;
+    color: var(--text-secondary) !important;
     
     &:hover {
-      color: var(--text-accent);
-      background-color: unquote('rgba(var(--text-accent-rgb), 0.15)');
-      border-radius: 8px;
-      opacity: 1;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(13, 20, 10, 0.2);
+      color: var(--text-accent) !important;
+      background-color: rgba(var(--text-accent-rgb), 0.15) !important;
+      border-radius: 10px !important;
+      opacity: 1 !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 20px rgba(13, 20, 10, 0.25) !important;
     }
   }
   
   // 当前活动链接
   .active a {
-    color: var(--accent-amber);
-    border-bottom: 2px solid var(--accent-amber);
+    color: var(--text-accent) !important;
+    border-bottom: 3px solid var(--text-accent) !important;
+    font-weight: 700 !important;
+  }
+}
+
+// 移动端导航栏调整
+@media (max-width: 991px) {
+  .header,
+  .site-nav,
+  .navbar,
+  .main-nav {
+    font-size: 1.4rem !important;  // 移动端稍小
+    padding: 0.8rem 0 !important;
+    
+    a {
+      padding: 0.5rem 1rem !important;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header,
+  .site-nav,
+  .navbar,
+  .main-nav {
+    font-size: 1.2rem !important;  // 手机端调整
   }
 }
 
@@ -905,7 +934,9 @@ custom_file_path:
         &:hover {
           background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
           color: var(--text-accent);
-        }
+}
+
+
       }
     }
   }
