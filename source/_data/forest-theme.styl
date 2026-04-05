@@ -1,51 +1,107 @@
-// 森林图书馆主题变量定义
+// 森林图书馆主题变量定义 - 清新活力版
 // 日间模式变量
 :root {
-  // 主色调（森林基础）
-  --primary-forest-deep: #2d5016;
-  --primary-forest-medium: #3e6a23;
-  --primary-forest-light: #5a8c3a;
+  // 主色调（森林基础）- 清新活力调色板
+  --primary-forest-deep: #2E5116;        // 深绿基底
+  --primary-forest-medium: #5E8C31;      // 清新绿主色
+  --primary-forest-light: #9ACD32;       // 苔藓黄绿过渡
   
-  // 强调色（自然元素）
-  --accent-amber: #c77d1f;
-  --accent-gold: #daa520;
-  --accent-sunlight: #f4d35e;
+  // 强调色（自然元素）- 增加清新感和活力
+  --accent-sunlight: #FFA726;           // 阳光橙 - 主要强调
+  --accent-sky-blue: #87CEEB;           // 天空蓝 - 清新点缀
+  --accent-amber: #d4a017;              // 暗金色 - 保留用于细节
   
-  // 背景系统
-  --bg-dark: #121a0f;
-  --bg-medium: #1c2516;
-  --bg-light: #26311d;
+  // 背景系统 - 建立清新层次感
+  --bg-deep: #0d140a;                   // 最深的森林底色
+  --bg-dark: #121a0f;                   // 深背景层
+  --bg-medium: #1a2512;                 // 中等背景
+  --bg-light: #26311d;                  // 浅背景
+  --bg-card: #162014;                   // 卡片背景（微亮悬浮）
+  --content-bg-color: #1a2316;          // 内容区域背景
+  --bg-sidebar: #1a2512;                // 侧边栏背景
+  --bg-image: none;                     // 背景图片（暂时不使用）
   
-  // 文字颜色
-  --text-primary: #e8f1e1;
-  --text-secondary: #b8c9ab;
-  --text-accent: #f4d35e;
+  // 文字颜色 - 清新舒适，降低对比度
+  --text-heading: #F0F7E9;              // 标题：柔和米白绿
+  --text-primary: #C8D4C0;              // 正文：浅灰绿，对比度适中
+  --text-secondary: #949C8F;            // 次要文字：灰绿色
+  --text-accent: #FFA726;               // 强调文字：阳光橙
+  --text-link: #87CEEB;                 // 链接文字：天空蓝
+  
+  // 边框与细节颜色
+  --border-color: #2d3a28;              // 自然大地色边框
+  --shadow-color: rgba(13, 20, 10, 0.4); // 自然阴影
   
   // 主题状态（供JavaScript检测当前模式）
   --theme-mode: 'day';
   
   // RGB变量（用于rgba）
-  --text-accent-rgb: 244, 211, 94;
-  --primary-forest-medium-rgb: 62, 106, 35;
+  --text-accent-rgb: 255, 167, 38;      // 阳光橙RGB
+  --text-link-rgb: 135, 206, 235;       // 天空蓝RGB
+  --primary-forest-medium-rgb: 94, 140, 49; // 清新绿RGB
+  --border-color-rgb: 45, 58, 40;       // 大地色RGB
 }
 
 // 夜间模式变量覆盖
 [data-theme="dark"],
 [data-theme="night"] {
   --theme-mode: 'night';
-  --bg-dark: #0c1208;
-  --bg-medium: #141c0e;
-  --bg-light: #1c2516;
-  --text-primary: #d8e1d0;
-  --text-accent: #ffd166;
-  --text-accent-rgb: 255, 209, 102;
+  
+  // 背景系统 - 夜间采用蓝色调
+  --bg-deep: #0C1A2F;                   // 深蓝夜空
+  --bg-dark: #121F3A;
+  --bg-medium: #1C3D2E;                 // 夜晚森林色
+  --bg-light: #263F50;
+  --bg-card: #141c0e;
+  --content-bg-color: #161e10;
+  --bg-sidebar: #141c0e;
+  
+  // 文字颜色 - 夜间稍亮但保持柔和
+  --text-heading: #D4D4DC;              // 银色月光色
+  --text-primary: #A0B0C0;
+  --text-secondary: #7A8A9C;
+  --text-accent: #D4D4DC;               // 银色月光
+  --text-link: #8A7FCF;                 // 迷雾紫
+  
+  // 边框与细节
+  --border-color: #252e20;
+  --shadow-color: rgba(8, 12, 6, 0.5);
+  
+  // RGB变量
+  --text-accent-rgb: 212, 212, 220;     // 月光银RGB
+  --text-link-rgb: 138, 127, 207;       // 迷雾紫RGB
 }
 
 // 应用CSS变量到基础元素
 body {
-  background-color: var(--bg-dark);
+  background-color: var(--bg-deep);
+  background-image: var(--bg-image, linear-gradient(145deg, 
+    rgba(26, 61, 15, 0.15) 0%, 
+    rgba(45, 80, 22, 0.12) 25%,
+    rgba(26, 37, 18, 0.08) 50%,
+    rgba(22, 32, 20, 0.05) 75%,
+    transparent 100%
+  ));
+  background-attachment: fixed;
+  background-size: cover;
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Source Serif Pro', Georgia, serif;
+  line-height: 1.7;
+  
+  // 为内容区域提供更好的可读性
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(13, 20, 10, 0.4);
+    z-index: -1;
+    pointer-events: none;
+  }
 }
 
 // 链接样式
@@ -244,4 +300,817 @@ a {
 // 性能模式
 .forest-performance-mode .forest-light-effects {
   display: none;
+}
+
+// ============================================================================
+// 导航栏和布局调整
+// ============================================================================
+
+// 顶部导航栏放大
+.header,
+.site-nav,
+.navbar,
+.main-nav {
+  font-size: 1.1rem;
+  padding: 1rem 0;
+  
+  a {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    opacity: 0.8;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &:hover {
+      color: var(--text-accent);
+      background-color: unquote('rgba(var(--text-accent-rgb), 0.15)');
+      border-radius: 8px;
+      opacity: 1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(13, 20, 10, 0.2);
+    }
+  }
+  
+  // 当前活动链接
+  .active a {
+    color: var(--accent-amber);
+    border-bottom: 2px solid var(--accent-amber);
+  }
+}
+
+// 侧边栏适配 - 覆盖Next主题的黑色背景
+.sidebar {
+  background: var(--bg-sidebar) !important;
+  backdrop-filter: blur(20px) !important;
+  border-right: 1px solid var(--border-color) !important;
+  box-shadow: 
+    4px 0 16px rgba(0, 0, 0, 0.2),
+    inset -1px 0 0 rgba(255, 255, 255, 0.05) !important;
+  
+  a {
+    color: var(--text-secondary) !important;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      color: var(--text-accent) !important;
+      opacity: 1;
+      background-color: unquote('rgba(var(--text-accent-rgb), 0.1)') !important;
+    }
+  }
+  
+  .site-state-item {
+    color: var(--text-secondary);
+    
+    &:hover {
+      color: var(--text-accent);
+    }
+  }
+  
+  .sidebar-nav li {
+    border-bottom-color: var(--border-color) !important;
+  }
+  
+  .sidebar-toggle {
+    background-color: unquote('rgba(var(--bg-card), 0.5)') !important;
+    border: 1px solid var(--border-color) !important;
+    
+    &:hover {
+      background-color: unquote('rgba(var(--text-accent-rgb), 0.2)') !important;
+    }
+  }
+}
+
+// ============================================================================
+// 标题与排版系统
+// ============================================================================
+
+// 文章标题
+.post-title,
+.post-title-link {
+  color: var(--text-heading) !important;
+  font-size: 2.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.2 !important;
+  margin-bottom: 1.5rem !important;
+  text-shadow: 0 2px 8px rgba(13, 20, 10, 0.3);
+  
+  @media (max-width: 768px) {
+    font-size: 2.2rem !important;
+  }
+}
+
+// 正文中的标题
+.post-body {
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-heading);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-top: 2.5rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: -1rem;
+      top: 0.5em;
+      width: 4px;
+      height: 1em;
+      background-color: var(--text-accent);
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+  }
+  
+  h1 {
+    font-size: 2.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+  
+  h2 {
+    font-size: 1.8rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+  }
+  
+  h4 {
+    font-size: 1.3rem;
+  }
+  
+  h5, h6 {
+    font-size: 1.1rem;
+  }
+}
+
+// 段落与文字排版
+.post-body {
+  p {
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    text-align: justify;
+    hyphens: auto;
+  }
+  
+  strong {
+    color: var(--text-heading);
+    font-weight: 600;
+  }
+  
+  em {
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+  
+  blockquote {
+    border-left: 4px solid var(--text-accent);
+    background-color: unquote('rgba(var(--text-accent-rgb), 0.05)');
+    padding: 1.5rem 2rem;
+    margin: 2rem 0;
+    border-radius: 0 12px 12px 0;
+    font-style: italic;
+    color: var(--text-primary);
+    
+    &::before {
+      content: '❝';
+      color: var(--text-accent);
+      font-size: 2rem;
+      margin-right: 0.5rem;
+      opacity: 0.7;
+    }
+  }
+}
+
+// 主内容区域
+.main-inner {
+  background-color: unquote('rgba(var(--bg-card), 0.85)');
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  padding: 3rem;
+  margin: 3rem auto;
+  box-shadow: 
+    0 16px 48px var(--shadow-color),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  max-width: 1200px;
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+    margin: 1.5rem auto;
+    border-radius: 20px;
+  }
+}
+
+// 文章卡片增强
+.post-block {
+  margin-bottom: 2.5rem;
+  padding: 2.5rem;
+  background: linear-gradient(145deg, 
+    rgba(26, 35, 22, 0.95) 0%, 
+    rgba(22, 32, 20, 0.98) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: 
+    0 4px 16px var(--shadow-color),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  
+  &:hover {
+    transform: translateY(-4px);
+    border-color: unquote('rgba(var(--text-accent-rgb), 0.5)');
+    box-shadow: 
+      0 12px 40px rgba(13, 20, 10, 0.3),
+      0 4px 20px rgba(212, 160, 23, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+}
+
+// 背景图片使用说明
+/* 
+要使用自定义背景图片，请在 _config.yml 中添加：
+custom_file_path:
+  style: source/_data/styles.styl
+然后在 forest-theme.styl 中设置：
+  --bg-image: url('/images/forest-background.jpg');
+确保图片存放在 source/images/forest-background.jpg
+*/
+
+// ============================================================================
+// 音频控制系统样式
+// ============================================================================
+
+.forest-audio-controls {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.forest-audio-toggle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+  border: 1px solid var(--primary-forest-medium);
+  color: var(--text-accent);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.forest-audio-volume-panel {
+  background-color: unquote('rgba(var(--bg-dark), 0.9)');
+  backdrop-filter: blur(10px);
+  border: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 10px;
+  width: 200px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  
+  label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  input[type="range"] {
+    width: 100%;
+    margin-bottom: 1rem;
+    height: 6px;
+    border-radius: 3px;
+    background: unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+    outline: none;
+    -webkit-appearance: none;
+    
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-amber);
+      cursor: pointer;
+    }
+    
+    &::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-amber);
+      cursor: pointer;
+      border: none;
+    }
+  }
+}
+
+.forest-audio-sounds-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+}
+
+.forest-audio-sound-item {
+  margin-bottom: 0.75rem;
+  
+  label {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+  }
+}
+
+// 夜间模式调整
+[data-theme="dark"],
+[data-theme="night"] {
+  .forest-audio-toggle {
+    background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+  }
+  
+  .forest-audio-volume-panel {
+    background-color: unquote('rgba(var(--bg-dark), 0.95)');
+  }
+}
+
+// 移动端调整
+@media (max-width: 768px) {
+  .forest-audio-controls {
+    bottom: 10px;
+    right: 10px;
+  }
+  
+  .forest-audio-toggle {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+  
+  .forest-audio-volume-panel {
+    width: 180px;
+    padding: 0.75rem;
+  }
+}
+
+// ============================================================================
+// 交互系统样式
+// ============================================================================
+
+// 涟漪效果
+.forest-ripple {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(199, 125, 31, 0.3);
+  pointer-events: none;
+  z-index: 9999;
+  animation: forest-ripple-animation 0.8s ease-out forwards;
+  
+  @keyframes forest-ripple-animation {
+    0% {
+      transform: scale(0.1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+}
+
+// 轨迹粒子
+.forest-trail-particle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  animation: forest-trail-fade 1s ease-out forwards;
+  
+  @keyframes forest-trail-fade {
+    0% {
+      opacity: 0.8;
+      transform: translate(0, 0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--tx, 0), var(--ty, 0)) scale(0.5);
+    }
+  }
+}
+
+// 章节高亮
+.forest-section-highlight {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -10px;
+    right: -10px;
+    bottom: -5px;
+    background-color: rgba(62, 106, 35, 0.2);
+    border-radius: 8px;
+    z-index: -1;
+    animation: forest-highlight-fade 2s ease-out;
+  }
+  
+  @keyframes forest-highlight-fade {
+    0% {
+      background-color: rgba(199, 125, 31, 0.3);
+    }
+    100% {
+      background-color: rgba(62, 106, 35, 0.2);
+    }
+  }
+}
+
+// 阅读进度指示器
+.forest-reading-progress {
+  position: fixed;
+  top: 100px;
+  right: 30px;
+  width: 6px;
+  height: 200px;
+  background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+  border-radius: 3px;
+  z-index: 1000;
+  
+  .forest-reading-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--accent-amber);
+    border-radius: 3px;
+    transition: height 0.3s ease;
+  }
+  
+  .forest-reading-progress-tree {
+    position: absolute;
+    left: -12px;
+    font-size: 24px;
+    transition: top 0.5s ease;
+  }
+}
+
+// 书签系统
+.forest-bookmark-toggle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+  border: 1px solid var(--primary-forest-medium);
+  color: var(--text-accent);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+    transform: scale(1.1);
+  }
+}
+
+.forest-bookmark-sidebar {
+  position: fixed;
+  top: 100px;
+  right: 30px;
+  width: 300px;
+  max-height: 500px;
+  background-color: unquote('rgba(var(--bg-dark), 0.95)');
+  backdrop-filter: blur(10px);
+  border: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+  border-radius: 12px;
+  padding: 1rem;
+  z-index: 1001;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  
+  .forest-bookmark-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+    
+    h3 {
+      margin: 0;
+      color: var(--text-accent);
+      font-size: 1.1rem;
+    }
+    
+    .forest-bookmark-close-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0 0.5rem;
+      
+      &:hover {
+        color: var(--text-accent);
+      }
+    }
+  }
+}
+
+.forest-bookmark-list {
+  .forest-bookmark-item {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    background-color: unquote('rgba(var(--bg-medium), 0.5)');
+    border-radius: 6px;
+    border: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+    
+    .forest-bookmark-text {
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    
+    .forest-bookmark-actions {
+      display: flex;
+      gap: 0.5rem;
+      
+      button {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 4px;
+        border: 1px solid var(--primary-forest-medium);
+        background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.1)');
+        color: var(--text-secondary);
+        cursor: pointer;
+        
+        &:hover {
+          background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+          color: var(--text-accent);
+        }
+      }
+    }
+  }
+  
+  .forest-bookmark-empty {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 2rem;
+    font-style: italic;
+  }
+}
+
+.forest-bookmark-prompt {
+  position: fixed;
+  background-color: unquote('rgba(var(--bg-dark), 0.95)');
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--accent-amber);
+  border-radius: 8px;
+  padding: 0.75rem;
+  z-index: 10000;
+  box-shadow: 0 4px 20px rgba(199, 125, 31, 0.3);
+  display: flex;
+  gap: 0.5rem;
+  
+  button {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    
+    &.forest-bookmark-add-btn {
+      background-color: var(--accent-amber);
+      color: var(--bg-dark);
+      
+      &:hover {
+        background-color: #daa520;
+      }
+    }
+    
+    &.forest-bookmark-cancel-btn {
+      background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.1)');
+      color: var(--text-secondary);
+      
+      &:hover {
+        background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+        color: var(--text-primary);
+      }
+    }
+  }
+}
+
+// 隐藏的森林动物
+.forest-hidden-animal {
+  position: absolute;
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+}
+
+// 植物图鉴
+.forest-herbarium-toggle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+  border: 1px solid var(--primary-forest-medium);
+  color: var(--text-accent);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+    transform: scale(1.1);
+  }
+}
+
+.forest-herbarium {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  
+  .forest-herbarium-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+    
+    h3 {
+      margin: 0;
+      color: var(--text-accent);
+      font-size: 1.5rem;
+    }
+    
+    .forest-herbarium-close-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 2rem;
+      cursor: pointer;
+      padding: 0 0.5rem;
+      line-height: 1;
+      
+      &:hover {
+        color: var(--text-accent);
+      }
+    }
+  }
+  
+  .forest-herbarium-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 800px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+}
+
+.forest-plant-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &.discovered {
+    background-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.15)');
+    border: 1px solid var(--primary-forest-medium);
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(62, 106, 35, 0.3);
+    }
+  }
+  
+  &.undiscovered {
+    background-color: unquote('rgba(var(--bg-medium), 0.5)');
+    border: 1px dashed unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+    opacity: 0.7;
+  }
+  
+  .forest-plant-emoji {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .forest-plant-name {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+  
+  .forest-plant-status {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+}
+
+// 通知
+.forest-notification {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  padding: 1rem 1.5rem;
+  background-color: unquote('rgba(var(--bg-dark), 0.95)');
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--accent-amber);
+  border-radius: 8px;
+  color: var(--text-accent);
+  z-index: 10000;
+  box-shadow: 0 4px 20px rgba(199, 125, 31, 0.3);
+  animation: forest-notification-slide 0.3s ease-out;
+  
+  @keyframes forest-notification-slide {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+// 移动端调整
+@media (max-width: 768px) {
+  .forest-reading-progress {
+    display: none;
+  }
+  
+  .forest-bookmark-sidebar {
+    width: calc(100% - 40px);
+    right: 20px;
+    left: 20px;
+    top: 80px;
+  }
+  
+  .forest-herbarium-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .forest-notification {
+    right: 20px;
+    left: 20px;
+    text-align: center;
+  }
+}
+
+// 减少动画偏好支持
+@media (prefers-reduced-motion: reduce) {
+  .forest-ripple,
+  .forest-trail-particle,
+  .forest-section-highlight::before,
+  .forest-notification {
+    animation: none !important;
+  }
+  
+  .forest-reading-progress-bar,
+  .forest-reading-progress-tree {
+    transition: none !important;
+  }
 }
