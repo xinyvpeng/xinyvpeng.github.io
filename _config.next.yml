@@ -1,0 +1,213 @@
+# NexT Theme Alternate Configuration
+# This file overrides settings in themes/next/_config.yml
+
+# ---------------------------------------------------------------
+# Scheme Settings
+# ---------------------------------------------------------------
+
+# Color schemes
+scheme: Mist
+
+# Custom colors
+custom_file_path:
+  style: source/_data/styles.styl
+  font: source/_data/fonts.styl
+
+# Color settings
+colors:
+  primary: #1a6dfc
+  link: #1a6dfc
+  link-hover: #0a4fdc
+
+# Dark Mode
+darkmode:
+  enable: true
+  # Override dark mode setting for chat services
+  # Available values: true | false | auto
+  chat: auto
+
+# Font settings (using hardcoded strings because NexT theme font config doesn't support Stylus variables)
+font:
+  enable: true
+  # 主字体
+  global:
+    external: false
+    family: 'PingFang SC, Hiragino Sans GB, Microsoft YaHei, WenQuanYi Micro Hei, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif'
+    size: 1
+  # 代码字体
+  codes:
+    external: false
+    family: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace'
+    size: 0.875
+
+# ---------------------------------------------------------------
+# Avatar Settings
+# ---------------------------------------------------------------
+
+# 头像配置
+avatar:
+  # 头像图片路径，将图片放在 source/images/avatar.jpg
+  url: /images/avatar.jpg
+  # 是否显示圆形头像
+  rounded: true
+  # 是否旋转头像（鼠标悬停时）
+  rotated: false
+
+# ---------------------------------------------------------------
+# Menu Settings
+# ---------------------------------------------------------------
+
+menu:
+  home: / || fa fa-home
+  about: /about/ || fa fa-user
+  tags: /tags/ || fa fa-tags
+  categories: /categories/ || fa fa-th
+  archives: /archives/ || fa fa-archive
+  # 社交链接可以通过social配置自动生成
+
+# Social Links
+social:
+  GitHub: https://github.com/xinyvpeng || fab fa-github
+  Twitter: https://twitter.com/yourusername || fab fa-twitter
+  Email: mailto:xinyvpeng@163.com || fa fa-envelope
+  RSS: /atom.xml || fa fa-rss
+
+# 社交链接显示设置
+social_icons:
+  enable: true
+  icons_only: false
+  transition: true
+
+# ---------------------------------------------------------------
+# Comments Settings
+# ---------------------------------------------------------------
+
+# Gitalk
+# For more information: https://gitalk.github.io/
+gitalk:
+  enable: true
+  github_id: xinyvpeng  # GitHub repo owner
+  repo: xinyvpeng.github.io  # Repository name to store issues
+  client_id: Ov23liLS30z0cOBFIY2x  # GitHub Application Client ID
+  client_secret: 201bb6a2793dd7ba5ec147623eca7d9828c411b4  # GitHub Application Client Secret
+  admin_user: xinyvpeng  # GitHub repo owner and collaborators
+  distraction_free_mode: true
+  # Language for Gitalk interface (e.g., 'en', 'zh-CN', 'zh-TW')
+  language: zh-CN
+
+# ---------------------------------------------------------------
+# Comments Activation
+# ---------------------------------------------------------------
+
+# Active comment plugin
+comments:
+  active: gitalk
+
+# ---------------------------------------------------------------
+# Search Settings
+# ---------------------------------------------------------------
+
+# Local Search
+# Dependencies: https://github.com/next-theme/hexo-generator-searchdb
+local_search:
+  enable: true
+  # If auto, trigger search by changing input
+  # If manual, trigger search by pressing enter key or search button
+  trigger: auto
+  # Show top n results per article, show all results by setting to -1
+  top_n_per_article: 5
+  # Unescape html strings to the readable one.
+  unescape: true
+  # Preload the search data when the page loads.
+  preload: true
+
+# ---------------------------------------------------------------
+# Share Settings
+# ---------------------------------------------------------------
+
+# Share Buttons
+# Dependencies: https://github.com/next-theme/hexo-theme-next
+share:
+  enable: true
+  # Available values: buttons | deA | deB
+  style: buttons
+  # Global option for all share buttons
+  mobile:
+    # Only for buttons style
+    enable: true
+  # Specific options for each share button
+  # Social media share buttons
+  # For more information: https://theme-next.js.org/docs/third-party-services/social-share-widgets
+  # 指定分享平台
+  platforms:
+    - twitter
+    - facebook
+    - linkedin
+    - weibo
+    - wechat
+
+# ---------------------------------------------------------------
+# Table of Contents Settings
+# ---------------------------------------------------------------
+
+# Table of Contents in the Sidebar
+# Front-matter variable `toc` set TOC to true/false
+toc:
+  enable: true
+  # Automatically add list number to toc.
+  number: true
+  # If true, all words will placed on next lines if header width longer then sidebar width.
+  wrap: true
+  # If true, all level of TOC in a post will be displayed, rather than the activated part of it.
+  expand_all: true
+  # Maximum heading depth of generated toc.
+  max_depth: 4
+# 移动端目录显示优化
+mobile:
+  enable: true
+  default: collapsed
+
+# ---------------------------------------------------------------
+# Post Settings
+# ---------------------------------------------------------------
+
+# Excerpt Settings
+# Use `description` in front-matter to specify post excerpt.
+excerpt_description: false
+
+# Read more button
+# If true, the read more button will be displayed in excerpt section.
+read_more_btn: true
+
+# ---------------------------------------------------------------
+# Math Settings
+# ---------------------------------------------------------------
+
+# Math Formulas Render Support
+# Choose between `mathjax` and `katex`
+math:
+  # Default (false) will load mathjax / katex script on demand.
+  # That is it only render those page which has `mathjax: true` in front-matter.
+  # If you set it to true, it will load mathjax / katex script EVERY PAGE.
+  per_page: false
+
+  # mathjax
+  mathjax:
+    enable: true
+    # Available values: none | ams | all
+    tags: all
+
+  # katex
+  katex:
+    enable: false
+    # See: https://github.com/KaTeX/KaTeX/tree/master/contrib/copy-tex
+    copy_tex: false
+
+# Forest Library Theme JavaScript
+forest_theme:
+  enable: true
+  scripts:
+    - /js/forest/forest-theme.js
+    - /js/forest/forest-particles.js
+    - /js/forest/forest-audio.js
+    - /js/forest/forest-interactions.js
