@@ -10,8 +10,8 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(94, 140, 49, 0.9); // #5E8C31
-  border: 2px solid #9ACD32;
+  background: unquote('rgba(var(--primary-forest-medium-rgb), 0.9)'); // 使用CSS变量
+  border: 2px solid var(--audio-secondary);
   color: white;
   font-size: 24px;
   cursor: pointer;
@@ -25,8 +25,15 @@
 
   &:hover {
     transform: scale(1.1);
-    background: rgba(87, 140, 49, 0.95);
+    background: unquote('rgba(var(--primary-forest-medium-rgb), 0.95)');
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  &:focus {
+    transform: scale(1.05);
+    background: unquote('rgba(var(--primary-forest-medium-rgb), 0.95)');
+    box-shadow: 0 0 0 3px unquote('rgba(var(--primary-forest-medium-rgb), 0.5)');
+    outline: none;
   }
 
   &:active {
@@ -35,11 +42,11 @@
 
   // 静音状态
   &.muted {
-    background: rgba(148, 156, 143, 0.7); // #949C8F
-    border-color: #949C8F;
+    background: unquote('rgba(var(--audio-muted-rgb), 0.7)'); // 使用CSS变量
+    border-color: var(--audio-muted);
     
     &:hover {
-      background: rgba(148, 156, 143, 0.8);
+      background: unquote('rgba(var(--audio-muted-rgb), 0.8)');
     }
   }
 
@@ -52,10 +59,10 @@
 // 呼吸动画
 @keyframes audio-breathing {
   0%, 100% {
-    box-shadow: 0 4px 12px rgba(94, 140, 49, 0.4);
+    box-shadow: 0 4px 12px unquote('rgba(var(--primary-forest-medium-rgb), 0.4)');
   }
   50% {
-    box-shadow: 0 4px 20px rgba(94, 140, 49, 0.6);
+    box-shadow: 0 4px 20px unquote('rgba(var(--primary-forest-medium-rgb), 0.6)');
   }
 }
 
@@ -74,6 +81,7 @@
   overflow: hidden;
   display: none;
   flex-direction: column;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 
   &.visible {
@@ -97,7 +105,7 @@
 .forest-audio-panel-header {
   padding: 16px;
   background: rgba(46, 81, 22, 0.8); // #2E5116
-  border-bottom: 1px solid #5E8C31;
+  border-bottom: 1px solid var(--audio-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -116,7 +124,7 @@
   .forest-audio-close-btn {
     background: none;
     border: none;
-    color: #9ACD32;
+    color: var(--audio-secondary);
     font-size: 24px;
     cursor: pointer;
     width: 32px;
@@ -127,7 +135,7 @@
     border-radius: 4px;
     
     &:hover {
-      background: rgba(154, 205, 50, 0.2);
+       background: unquote('rgba(var(--audio-secondary-rgb), 0.2)');
     }
   }
 }
@@ -135,7 +143,7 @@
 // 主音量控制
 .forest-audio-master-volume {
   padding: 16px;
-  border-bottom: 1px solid rgba(94, 140, 49, 0.3);
+  border-bottom: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
 
   .volume-label {
     display: flex;
@@ -153,7 +161,7 @@
 
   .volume-icon {
     font-size: 18px;
-    color: #9ACD32;
+    color: var(--audio-secondary);
     min-width: 24px;
   }
 
@@ -162,7 +170,7 @@
     height: 6px;
     -webkit-appearance: none;
     appearance: none;
-    background: rgba(154, 205, 50, 0.2);
+    background: unquote('rgba(var(--audio-secondary-rgb), 0.2)');
     border-radius: 3px;
     outline: none;
 
@@ -172,9 +180,9 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: #5E8C31;
+      background: var(--audio-primary);
       cursor: pointer;
-      border: 2px solid #9ACD32;
+      border: 2px solid var(--audio-secondary);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
@@ -182,9 +190,9 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: #5E8C31;
+      background: var(--audio-primary);
       cursor: pointer;
-      border: 2px solid #9ACD32;
+      border: 2px solid var(--audio-secondary);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
   }
@@ -209,12 +217,12 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: rgba(94, 140, 49, 0.1);
+    background: unquote('rgba(var(--primary-forest-medium-rgb), 0.1)');
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #5E8C31;
+    background: var(--audio-primary);
     border-radius: 3px;
   }
 }
@@ -222,7 +230,7 @@
 // 单个音效项
 .forest-audio-sound-item {
   padding: 12px 0;
-  border-bottom: 1px solid rgba(94, 140, 49, 0.2);
+  border-bottom: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
 
   &:last-child {
     border-bottom: none;
@@ -244,7 +252,7 @@
     .sound-checkbox {
       width: 20px;
       height: 20px;
-      border: 2px solid #9ACD32;
+      border: 2px solid var(--audio-secondary);
       border-radius: 4px;
       position: relative;
       display: flex;
@@ -252,14 +260,32 @@
       justify-content: center;
 
       &.checked {
-        background: #5E8C31;
+        background: var(--audio-primary);
         
         &::after {
           content: '✓';
           color: white;
           font-size: 14px;
           font-weight: bold;
-        }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .forest-audio-toggle-btn {
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .forest-audio-controls-panel {
+    bottom: 70px;
+    right: 20px;
+    width: 260px;
+    max-height: 360px;
+  }
+}
       }
     }
 
@@ -295,32 +321,32 @@
       height: 4px;
       -webkit-appearance: none;
       appearance: none;
-      background: rgba(135, 206, 235, 0.2); // #87CEEB
+       background: unquote('rgba(var(--audio-accent-rgb), 0.2)'); // 使用CSS变量
       border-radius: 2px;
 
-      &::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #87CEEB;
-        cursor: pointer;
-        border: 2px solid #5E8C31;
-      }
+       &::-webkit-slider-thumb {
+         -webkit-appearance: none;
+         appearance: none;
+         width: 16px;
+         height: 16px;
+         border-radius: 50%;
+         background: var(--audio-accent);
+         cursor: pointer;
+         border: 2px solid var(--audio-primary);
+       }
 
-      &::-moz-range-thumb {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #87CEEB;
-        cursor: pointer;
-        border: 2px solid #5E8C31;
-      }
+       &::-moz-range-thumb {
+         width: 16px;
+         height: 16px;
+         border-radius: 50%;
+         background: var(--audio-accent);
+         cursor: pointer;
+         border: 2px solid var(--audio-primary);
+       }
     }
 
     .sound-volume-value {
-      color: #87CEEB;
+    color: var(--audio-accent);
       font-size: 12px;
       min-width: 35px;
       text-align: right;
@@ -330,11 +356,11 @@
   // 禁用状态
   &.disabled {
     .sound-name {
-      color: #949C8F;
+    color: var(--audio-muted);
     }
     
     .sound-description {
-      color: #6A7165;
+       color: var(--audio-muted);
     }
     
     .sound-volume-control {
@@ -347,7 +373,7 @@
 // 预设按钮区域
 .forest-audio-presets {
   padding: 16px;
-  border-top: 1px solid rgba(94, 140, 49, 0.3);
+  border-top: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
   background: rgba(30, 40, 25, 0.5);
 
   h4 {
@@ -365,8 +391,8 @@
 
   .preset-btn {
     padding: 8px 12px;
-    background: rgba(94, 140, 49, 0.3);
-    border: 1px solid #5E8C31;
+    background: unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+  border: 1px solid var(--audio-primary);
     border-radius: 6px;
     color: #C8D4C0;
     font-size: 13px;
@@ -375,7 +401,7 @@
     transition: all 0.2s;
 
     &:hover {
-      background: rgba(94, 140, 49, 0.5);
+       background: unquote('rgba(var(--primary-forest-medium-rgb), 0.5)');
       transform: translateY(-2px);
     }
 
