@@ -1682,9 +1682,115 @@ html {
       transform: translateY(0)
     }
   }
-  
+   
   .forest-bookmark-list {
     height: calc(100% - 73px)
+  }
+}
+
+// 树叶书签项
+.forest-bookmark-item {
+  background: linear-gradient(135deg, var(--bookmark-bg-light), var(--bookmark-bg-dark))
+  border: 1px solid var(--bookmark-border)
+  border-radius: 12px  // 圆角
+  padding: 16px
+  margin-bottom: 12px
+  position: relative
+  transition: all 0.2s ease
+  cursor: pointer
+  backdrop-filter: blur(5px)
+  
+  // 树叶边缘锯齿效果
+  &::after {
+    content: ''
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    border-radius: 12px
+    background: linear-gradient(45deg, transparent 48%, var(--bookmark-border) 50%, transparent 52%)
+    background-size: 20px 20px
+    opacity: 0.1
+    pointer-events: none
+  }
+  
+  &:hover {
+    transform: translateY(-3px)
+    box-shadow: 0 6px 20px var(--bookmark-shadow)
+    border-color: var(--bookmark-primary)
+    
+    &::after {
+      opacity: 0.15
+    }
+  }
+}
+
+// 书签文本
+.forest-bookmark-text {
+  color: var(--bookmark-text)
+  font-size: 14px
+  line-height: 1.5
+  margin-bottom: 12px
+  font-family: var(--font-sans)
+  
+  // 文本溢出处理
+  display: -webkit-box
+  -webkit-line-clamp: 3
+  -webkit-box-orient: vertical
+  overflow: hidden
+  text-overflow: ellipsis
+}
+
+// 书签操作按钮
+.forest-bookmark-actions {
+  display: flex
+  gap: 8px
+  justify-content: flex-end
+}
+
+.forest-bookmark-jump-btn,
+.forest-bookmark-delete-btn {
+  border: none
+  padding: 6px 12px
+  border-radius: 6px
+  font-size: 13px
+  font-weight: 500
+  cursor: pointer
+  transition: all 0.2s ease
+  display: flex
+  align-items: center
+  gap: 4px
+  font-family: var(--font-sans)
+}
+
+.forest-bookmark-jump-btn {
+  background: rgba(94, 140, 49, 0.15)
+  color: var(--bookmark-primary)
+  
+  &::before {
+    content: '📍'
+    font-size: 14px
+  }
+  
+  &:hover {
+    background: rgba(94, 140, 49, 0.25)
+    transform: translateY(-1px)
+  }
+}
+
+.forest-bookmark-delete-btn {
+  background: rgba(220, 100, 100, 0.1)
+  color: rgba(220, 100, 100, 0.9)
+  
+  &::before {
+    content: '🍂'
+    font-size: 14px
+  }
+  
+  &:hover {
+    background: rgba(220, 100, 100, 0.2)
+    transform: translateY(-1px)
   }
 }
 
