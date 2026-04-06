@@ -1385,7 +1385,7 @@ pre code {
   transition: all 0.2s ease-in-out;
 }
 .links-of-author a::before {
-  background: #4071d5;
+  background: #cb58ff;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -2948,6 +2948,7 @@ header.header {
   --bg-card-light: #f8f8f8;
   --content-bg-color: #1a2316;
   --bg-sidebar: #1a2512;
+  --sidebar-width: 320px;
   --bg-image: url("/images/forest-background.png");
   --text-heading: #1a1a1a;
   --text-subtitle: #555;
@@ -2980,6 +2981,7 @@ header.header {
   --bg-card-light: #141c0e;
   --content-bg-color: #161e10;
   --bg-sidebar: #141c0e;
+  --sidebar-width: 320px;
   --text-heading: #fff;
   --text-subtitle: #8bb48b;
   --text-primary: #f0f0e6;
@@ -3252,6 +3254,9 @@ body::before {
   background: transparent !important;
 }
 .sidebar {
+  width: var(--sidebar-width) !important;
+  max-width: var(--sidebar-width) !important;
+  min-width: var(--sidebar-width) !important;
   background: rgba(var(--bg-sidebar-light-rgb), 0.85) !important;
   backdrop-filter: blur(24px) saturate(200%) !important;
   border-right: 1px solid rgba(var(--primary-forest-medium-rgb), 0.2) !important;
