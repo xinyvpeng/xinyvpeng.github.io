@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"xinyvpeng.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":{"enable":false,"chat":"auto"},"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":5,"unescape":true,"preload":true,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成引言2022年，CompVis团队在论文《High-Resolution Image Synthesis with Latent Diffusion Models》中提出了潜在扩散模型（LDM），解决了传统扩散模型在像素空间训练的巨大计算开销问题。这项工作是Stable Diffusion的前身，开启了高效高分辨率图像生成的新篇章。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成">
+<meta property="og:url" content="https://xinyvpeng.github.io/2026/04/04/2026-04-04-latent-diffusion-models-paper-interpretation/index.html">
+<meta property="og:site_name" content="Raniy">
+<meta property="og:description" content="潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成引言2022年，CompVis团队在论文《High-Resolution Image Synthesis with Latent Diffusion Models》中提出了潜在扩散模型（LDM），解决了传统扩散模型在像素空间训练的巨大计算开销问题。这项工作是Stable Diffusion的前身，开启了高效高分辨率图像生成的新篇章。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-04T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-04T02:00:00.000Z">
+<meta property="article:author" content="Raniy">
+<meta property="article:tag" content="AI绘画">
+<meta property="article:tag" content="CompVis">
+<meta property="article:tag" content="Latent Diffusion Models">
+<meta property="article:tag" content="图像生成">
+<meta property="article:tag" content="扩散模型">
+<meta property="article:tag" content="论文解读">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://xinyvpeng.github.io/2026/04/04/2026-04-04-latent-diffusion-models-paper-interpretation/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://xinyvpeng.github.io/2026/04/04/2026-04-04-latent-diffusion-models-paper-interpretation/","path":"2026/04/04/2026-04-04-latent-diffusion-models-paper-interpretation/","title":"潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成 | Raniy</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"all","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Raniy</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录项目、工作、论文、笔记</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BD%9C%E5%9C%A8%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B-LDM-%E8%AE%BA%E6%96%87%E7%B2%BE%E8%AF%BB%EF%BC%9A%E4%BB%8E%E5%83%8F%E7%B4%A0%E7%A9%BA%E9%97%B4%E5%88%B0%E6%BD%9C%E5%9C%A8%E7%A9%BA%E9%97%B4%E7%9A%84%E9%AB%98%E6%95%88%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90"><span class="nav-number">1.</span> <span class="nav-text">潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%83%8C%E6%99%AF%E5%9B%9E%E9%A1%BE%EF%BC%9A%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E7%9A%84%E8%AE%A1%E7%AE%97%E7%93%B6%E9%A2%88"><span class="nav-number">1.2.</span> <span class="nav-text">1. 背景回顾：扩散模型的计算瓶颈</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E5%9F%BA%E7%A1%80"><span class="nav-number">1.2.1.</span> <span class="nav-text">1.1 扩散模型基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E5%83%8F%E7%B4%A0%E7%A9%BA%E9%97%B4%E6%89%A9%E6%95%A3%E7%9A%84%E8%AE%A1%E7%AE%97%E7%93%B6%E9%A2%88"><span class="nav-number">1.2.2.</span> <span class="nav-text">1.2 像素空间扩散的计算瓶颈</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-LDM%E6%A0%B8%E5%BF%83%E5%88%9B%E6%96%B0%EF%BC%9A%E6%BD%9C%E5%9C%A8%E7%A9%BA%E9%97%B4%E6%89%A9%E6%95%A3"><span class="nav-number">1.3.</span> <span class="nav-text">2. LDM核心创新：潜在空间扩散</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="nav-number">1.3.1.</span> <span class="nav-text">2.1 整体架构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%BD%9C%E5%9C%A8%E7%A9%BA%E9%97%B4%E6%9B%B4%E9%AB%98%E6%95%88%EF%BC%9F"><span class="nav-number">1.3.2.</span> <span class="nav-text">2.2 为什么潜在空间更高效？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3"><span class="nav-number">1.4.</span> <span class="nav-text">3. 架构详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E8%87%AA%E5%8A%A8%E7%BC%96%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="nav-number">1.4.1.</span> <span class="nav-text">3.1 自动编码器架构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E6%BD%9C%E5%9C%A8%E7%A9%BA%E9%97%B4%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.4.2.</span> <span class="nav-text">3.2 潜在空间扩散模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E6%9D%A1%E4%BB%B6%E6%9C%BA%E5%88%B6"><span class="nav-number">1.4.3.</span> <span class="nav-text">3.3 条件机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-%E6%9D%A1%E4%BB%B6UNet%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="nav-number">1.4.4.</span> <span class="nav-text">3.4 条件UNet架构图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%85%B3%E9%94%AE%E5%85%AC%E5%BC%8F%E6%80%BB%E7%BB%93"><span class="nav-number">1.5.</span> <span class="nav-text">4. 关键公式总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E6%A0%B8%E5%BF%83%E6%89%A9%E6%95%A3%E5%85%AC%E5%BC%8F"><span class="nav-number">1.5.1.</span> <span class="nav-text">4.1 核心扩散公式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E6%9D%A1%E4%BB%B6%E6%9C%BA%E5%88%B6%E5%85%AC%E5%BC%8F"><span class="nav-number">1.5.2.</span> <span class="nav-text">4.2 条件机制公式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%AE%9E%E7%8E%B0%E8%A6%81%E7%82%B9%E4%B8%8E%E5%85%B3%E9%94%AE%E4%BB%A3%E7%A0%81"><span class="nav-number">1.6.</span> <span class="nav-text">5. 实现要点与关键代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E8%87%AA%E5%8A%A8%E7%BC%96%E7%A0%81%E5%99%A8%E5%AE%9E%E7%8E%B0%EF%BC%88PyTorch%E9%A3%8E%E6%A0%BC%EF%BC%89"><span class="nav-number">1.6.1.</span> <span class="nav-text">5.1 自动编码器实现（PyTorch风格）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-%E6%9D%A1%E4%BB%B6UNet%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%85%B3%E9%94%AE%E9%83%A8%E5%88%86%EF%BC%89"><span class="nav-number">1.6.2.</span> <span class="nav-text">5.2 条件UNet实现（关键部分）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF%E5%85%B3%E9%94%AE%E9%83%A8%E5%88%86"><span class="nav-number">1.6.3.</span> <span class="nav-text">5.3 训练循环关键部分</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E8%AE%AD%E7%BB%83%E4%B8%8E%E6%8E%A8%E7%90%86%E6%B5%81%E7%A8%8B"><span class="nav-number">1.7.</span> <span class="nav-text">6. 训练与推理流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-%E4%B8%A4%E9%98%B6%E6%AE%B5%E8%AE%AD%E7%BB%83%E7%AD%96%E7%95%A5"><span class="nav-number">1.7.1.</span> <span class="nav-text">6.1 两阶段训练策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-%E6%8E%A8%E7%90%86%EF%BC%88%E9%87%87%E6%A0%B7%EF%BC%89%E6%B5%81%E7%A8%8B"><span class="nav-number">1.7.2.</span> <span class="nav-text">6.2 推理（采样）流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E6%A0%B8%E5%BF%83%E4%BC%98%E5%8A%BF%E4%B8%8E%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.8.</span> <span class="nav-text">7. 核心优势与实验结果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-%E8%AE%A1%E7%AE%97%E6%95%88%E7%8E%87%E5%AF%B9%E6%AF%94"><span class="nav-number">1.8.1.</span> <span class="nav-text">7.1 计算效率对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-%E5%85%B3%E9%94%AE%E4%BC%98%E5%8A%BF%E6%80%BB%E7%BB%93"><span class="nav-number">1.8.2.</span> <span class="nav-text">7.2 关键优势总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E6%80%BB%E7%BB%93%E4%B8%8E%E5%B1%95%E6%9C%9B"><span class="nav-number">1.9.</span> <span class="nav-text">8. 总结与展望</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#8-1-LDM%E7%9A%84%E6%A0%B8%E5%BF%83%E8%B4%A1%E7%8C%AE"><span class="nav-number">1.9.1.</span> <span class="nav-text">8.1 LDM的核心贡献</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-2-%E5%90%8E%E7%BB%AD%E5%8F%91%E5%B1%95%E4%B8%8E%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91"><span class="nav-number">1.9.2.</span> <span class="nav-text">8.2 后续发展与研究方向</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-3-%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%BB%BA%E8%AE%AE"><span class="nav-number">1.9.3.</span> <span class="nav-text">8.3 实际应用建议</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-%E8%BF%9B%E4%B8%80%E6%AD%A5%E5%AD%A6%E4%B9%A0%E8%B5%84%E6%BA%90"><span class="nav-number">1.10.</span> <span class="nav-text">9. 进一步学习资源</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Raniy"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Raniy</p>
+  <div class="site-description" itemprop="description">个人技术博客，记录项目介绍、工作内容、论文阅读、笔记和个人介绍</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/xinyvpeng" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;xinyvpeng" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:xinyvpeng@163.com" title="Email → mailto:xinyvpeng@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>Email</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xinyvpeng.github.io/2026/04/04/2026-04-04-latent-diffusion-models-paper-interpretation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Raniy">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Raniy">
+      <meta itemprop="description" content="个人技术博客，记录项目介绍、工作内容、论文阅读、笔记和个人介绍">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成 | Raniy">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-04-04 10:00:00" itemprop="dateCreated datePublished" datetime="2026-04-04T10:00:00+08:00">2026-04-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">人工智能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="潜在扩散模型-LDM-论文精读：从像素空间到潜在空间的高效图像生成"><a href="#潜在扩散模型-LDM-论文精读：从像素空间到潜在空间的高效图像生成" class="headerlink" title="潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成"></a>潜在扩散模型(LDM)论文精读：从像素空间到潜在空间的高效图像生成</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>2022年，CompVis团队在论文《High-Resolution Image Synthesis with Latent Diffusion Models》中提出了潜在扩散模型（LDM），解决了传统扩散模型在像素空间训练的巨大计算开销问题。这项工作是Stable Diffusion的前身，开启了高效高分辨率图像生成的新篇章。</p>
+<p><strong>核心问题</strong>：传统的扩散模型（如DDPM、DDIM）直接在像素空间操作，生成高分辨率图像需要数百到数千步的迭代，每次迭代都在高维空间（如256×256×3≈200K维度）进行，导致：</p>
+<ul>
+<li>训练成本高昂（GPU内存占用大）</li>
+<li>推理速度慢（实时应用困难）</li>
+<li>难以扩展到更高分辨率</li>
+</ul>
+<p><strong>LDM的核心创新</strong>：将扩散过程从像素空间转移到<strong>压缩的潜在空间</strong>，通过预训练的自动编码器将图像压缩到低维表示（如32×32×4≈4K维度），在这个空间执行扩散过程，最后解码回像素空间。</p>
+<p><strong>主要贡献</strong>：</p>
+<ol>
+<li><strong>计算效率提升</strong>：内存占用减少约3-4倍，推理速度提升2-3倍</li>
+<li><strong>高质量生成</strong>：在多个基准测试上达到SOTA或接近SOTA</li>
+<li><strong>灵活的conditioning</strong>：支持文本、图像、类别等多种条件输入</li>
+</ol>
+<span id="more"></span>
+
+<h2 id="1-背景回顾：扩散模型的计算瓶颈"><a href="#1-背景回顾：扩散模型的计算瓶颈" class="headerlink" title="1. 背景回顾：扩散模型的计算瓶颈"></a>1. 背景回顾：扩散模型的计算瓶颈</h2><h3 id="1-1-扩散模型基础"><a href="#1-1-扩散模型基础" class="headerlink" title="1.1 扩散模型基础"></a>1.1 扩散模型基础</h3><p>扩散模型的核心是通过逐步添加噪声将数据分布转化为简单的高斯分布（前向过程），然后学习逆向去噪过程（反向过程）：</p>
+<p><strong>前向过程（加噪）</strong>：<br>$$<br>x_t &#x3D; \sqrt{\alpha_t} x_0 + \sqrt{1 - \alpha_t} \epsilon, \quad \epsilon \sim \mathcal{N}(0, I)<br>$$</p>
+<p>其中 $\alpha_t$ 是噪声调度参数，$\alpha_t &#x3D; \prod_{s&#x3D;1}^t (1 - \beta_s)$，$\beta_t$ 是方差调度。</p>
+<p><strong>反向过程（去噪）</strong>：<br>模型学习从噪声中恢复原始图像：<br>$$<br>p_\theta(x_{t-1}|x_t) &#x3D; \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))<br>$$</p>
+<p>其中 $\mu_\theta$ 由噪声预测网络 $\epsilon_\theta$ 参数化：<br>$$<br>\mu_\theta(x_t, t) &#x3D; \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}<em>t}} \epsilon</em>\theta(x_t, t) \right)<br>$$</p>
+<h3 id="1-2-像素空间扩散的计算瓶颈"><a href="#1-2-像素空间扩散的计算瓶颈" class="headerlink" title="1.2 像素空间扩散的计算瓶颈"></a>1.2 像素空间扩散的计算瓶颈</h3><p>在像素空间直接操作高分辨率图像时：</p>
+<ol>
+<li><strong>计算复杂度</strong>：对于 $H \times W \times C$ 的图像，UNet需要在 $O(H \times W)$ 的空间维度上操作</li>
+<li><strong>内存占用</strong>：特征图尺寸随分辨率平方增长</li>
+<li><strong>训练成本</strong>：生成512×512图像需要约16GB GPU内存，推理需要数百步</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">计算复杂度对比：</span><br><span class="line">像素空间: 512×512×3 ≈ 786,432 元素</span><br><span class="line">潜在空间: 32×32×4 ≈ 4,096 元素 (压缩约192倍)</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-LDM核心创新：潜在空间扩散"><a href="#2-LDM核心创新：潜在空间扩散" class="headerlink" title="2. LDM核心创新：潜在空间扩散"></a>2. LDM核心创新：潜在空间扩散</h2><h3 id="2-1-整体架构图"><a href="#2-1-整体架构图" class="headerlink" title="2.1 整体架构图"></a>2.1 整体架构图</h3><p>LDM的核心创新在于将扩散过程从高维像素空间转移到低维潜在空间。以下是LDM的整体架构图：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────────────────────────────┐</span><br><span class="line">│                        Latent Diffusion Model (LDM)                 │</span><br><span class="line">├─────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│                                                                     │</span><br><span class="line">│  ┌─────────────┐    ┌─────────────┐    ┌──────────────────────┐    │</span><br><span class="line">│  │   输入图像   │    │   编码器     │    │   潜在表示(z)        │    │</span><br><span class="line">│  │   x ∈ ℝ^&#123;H×W×3&#125; │────▶ E(x)   │────▶ z ∈ ℝ^&#123;h×w×d&#125;       │    │</span><br><span class="line">│  └─────────────┘    └─────────────┘    └──────────────────────┘    │</span><br><span class="line">│                                          │                          │</span><br><span class="line">│                                          │ 扩散过程在潜在空间        │</span><br><span class="line">│                                          ▼                          │</span><br><span class="line">│  ┌──────────────────────────────────────────────────────┐          │</span><br><span class="line">│  │         条件UNet: ε_θ(z_t, t, c)                    │          │</span><br><span class="line">│  │  ┌────────────────────────────────────────────────┐  │          │</span><br><span class="line">│  │  │        交叉注意力: Attention(Q, K, V)          │  │          │</span><br><span class="line">│  │  │  Q = W_Q·φ(z_t)  K = W_K·τ(c)  V = W_V·τ(c)    │  │          │</span><br><span class="line">│  │  └────────────────────────────────────────────────┘  │          │</span><br><span class="line">│  └──────────────────────────────────────────────────────┘          │</span><br><span class="line">│                                          │                          │</span><br><span class="line">│                                          │ 去噪后的潜在表示          │</span><br><span class="line">│                                          ▼                          │</span><br><span class="line">│  ┌─────────────┐    ┌─────────────┐    ┌──────────────────────┐    │</span><br><span class="line">│  │   重建图像   │◀───│   解码器     │◀───│   去噪潜在表示       │    │</span><br><span class="line">│  │   x̂ ≈ x     │    │   D(z)      │    │   ẑ ∈ ℝ^&#123;h×w×d&#125;     │    │</span><br><span class="line">│  └─────────────┘    └─────────────┘    └──────────────────────┘    │</span><br><span class="line">│                                                                     │</span><br><span class="line">│  条件输入(c):                                                        │</span><br><span class="line">│  ┌─────────────┐    ┌─────────────┐                                │</span><br><span class="line">│  │   文本/类别  │───▶│ 条件编码器   │───▶ τ(c)                      │</span><br><span class="line">│  │   &quot;a cat&quot;   │    │   CLIP/Embed│                                │</span><br><span class="line">│  └─────────────┘    └─────────────┘                                │</span><br><span class="line">└─────────────────────────────────────────────────────────────────────┘</span><br><span class="line"></span><br><span class="line">关键维度说明:</span><br><span class="line">- H×W×3: 原始图像尺寸 (如512×512×3 ≈ 786K元素)</span><br><span class="line">- h×w×d: 潜在表示尺寸 (如64×64×4 ≈ 16K元素, 压缩49倍)</span><br><span class="line">- f = H/h: 下采样因子 (通常8-16)</span><br></pre></td></tr></table></figure>
+
+<p>LDM采用两阶段训练策略：</p>
+<p><strong>第一阶段</strong>：训练自动编码器 $(E, D)$，学习将图像压缩到低维潜在空间：<br>$$<br>z &#x3D; E(x), \quad \hat{x} &#x3D; D(z)<br>$$</p>
+<p><strong>第二阶段</strong>：在潜在空间 $z$ 上训练扩散模型 $\epsilon_\theta$，学习去噪过程。</p>
+<h3 id="2-2-为什么潜在空间更高效？"><a href="#2-2-为什么潜在空间更高效？" class="headerlink" title="2.2 为什么潜在空间更高效？"></a>2.2 为什么潜在空间更高效？</h3><ol>
+<li><strong>维度降低</strong>：将图像从 $H \times W \times 3$ 压缩到 $h \times w \times d$，其中 $h &#x3D; H&#x2F;f$, $w &#x3D; W&#x2F;f$，$f$ 是下采样因子（通常8-16）</li>
+<li><strong>计算复杂度降低</strong>：扩散过程在低维空间进行，UNet参数量减少</li>
+<li><strong>感知压缩</strong>：自动编码器学习保留视觉重要信息，丢弃高频细节</li>
+</ol>
+<p>数学上，计算复杂度从 $O(HW)$ 降低到 $O(HW&#x2F;f^2)$，对于 $f&#x3D;8$，复杂度降低64倍。</p>
+<h2 id="3-架构详解"><a href="#3-架构详解" class="headerlink" title="3. 架构详解"></a>3. 架构详解</h2><h3 id="3-1-自动编码器架构图"><a href="#3-1-自动编码器架构图" class="headerlink" title="3.1 自动编码器架构图"></a>3.1 自动编码器架构图</h3><p>自动编码器是LDM的第一阶段，负责将高维图像压缩到低维潜在空间。其架构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">自动编码器详细架构:</span><br><span class="line">┌─────────────────────────────────────────────────────────────┐</span><br><span class="line">│                    编码器 (Encoder)                         │</span><br><span class="line">├─────────────────────────────────────────────────────────────┤</span><br><span class="line">│ 输入: x ∈ ℝ^&#123;512×512×3&#125;                                    │</span><br><span class="line">│                                                            │</span><br><span class="line">│ Conv2d(3, 64, 3, stride=2, padding=1)  → 256×256×64       │</span><br><span class="line">│ GroupNorm(32, 64) + SiLU()                                │</span><br><span class="line">│                                                            │</span><br><span class="line">│ Conv2d(64, 128, 3, stride=2, padding=1) → 128×128×128     │</span><br><span class="line">│ GroupNorm(32, 128) + SiLU()                               │</span><br><span class="line">│                                                            │</span><br><span class="line">│ Conv2d(128, 256, 3, stride=2, padding=1) → 64×64×256      │</span><br><span class="line">│ GroupNorm(32, 256) + SiLU()                               │</span><br><span class="line">│                                                            │</span><br><span class="line">│ Conv2d(256, 4, 3, padding=1)          → 64×64×4          │</span><br><span class="line">│ 输出: z ∈ ℝ^&#123;64×64×4&#125; (下采样8倍)                         │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line">                                    │</span><br><span class="line">                                    ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────────┐</span><br><span class="line">│                    解码器 (Decoder)                         │</span><br><span class="line">├─────────────────────────────────────────────────────────────┤</span><br><span class="line">│ 输入: z ∈ ℝ^&#123;64×64×4&#125;                                      │</span><br><span class="line">│                                                            │</span><br><span class="line">│ Conv2d(4, 256, 3, padding=1)        → 64×64×256           │</span><br><span class="line">│ GroupNorm(32, 256) + SiLU()                                │</span><br><span class="line">│                                                            │</span><br><span class="line">│ Upsample(2×) + Conv2d(256, 128, 3)  → 128×128×128         │</span><br><span class="line">│ GroupNorm(32, 128) + SiLU()                               │</span><br><span class="line">│                                                            │</span><br><span class="line">│ Upsample(2×) + Conv2d(128, 64, 3)   → 256×256×64          │</span><br><span class="line">│ GroupNorm(32, 64) + SiLU()                                │</span><br><span class="line">│                                                            │</span><br><span class="line">│ Upsample(2×) + Conv2d(64, 3, 3)     → 512×512×3           │</span><br><span class="line">│ 输出: x̂ ∈ ℝ^&#123;512×512×3&#125; (重建图像)                        │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br><span class="line"></span><br><span class="line">训练目标（复合损失）:</span><br><span class="line">$$</span><br><span class="line">\mathcal&#123;L&#125;_&#123;\mathrm&#123;AE&#125;&#125; = \mathcal&#123;L&#125;_&#123;\mathrm&#123;rec&#125;&#125; + \lambda_&#123;\mathrm&#123;perc&#125;&#125;\mathcal&#123;L&#125;_&#123;\mathrm&#123;perc&#125;&#125; + \lambda_&#123;\mathrm&#123;adv&#125;&#125;\mathcal&#123;L&#125;_&#123;\mathrm&#123;adv&#125;&#125;</span><br><span class="line">$$</span><br><span class="line"></span><br><span class="line">- $\mathcal&#123;L&#125;_&#123;\mathrm&#123;rec&#125;&#125;$：像素级重建损失（L1或L2），保证像素级准确</span><br><span class="line">- $\mathcal&#123;L&#125;_&#123;\mathrm&#123;perc&#125;&#125;$：感知损失（VGG特征匹配），保证语义级相似</span><br><span class="line">- $\mathcal&#123;L&#125;_&#123;\mathrm&#123;adv&#125;&#125;$：对抗损失，保证重建图像真实感</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-潜在空间扩散模型"><a href="#3-2-潜在空间扩散模型" class="headerlink" title="3.2 潜在空间扩散模型"></a>3.2 潜在空间扩散模型</h3><p>在潜在空间 $z$ 上定义扩散过程：</p>
+<p><strong>前向过程</strong>：<br>$$<br>z_t &#x3D; \sqrt{\alpha_t} z_0 + \sqrt{1 - \alpha_t} \epsilon, \quad \epsilon \sim \mathcal{N}(0, I)<br>$$</p>
+<p><strong>反向过程</strong>（参数化为UNet）：<br>$$<br>p_\theta(z_{t-1}|z_t, c) &#x3D; \mathcal{N}(z_{t-1}; \mu_\theta(z_t, t, c), \Sigma_\theta(z_t, t, c))<br>$$</p>
+<p>其中 $c$ 是条件信息（文本、类别等）。</p>
+<p><strong>训练目标</strong>（简化的ELBO）：<br>$$<br>\mathcal{L}<em>{\mathrm{LDM}} &#x3D; \mathbb{E}</em>{z \sim E(x), \epsilon \sim \mathcal{N}(0,1), t} \left[ | \epsilon - \epsilon_\theta(z_t, t, c) |_2^2 \right]<br>$$</p>
+<h3 id="3-3-条件机制"><a href="#3-3-条件机制" class="headerlink" title="3.3 条件机制"></a>3.3 条件机制</h3><p>LDM支持多种条件输入，通过<strong>交叉注意力</strong>机制实现：</p>
+<p>$$<br>\mathrm{Attention}(Q, K, V) &#x3D; \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d}}\right)V<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$Q &#x3D; W_Q \cdot \phi(z_t)$（潜在表示投影）</li>
+<li>$K &#x3D; W_K \cdot \tau(c)$（条件编码投影）</li>
+<li>$V &#x3D; W_V \cdot \tau(c)$（条件值投影）</li>
+</ul>
+<p>$\tau(c)$ 是条件编码器（如文本的CLIP、类别的嵌入层）。</p>
+<h3 id="3-4-条件UNet架构图"><a href="#3-4-条件UNet架构图" class="headerlink" title="3.4 条件UNet架构图"></a>3.4 条件UNet架构图</h3><p>LDM的条件UNet是扩散过程的核心，它在潜在空间执行去噪，同时整合条件信息。以下是详细的架构图：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">条件UNet详细架构 (U-Net with Cross-Attention):</span><br><span class="line">┌─────────────────────────────────────────────────────────────────────┐</span><br><span class="line">│                        条件UNet: ε_θ(z_t, t, c)                     │</span><br><span class="line">├─────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│                                                                     │</span><br><span class="line">│ 输入: z_t ∈ ℝ^&#123;64×64×4&#125;, t ∈ [0, T], c = τ(&quot;text prompt&quot;)          │</span><br><span class="line">│                                                                     │</span><br><span class="line">│ ┌─────────────────────────────────────────────────────────────┐    │</span><br><span class="line">│ │                    下采样路径 (Encoder)                     │    │</span><br><span class="line">│ ├─────────────────────────────────────────────────────────────┤    │</span><br><span class="line">│ │ ResBlock(z_t, t_emb) → [64×64×256]                         │    │</span><br><span class="line">│ │   ↓ Cross-Attn(z, c)  (与条件交互)                           │    │</span><br><span class="line">│ │                                                             │    │</span><br><span class="line">│ │ Downsample(2×) → ResBlock → [32×32×512]                    │    │</span><br><span class="line">│ │   ↓ Cross-Attn(z, c)                                       │    │</span><br><span class="line">│ │                                                             │    │</span><br><span class="line">│ │ Downsample(2×) → ResBlock → [16×16×512]                    │    │</span><br><span class="line">│ │   ↓ Cross-Attn(z, c)                                       │    │</span><br><span class="line">│ │                                                             │    │</span><br><span class="line">│ │ Downsample(2×) → ResBlock → [8×8×512]                      │    │</span><br><span class="line">│ │   ↓ Cross-Attn(z, c)                                       │    │</span><br><span class="line">│ └─────────────────────────────────────────────────────────────┘    │</span><br><span class="line">│                                    │                               │</span><br><span class="line">│ ┌─────────────────────────────────────────────────────────────┐    │</span><br><span class="line">│ │                    瓶颈层 (Bottleneck)                      │    │</span><br><span class="line">│ ├─────────────────────────────────────────────────────────────┤    │</span><br><span class="line">│ │ ResBlock → [8×8×512]                                        │    │</span><br><span class="line">│ │   ↓ Cross-Attn(z, c)                                        │    │</span><br><span class="line">│ │ ResBlock → [8×8×512]                                        │    │</span><br><span class="line">│ └─────────────────────────────────────────────────────────────┘    │</span><br><span class="line">│                                    │                               │</span><br><span class="line">│ ┌─────────────────────────────────────────────────────────────┐    │</span><br><span class="line">│ │                    上采样路径 (Decoder)                     │    │</span><br><span class="line">│ ├─────────────────────────────────────────────────────────────┤    │</span><br><span class="line">│ │ ResBlock → [8×8×512]                                        │    │</span><br><span class="line">│ │   ↑ Upsample(2×) + Skip(来自编码器)                         │    │</span><br><span class="line">│ │                                                             │    │</span><br><span class="line">│ │ ResBlock → [16×16×512]                                      │    │</span><br><span class="line">│ │   ↑ Upsample(2×) + Skip(来自编码器)                         │    │</span><br><span class="line">│ │   ↓ Cross-Attn(z, c)                                       │    │</span><br><span class="line">│ │                                                             │    │</span><br><span class="line">│ │ ResBlock → [32×32×512]                                      │    │</span><br><span class="line">│ │   ↑ Upsample(2×) + Skip(来自编码器)                         │    │</span><br><span class="line">│ │   ↓ Cross-Attn(z, c)                                       │    │</span><br><span class="line">│ │                                                             │    │</span><br><span class="line">│ │ ResBlock → [64×64×256]                                      │    │</span><br><span class="line">│ │   ↑ Upsample(2×) + Skip(来自编码器)                         │    │</span><br><span class="line">│ │   ↓ Cross-Attn(z, c)                                       │    │</span><br><span class="line">│ └─────────────────────────────────────────────────────────────┘    │</span><br><span class="line">│                                    │                               │</span><br><span class="line">│                          Conv2d(256, 4, 3)                         │</span><br><span class="line">│                                    ↓                               │</span><br><span class="line">│                       输出: ε_pred ∈ ℝ^&#123;64×64×4&#125;                   │</span><br><span class="line">│                           (预测的噪声)                             │</span><br><span class="line">└─────────────────────────────────────────────────────────────────────┘</span><br><span class="line"></span><br><span class="line">关键组件说明:</span><br><span class="line">1. ResBlock: 残差块，包含GroupNorm、SiLU、卷积，融入时间嵌入t_emb</span><br><span class="line">2. Cross-Attn: 交叉注意力层，连接潜在表示z和条件编码c</span><br><span class="line">3. Skip Connection: U-Net跳跃连接，保留多尺度特征</span><br><span class="line">4. Time Embedding: 正弦位置编码，将时间步t映射为向量</span><br><span class="line"></span><br><span class="line">交叉注意力层的详细计算:</span><br><span class="line">    潜在特征 → 展平 → Q = W_Q·z_flat → Attention(Q, K, V) → 重塑 → 输出</span><br><span class="line">    条件编码 → τ(c) → K = W_K·τ(c), V = W_V·τ(c)</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-关键公式总结"><a href="#4-关键公式总结" class="headerlink" title="4. 关键公式总结"></a>4. 关键公式总结</h2><h3 id="4-1-核心扩散公式"><a href="#4-1-核心扩散公式" class="headerlink" title="4.1 核心扩散公式"></a>4.1 核心扩散公式</h3><p><strong>潜在空间前向过程</strong>：<br>$$<br>z_t &#x3D; \sqrt{\alpha_t} z_0 + \sqrt{1 - \alpha_t} \epsilon<br>$$</p>
+<p><strong>噪声预测目标</strong>：<br>$$<br>\mathcal{L} &#x3D; \mathbb{E}<em>{z,\epsilon,t,c} \left[ | \epsilon - \epsilon</em>\theta(z_t, t, c) |_2^2 \right]<br>$$</p>
+<p><strong>采样过程（DDIM）</strong>：<br>$$<br>z_{t-1} &#x3D; \sqrt{\alpha_{t-1}} \left( \frac{z_t - \sqrt{1 - \alpha_t} \epsilon_\theta(z_t, t, c)}{\sqrt{\alpha_t}} \right) + \sqrt{1 - \alpha_{t-1}} \epsilon_\theta(z_t, t, c)<br>$$</p>
+<h3 id="4-2-条件机制公式"><a href="#4-2-条件机制公式" class="headerlink" title="4.2 条件机制公式"></a>4.2 条件机制公式</h3><p><strong>交叉注意力</strong>：<br>$$<br>\mathrm{CrossAttn}(z, c) &#x3D; \mathrm{softmax}\left(\frac{(W_Q z)(W_K \tau(c))^T}{\sqrt{d}}\right) (W_V \tau(c))<br>$$</p>
+<h2 id="5-实现要点与关键代码"><a href="#5-实现要点与关键代码" class="headerlink" title="5. 实现要点与关键代码"></a>5. 实现要点与关键代码</h2><h3 id="5-1-自动编码器实现（PyTorch风格）"><a href="#5-1-自动编码器实现（PyTorch风格）" class="headerlink" title="5.1 自动编码器实现（PyTorch风格）"></a>5.1 自动编码器实现（PyTorch风格）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">VAEEncoder</span>(nn.Module):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;自动编码器编码器部分&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, in_channels=<span class="number">3</span>, latent_channels=<span class="number">4</span>, downscale_factor=<span class="number">8</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="comment"># 卷积下采样层</span></span><br><span class="line">        <span class="variable language_">self</span>.conv_layers = nn.Sequential(</span><br><span class="line">            nn.Conv2d(in_channels, <span class="number">64</span>, <span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>),  <span class="comment"># 下采样2倍</span></span><br><span class="line">            nn.GroupNorm(<span class="number">32</span>, <span class="number">64</span>),</span><br><span class="line">            nn.SiLU(),</span><br><span class="line">            nn.Conv2d(<span class="number">64</span>, <span class="number">128</span>, <span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>),  <span class="comment"># 下采样4倍</span></span><br><span class="line">            nn.GroupNorm(<span class="number">32</span>, <span class="number">128</span>),</span><br><span class="line">            nn.SiLU(),</span><br><span class="line">            nn.Conv2d(<span class="number">128</span>, <span class="number">256</span>, <span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>),  <span class="comment"># 下采样8倍</span></span><br><span class="line">            nn.GroupNorm(<span class="number">32</span>, <span class="number">256</span>),</span><br><span class="line">            nn.SiLU(),</span><br><span class="line">        )</span><br><span class="line">        <span class="comment"># 输出层</span></span><br><span class="line">        <span class="variable language_">self</span>.out_conv = nn.Conv2d(<span class="number">256</span>, latent_channels, <span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = <span class="variable language_">self</span>.conv_layers(x)</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.out_conv(x)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">VAEDecoder</span>(nn.Module):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;自动编码器解码器部分&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, latent_channels=<span class="number">4</span>, out_channels=<span class="number">3</span>, upscale_factor=<span class="number">8</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="comment"># 初始卷积</span></span><br><span class="line">        <span class="variable language_">self</span>.in_conv = nn.Conv2d(latent_channels, <span class="number">256</span>, <span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># 卷积上采样层</span></span><br><span class="line">        <span class="variable language_">self</span>.conv_layers = nn.Sequential(</span><br><span class="line">            nn.Conv2d(<span class="number">256</span>, <span class="number">256</span>, <span class="number">3</span>, padding=<span class="number">1</span>),</span><br><span class="line">            nn.GroupNorm(<span class="number">32</span>, <span class="number">256</span>),</span><br><span class="line">            nn.SiLU(),</span><br><span class="line">            nn.Upsample(scale_factor=<span class="number">2</span>, mode=<span class="string">&#x27;nearest&#x27;</span>),  <span class="comment"># 上采样2倍</span></span><br><span class="line">            nn.Conv2d(<span class="number">256</span>, <span class="number">128</span>, <span class="number">3</span>, padding=<span class="number">1</span>),</span><br><span class="line">            nn.GroupNorm(<span class="number">32</span>, <span class="number">128</span>),</span><br><span class="line">            nn.SiLU(),</span><br><span class="line">            nn.Upsample(scale_factor=<span class="number">2</span>, mode=<span class="string">&#x27;nearest&#x27;</span>),  <span class="comment"># 上采样4倍</span></span><br><span class="line">            nn.Conv2d(<span class="number">128</span>, <span class="number">64</span>, <span class="number">3</span>, padding=<span class="number">1</span>),</span><br><span class="line">            nn.GroupNorm(<span class="number">32</span>, <span class="number">64</span>),</span><br><span class="line">            nn.SiLU(),</span><br><span class="line">            nn.Upsample(scale_factor=<span class="number">2</span>, mode=<span class="string">&#x27;nearest&#x27;</span>),  <span class="comment"># 上采样8倍</span></span><br><span class="line">        )</span><br><span class="line">        <span class="comment"># 输出层</span></span><br><span class="line">        <span class="variable language_">self</span>.out_conv = nn.Conv2d(<span class="number">64</span>, out_channels, <span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, z</span>):</span><br><span class="line">        z = <span class="variable language_">self</span>.in_conv(z)</span><br><span class="line">        z = <span class="variable language_">self</span>.conv_layers(z)</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.out_conv(z)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AutoencoderKL</span>(nn.Module):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;KL正则化的自动编码器（LDM使用）&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="variable language_">self</span>.encoder = VAEEncoder()</span><br><span class="line">        <span class="variable language_">self</span>.decoder = VAEDecoder()</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">encode</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;编码图像到潜在空间&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.encoder(x)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">decode</span>(<span class="params">self, z</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;解码潜在表示回图像&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.decoder(z)</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-条件UNet实现（关键部分）"><a href="#5-2-条件UNet实现（关键部分）" class="headerlink" title="5.2 条件UNet实现（关键部分）"></a>5.2 条件UNet实现（关键部分）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">CrossAttention</span>(nn.Module):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;交叉注意力层（条件机制核心）&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, query_dim, context_dim=<span class="literal">None</span>, heads=<span class="number">8</span>, dim_head=<span class="number">64</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        inner_dim = dim_head * heads</span><br><span class="line">        context_dim = context_dim <span class="keyword">if</span> context_dim <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">else</span> query_dim</span><br><span class="line">        </span><br><span class="line">        <span class="variable language_">self</span>.scale = dim_head ** -<span class="number">0.5</span></span><br><span class="line">        <span class="variable language_">self</span>.heads = heads</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 投影层</span></span><br><span class="line">        <span class="variable language_">self</span>.to_q = nn.Linear(query_dim, inner_dim, bias=<span class="literal">False</span>)</span><br><span class="line">        <span class="variable language_">self</span>.to_k = nn.Linear(context_dim, inner_dim, bias=<span class="literal">False</span>)</span><br><span class="line">        <span class="variable language_">self</span>.to_v = nn.Linear(context_dim, inner_dim, bias=<span class="literal">False</span>)</span><br><span class="line">        <span class="variable language_">self</span>.to_out = nn.Linear(inner_dim, query_dim)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x, context=<span class="literal">None</span></span>):</span><br><span class="line">        h = <span class="variable language_">self</span>.heads</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 查询投影</span></span><br><span class="line">        q = <span class="variable language_">self</span>.to_q(x)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 键值投影（使用条件上下文）</span></span><br><span class="line">        context = x <span class="keyword">if</span> context <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> context</span><br><span class="line">        k = <span class="variable language_">self</span>.to_k(context)</span><br><span class="line">        v = <span class="variable language_">self</span>.to_v(context)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 分头并计算注意力</span></span><br><span class="line">        q, k, v = <span class="built_in">map</span>(<span class="keyword">lambda</span> t: t.view(*t.shape[:<span class="number">2</span>], h, -<span class="number">1</span>).transpose(<span class="number">1</span>, <span class="number">2</span>), (q, k, v))</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 注意力计算</span></span><br><span class="line">        sim = torch.einsum(<span class="string">&#x27;b h i d, b h j d -&gt; b h i j&#x27;</span>, q, k) * <span class="variable language_">self</span>.scale</span><br><span class="line">        attn = sim.softmax(dim=-<span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 加权聚合</span></span><br><span class="line">        out = torch.einsum(<span class="string">&#x27;b h i j, b h j d -&gt; b h i d&#x27;</span>, attn, v)</span><br><span class="line">        out = out.transpose(<span class="number">1</span>, <span class="number">2</span>).reshape(*x.shape[:<span class="number">2</span>], -<span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.to_out(out)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UNetBlock</span>(nn.Module):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;UNet基础块（带条件）&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, dim, context_dim=<span class="literal">None</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="comment"># 基础卷积层</span></span><br><span class="line">        <span class="variable language_">self</span>.norm1 = nn.GroupNorm(<span class="number">32</span>, dim)</span><br><span class="line">        <span class="variable language_">self</span>.conv1 = nn.Conv2d(dim, dim, <span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 时间嵌入</span></span><br><span class="line">        <span class="variable language_">self</span>.time_emb = nn.Sequential(</span><br><span class="line">            nn.SiLU(),</span><br><span class="line">            nn.Linear(<span class="number">1280</span>, dim)  <span class="comment"># 时间嵌入维度</span></span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 交叉注意力（条件机制）</span></span><br><span class="line">        <span class="variable language_">self</span>.norm2 = nn.GroupNorm(<span class="number">32</span>, dim)</span><br><span class="line">        <span class="variable language_">self</span>.attn = CrossAttention(dim, context_dim)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 输出层</span></span><br><span class="line">        <span class="variable language_">self</span>.norm3 = nn.GroupNorm(<span class="number">32</span>, dim)</span><br><span class="line">        <span class="variable language_">self</span>.conv2 = nn.Conv2d(dim, dim, <span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x, time_emb=<span class="literal">None</span>, context=<span class="literal">None</span></span>):</span><br><span class="line">        <span class="comment"># 残差连接1</span></span><br><span class="line">        h = x</span><br><span class="line">        h = <span class="variable language_">self</span>.norm1(h)</span><br><span class="line">        h = <span class="variable language_">self</span>.conv1(h)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 添加时间嵌入</span></span><br><span class="line">        <span class="keyword">if</span> time_emb <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            time_emb = <span class="variable language_">self</span>.time_emb(time_emb)</span><br><span class="line">            h = h + time_emb[:, :, <span class="literal">None</span>, <span class="literal">None</span>]</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 交叉注意力</span></span><br><span class="line">        h = <span class="variable language_">self</span>.norm2(h)</span><br><span class="line">        <span class="comment"># 将空间特征展平为序列</span></span><br><span class="line">        b, c, hh, ww = h.shape</span><br><span class="line">        h_flat = h.view(b, c, -<span class="number">1</span>).transpose(<span class="number">1</span>, <span class="number">2</span>)  <span class="comment"># [b, h*w, c]</span></span><br><span class="line">        context_flat = <span class="variable language_">self</span>.attn(h_flat, context)  <span class="comment"># 交叉注意力</span></span><br><span class="line">        h = context_flat.transpose(<span class="number">1</span>, <span class="number">2</span>).view(b, c, hh, ww)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 输出</span></span><br><span class="line">        h = <span class="variable language_">self</span>.norm3(h)</span><br><span class="line">        h = <span class="variable language_">self</span>.conv2(h)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> x + h  <span class="comment"># 残差连接</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-训练循环关键部分"><a href="#5-3-训练循环关键部分" class="headerlink" title="5.3 训练循环关键部分"></a>5.3 训练循环关键部分</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">train_step_latent_diffusion</span>(<span class="params">autoencoder, diffusion_model, batch, </span></span><br><span class="line"><span class="params">                                text_encoder, optimizer, device</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;LDM训练步骤&quot;&quot;&quot;</span></span><br><span class="line">    images, captions = batch</span><br><span class="line">    images = images.to(device)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 1. 编码图像到潜在空间</span></span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        latents = autoencoder.encode(images)  <span class="comment"># [B, C, H/8, W/8]</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 编码文本条件</span></span><br><span class="line">    text_embeddings = text_encoder(captions)  <span class="comment"># [B, seq_len, d_model]</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 扩散过程</span></span><br><span class="line">    batch_size = latents.shape[<span class="number">0</span>]</span><br><span class="line">    timesteps = torch.randint(<span class="number">0</span>, <span class="number">1000</span>, (batch_size,), device=device)</span><br><span class="line">    noise = torch.randn_like(latents)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 加噪</span></span><br><span class="line">    noisy_latents = add_noise(latents, noise, timesteps)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 4. 预测噪声</span></span><br><span class="line">    noise_pred = diffusion_model(noisy_latents, timesteps, text_embeddings)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 5. 计算损失</span></span><br><span class="line">    loss = F.mse_loss(noise_pred, noise)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 6. 反向传播</span></span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line">    loss.backward()</span><br><span class="line">    optimizer.step()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> loss.item()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add_noise</span>(<span class="params">latents, noise, timesteps, noise_scheduler</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;添加噪声到潜在表示&quot;&quot;&quot;</span></span><br><span class="line">    sqrt_alpha = torch.sqrt(noise_scheduler.alphas_cumprod[timesteps])</span><br><span class="line">    sqrt_one_minus_alpha = torch.sqrt(<span class="number">1</span> - noise_scheduler.alphas_cumprod[timesteps])</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 调整维度用于广播</span></span><br><span class="line">    sqrt_alpha = sqrt_alpha[:, <span class="literal">None</span>, <span class="literal">None</span>, <span class="literal">None</span>]</span><br><span class="line">    sqrt_one_minus_alpha = sqrt_one_minus_alpha[:, <span class="literal">None</span>, <span class="literal">None</span>, <span class="literal">None</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> sqrt_alpha * latents + sqrt_one_minus_alpha * noise</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-训练与推理流程"><a href="#6-训练与推理流程" class="headerlink" title="6. 训练与推理流程"></a>6. 训练与推理流程</h2><h3 id="6-1-两阶段训练策略"><a href="#6-1-两阶段训练策略" class="headerlink" title="6.1 两阶段训练策略"></a>6.1 两阶段训练策略</h3><p><strong>第一阶段：自动编码器训练</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">for epoch in range(autoencoder_epochs):</span><br><span class="line">    # 1. 编码图像</span><br><span class="line">    latents = encoder(images)</span><br><span class="line">    </span><br><span class="line">    # 2. 解码重建</span><br><span class="line">    reconstructions = decoder(latents)</span><br><span class="line">    </span><br><span class="line">    # 3. 计算损失（重建+感知+对抗）</span><br><span class="line">    loss = reconstruction_loss + λ_perc * perceptual_loss + λ_adv * adversarial_loss</span><br><span class="line">    </span><br><span class="line">    # 4. 反向传播</span><br><span class="line">    loss.backward()</span><br><span class="line">    optimizer.step()</span><br></pre></td></tr></table></figure>
+
+<p><strong>第二阶段：潜在扩散训练</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># 冻结自动编码器</span><br><span class="line">autoencoder.eval()</span><br><span class="line">for param in autoencoder.parameters():</span><br><span class="line">    param.requires_grad = False</span><br><span class="line"></span><br><span class="line">for epoch in range(diffusion_epochs):</span><br><span class="line">    # 1. 编码图像到潜在空间</span><br><span class="line">    with torch.no_grad():</span><br><span class="line">        latents = autoencoder.encode(images)</span><br><span class="line">    </span><br><span class="line">    # 2. 训练扩散模型（在潜在空间）</span><br><span class="line">    loss = diffusion_train_step(latents, conditions)</span><br><span class="line">    </span><br><span class="line">    # 3. 反向传播</span><br><span class="line">    loss.backward()</span><br><span class="line">    optimizer.step()</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-推理（采样）流程"><a href="#6-2-推理（采样）流程" class="headerlink" title="6.2 推理（采样）流程"></a>6.2 推理（采样）流程</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">sample_latent_diffusion</span>(<span class="params">diffusion_model, autoencoder, </span></span><br><span class="line"><span class="params">                           condition, steps=<span class="number">50</span>, guidance_scale=<span class="number">7.5</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;从LDM采样图像&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 1. 从纯噪声开始</span></span><br><span class="line">    batch_size = condition.shape[<span class="number">0</span>]</span><br><span class="line">    latent_shape = (batch_size, <span class="number">4</span>, <span class="number">32</span>, <span class="number">32</span>)  <span class="comment"># 示例：32×32潜在空间</span></span><br><span class="line">    latents = torch.randn(latent_shape, device=device)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 逐步去噪（DDIM采样）</span></span><br><span class="line">    <span class="keyword">for</span> i, t <span class="keyword">in</span> <span class="built_in">enumerate</span>(<span class="built_in">reversed</span>(<span class="built_in">range</span>(steps))):</span><br><span class="line">        <span class="comment"># 添加条件信息</span></span><br><span class="line">        noise_pred = diffusion_model(latents, t, condition)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 分类器自由引导（CFG）</span></span><br><span class="line">        <span class="keyword">if</span> guidance_scale &gt; <span class="number">1.0</span>:</span><br><span class="line">            <span class="comment"># 无条件预测</span></span><br><span class="line">            uncond_pred = diffusion_model(latents, t, <span class="literal">None</span>)</span><br><span class="line">            <span class="comment"># 引导插值</span></span><br><span class="line">            noise_pred = uncond_pred + guidance_scale * (noise_pred - uncond_pred)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># DDIM更新步骤</span></span><br><span class="line">        latents = ddim_step(latents, noise_pred, t, t-<span class="number">1</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 解码回图像空间</span></span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        images = autoencoder.decode(latents)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> images</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-核心优势与实验结果"><a href="#7-核心优势与实验结果" class="headerlink" title="7. 核心优势与实验结果"></a>7. 核心优势与实验结果</h2><h3 id="7-1-计算效率对比"><a href="#7-1-计算效率对比" class="headerlink" title="7.1 计算效率对比"></a>7.1 计算效率对比</h3><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>分辨率</th>
+<th>参数量</th>
+<th>训练内存</th>
+<th>推理速度（步）</th>
+<th>FID↓</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pixel Diffusion</td>
+<td>256×256</td>
+<td>400M</td>
+<td>16GB</td>
+<td>1000</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><strong>LDM</strong></td>
+<td>256×256</td>
+<td>400M</td>
+<td><strong>4GB</strong></td>
+<td><strong>250</strong></td>
+<td><strong>4.8</strong></td>
+</tr>
+<tr>
+<td>Pixel Diffusion</td>
+<td>512×512</td>
+<td>800M</td>
+<td>OOM</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>LDM</strong></td>
+<td>512×512</td>
+<td>800M</td>
+<td><strong>8GB</strong></td>
+<td><strong>500</strong></td>
+<td><strong>7.2</strong></td>
+</tr>
+</tbody></table>
+<h3 id="7-2-关键优势总结"><a href="#7-2-关键优势总结" class="headerlink" title="7.2 关键优势总结"></a>7.2 关键优势总结</h3><ol>
+<li><strong>效率提升</strong>：内存占用减少3-4倍，推理速度提升2-4倍</li>
+<li><strong>质量保持</strong>：在ImageNet、LSUN等数据集上达到SOTA或接近SOTA</li>
+<li><strong>灵活扩展</strong>：易于扩展到文本到图像、图像修复、超分辨率等任务</li>
+<li><strong>实用性强</strong>：成为Stable Diffusion等工业级应用的基础</li>
+</ol>
+<h2 id="8-总结与展望"><a href="#8-总结与展望" class="headerlink" title="8. 总结与展望"></a>8. 总结与展望</h2><h3 id="8-1-LDM的核心贡献"><a href="#8-1-LDM的核心贡献" class="headerlink" title="8.1 LDM的核心贡献"></a>8.1 LDM的核心贡献</h3><ol>
+<li><strong>潜在空间范式</strong>：首次系统地在压缩潜在空间进行扩散，解决计算瓶颈</li>
+<li><strong>两阶段训练</strong>：解耦表征学习和生成建模，提高训练稳定性</li>
+<li><strong>通用条件框架</strong>：统一的交叉注意力机制支持多模态条件输入</li>
+<li><strong>实用化路径</strong>：为Stable Diffusion等实际应用铺平道路</li>
+</ol>
+<h3 id="8-2-后续发展与研究方向"><a href="#8-2-后续发展与研究方向" class="headerlink" title="8.2 后续发展与研究方向"></a>8.2 后续发展与研究方向</h3><ol>
+<li><strong>更大规模预训练</strong>：Stable Diffusion在LAION-5B上的成功验证</li>
+<li><strong>更高效架构</strong>：DiT（Diffusion Transformer）等新架构探索</li>
+<li><strong>更快采样</strong>：DPM-Solver、LCM等加速方法</li>
+<li><strong>视频与3D生成</strong>：扩展到时序和三维数据</li>
+</ol>
+<h3 id="8-3-实际应用建议"><a href="#8-3-实际应用建议" class="headerlink" title="8.3 实际应用建议"></a>8.3 实际应用建议</h3><ol>
+<li><strong>入门实践</strong>：从Stable Diffusion微调开始，理解LDM工作流程</li>
+<li><strong>研究扩展</strong>：探索新的条件机制、更高效的潜在表示</li>
+<li><strong>工业应用</strong>：考虑计算约束，选择合适的下采样因子和模型规模</li>
+</ol>
+<h2 id="9-进一步学习资源"><a href="#9-进一步学习资源" class="headerlink" title="9. 进一步学习资源"></a>9. 进一步学习资源</h2><ul>
+<li><strong>原始论文</strong>：<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2112.10752">High-Resolution Image Synthesis with Latent Diffusion Models</a></li>
+<li><strong>官方代码</strong>：<a target="_blank" rel="noopener" href="https://github.com/CompVis/latent-diffusion">CompVis&#x2F;latent-diffusion</a></li>
+<li><strong>衍生应用</strong>：<a target="_blank" rel="noopener" href="https://github.com/CompVis/stable-diffusion">Stable Diffusion</a></li>
+<li><strong>教程资源</strong>：<a target="_blank" rel="noopener" href="https://github.com/huggingface/diffusion-models-class">Hugging Face Diffusion Course</a></li>
+</ul>
+<hr>
+<p><strong>关键要点回顾</strong>：</p>
+<ol>
+<li><strong>核心创新</strong>：在自动编码器压缩的潜在空间执行扩散，而非像素空间</li>
+<li><strong>关键公式</strong>：潜在空间扩散 $\mathcal{L} &#x3D; \mathbb{E}[| \epsilon - \epsilon_\theta(z_t, t, c) |^2]$</li>
+<li><strong>条件机制</strong>：交叉注意力实现文本&#x2F;图像等多模态条件</li>
+<li><strong>效率提升</strong>：内存减少3-4倍，推理加速2-4倍，支持高分辨率生成</li>
+</ol>
+<p><em>希望本文帮助你深入理解LDM的核心思想与实现。如果你在实践中有任何问题或想法，欢迎在评论区交流讨论！</em></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Latent-Diffusion-Models/" rel="tag"># Latent Diffusion Models</a>
+              <a href="/tags/%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90/" rel="tag"># 图像生成</a>
+              <a href="/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/" rel="tag"># 扩散模型</a>
+              <a href="/tags/AI%E7%BB%98%E7%94%BB/" rel="tag"># AI绘画</a>
+              <a href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/" rel="tag"># 论文解读</a>
+              <a href="/tags/CompVis/" rel="tag"># CompVis</a>
+          </div>
+
+        
+          <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+            <span class="post-meta-item-icon">
+              <i class="far fa-eye"></i>
+            </span>
+            <span class="post-meta-item-text">阅读次数：</span>
+            <span id="busuanzi_value_page_pv"></span>
+          </span>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/04/03/2026-04-03-transformer-architecture-explained/" rel="prev" title="Transformer架构详解：从原理到手撕注意力代码">
+                  <i class="fa fa-angle-left"></i> Transformer架构详解：从原理到手撕注意力代码
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2026/04/05/2026-04-05-clip-paper-interpretation/" rel="next" title="CLIP论文深度解析：视觉-语言预训练的范式转移">
+                  CLIP论文深度解析：视觉-语言预训练的范式转移 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Raniy</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"xinyvpeng","repo":"xinyvpeng.github.io","client_id":"Ov23liLS30z0cOBFIY2x","client_secret":"201bb6a2793dd7ba5ec147623eca7d9828c411b4","admin_user":"xinyvpeng","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"zh-CN","body":null,"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"fed9c75ca57f8353d90ad31b4b40bc4b"}</script>
+<script src="/js/third-party/comments/gitalk.js" defer></script>
+<!-- 森林图书馆主题脚本注入 -->
+
+  <!-- 森林主题核心脚本 -->
+  <script src="/js/forest/forest-theme.js" defer></script>
+  
+  
+    
+      
+    
+      
+        <script src="/js/forest/forest-interactions.js" defer></script>
+      
+    
+      
+        <script src="/js/forest/forest-audio.js" defer></script>
+      
+    
+      
+        <script src="/js/forest/forest-achievements.js" defer></script>
+      
+    
+  
+  
+  <!-- 主题初始化脚本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof window.ForestTheme !== 'undefined') {
+        // 主题管理器会自动初始化
+        console.log('🌲 森林主题加载完成');
+      } else {
+        console.warn('🌲 森林主题脚本未正确加载');
+      }
+    });
+  </script>
+  
+  <!-- 音频系统配置注入 -->
+  <script>
+    // 音频系统配置
+    window.FOREST_AUDIO_CONFIG = {
+      enabled: false,
+      default_preset: "morning"
+    };
+  </script>
+  
+  <!-- 成就系统配置注入 -->
+  <script>
+    // 成就系统配置
+    window.FOREST_ACHIEVEMENTS_CONFIG = {
+      enabled: true,
+      show_notifications: true,
+      show_progress_indicator: true,
+      max_plants: 12,
+      achievement_sound: true
+    };
+  </script>
+  
+  <!-- 森林主题脚本初始化 -->
+  <!-- 功能配置注入 -->
+  <script>
+    window.FOREST_THEME_FEATURES = {
+      audio: true,
+      achievements: true,
+      hidden_animals: true
+    };
+  </script>
+  
+  <script>
+    // 等待DOM加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化主题系统
+      if (typeof window.ForestTheme !== 'undefined') {
+        window.ForestTheme.init();
+      }
+      
+      // 初始化交互系统（延迟确保主题已加载）
+      setTimeout(function() {
+        if (typeof window.ForestInteractions !== 'undefined' && 
+            window.FOREST_THEME_FEATURES.hidden_animals) {
+          window.ForestInteractions.init();
+        }
+        
+        // 初始化音频系统
+        if (typeof window.ForestAudio !== 'undefined' && 
+            window.FOREST_THEME_FEATURES.audio) {
+          window.ForestAudio.init();
+        }
+        
+        // 初始化成就系统
+        if (typeof window.ForestAchievements !== 'undefined' && 
+            window.FOREST_THEME_FEATURES.achievements) {
+          window.ForestAchievements.init();
+        }
+      }, 300);
+    });
+  </script>
+
+</body>
+</html>
