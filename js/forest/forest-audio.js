@@ -278,6 +278,19 @@ const ForestAudio = {
       const soundConfig = this.config.sounds[soundId];
       const audioPath = soundConfig.path;
       
+      // 如果音频路径指向不存在的本地文件，直接使用合成音效避免404错误
+      if (audioPath && audioPath.startsWith('/audio/') && audioPath.endsWith('.mp3')) {
+        console.log(`🎧 跳过网络请求，直接生成合成音效: ${soundConfig.name}`);
+        const placeholderBuffer = this.generatePlaceholderSound(soundId);
+        this.sounds[soundId] = {
+          buffer: placeholderBuffer,
+          config: soundConfig,
+          source: null
+        };
+        resolve(this.sounds[soundId]);
+        return;
+      }
+      
       // 使用XMLHttpRequest加载音频（规范要求）
       const request = new XMLHttpRequest();
       request.open('GET', audioPath, true);
@@ -391,6 +404,48 @@ const ForestAudio = {
             }
             i += 100;
           }
+        }
+        break;
+        
+      case 'leaves':
+        // 树叶沙沙声：高频随机噪声
+        for (let i = 0; i < data.length; i++) {
+          // 高频噪声，模拟树叶摩擦声
+          const noise = (Math.random() * 2 - 1) * 0.3;
+          const freq = 2000 + Math.sin(i / 1000) * 500;
+          data[i] = noise * 0.7 + 0.3 * Math.sin(2 * Math.PI * freq * i / this.audioContext.sampleRate) * Math.exp(-i / this.audioContext.sampleRate / 10);
+        }
+        break;
+        
+      case 'stream':
+        // 溪流声：连续的白噪声
+        for (let i = 0; i < data.length; i++) {
+          // 白噪声加上轻微的低频波动
+          const noise = (Math.random() * 2 - 1) * 0.4;
+          const wave = 0.1 * Math.sin(2 * Math.PI * 100 * i / this.audioContext.sampleRate);
+          data[i] = noise + wave;
+        }
+        break;
+        
+      case 'click':
+        // 点击反馈音：短促的"滴"声
+        for (let i = 0; i < this.audioContext.sampleRate * 0.1 && i < data.length; i++) {
+          const t = i / this.audioContext.sampleRate;
+          const freq = 1000 + 500 * Math.exp(-t * 20); // 频率从1000Hz下降到500Hz
+          data[i] = 0.3 * Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 100);
+        }
+        break;
+        
+      case 'achievement':
+        // 成就解锁音：上升音阶庆祝音效
+        for (let i = 0; i < this.audioContext.sampleRate * 1.5 && i < data.length; i++) {
+          const t = i / this.audioContext.sampleRate;
+          // 上升的音阶：C4(261.63), E4(329.63), G4(392.00), C5(523.25)
+          const notes = [261.63, 329.63, 392.00, 523.25];
+          const noteIndex = Math.min(3, Math.floor(t * 3));
+          const freq = notes[noteIndex];
+          const envelope = Math.min(1, t * 5) * Math.exp(-t * 2); // 快速上升，缓慢衰减
+          data[i] = 0.4 * Math.sin(2 * Math.PI * freq * t) * envelope;
         }
         break;
         
