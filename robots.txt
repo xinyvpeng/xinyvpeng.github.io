@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://xinyvpeng.github.io/sitemap.xml
-Sitemap: https://xinyvpeng.github.io/baidusitemap.xml
-
-# 禁止爬虫访问后台文件
-Disallow: /admin/
-Disallow: /wp-admin/
-Disallow: /search/
