@@ -788,6 +788,12 @@ const ForestInteractions = {
     
     this.showNotification(messages[animalType] || '发现了一只森林动物！');
     
+    // 触发动物发现事件
+    const event = new CustomEvent('forest-animal-discovered', {
+      detail: { animalType, timestamp: new Date().toISOString() }
+    });
+    document.dispatchEvent(event);
+    
     // 播放点击音效（如果音频系统可用）
     if (window.ForestAudio && typeof window.ForestAudio.playClickFeedback === 'function') {
       window.ForestAudio.playClickFeedback();
@@ -795,35 +801,26 @@ const ForestInteractions = {
   },
   
   // ============================================================================
-  // 阅读成就系统
+  // 阅读成就系统（转发到新系统）
   // ============================================================================
   
-  // 设置成就系统
+  // 设置成就系统（转发到新系统）
   setupAchievementSystem() {
-    // 监听滚动事件来跟踪阅读进度
-    let lastScrollTop = 0;
-    let totalScrolled = 0;
-    let wordCount = 0;
+    // 此函数已由新成就系统处理，这里只保留兼容性事件转发
     
-    // 估算文章字数
-    const articleContent = document.querySelector('.post-body');
-    if (articleContent) {
-      const text = articleContent.textContent || '';
-      wordCount = text.split(/\s+/).length;
-    }
-    
+    // 监听滚动事件并转发
     window.addEventListener('scroll', () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const scrollDiff = Math.abs(scrollTop - lastScrollTop);
-      totalScrolled += scrollDiff;
-      lastScrollTop = scrollTop;
-      
-      // 检查是否达到发现植物的阈值
-      this.checkForPlantDiscovery(totalScrolled, wordCount);
+      // 转发阅读进度事件（简化）
+      const event = new CustomEvent('forest-reading-progress', {
+        detail: {
+          scrollTop: window.pageYOffset || document.documentElement.scrollTop,
+          scrollHeight: document.documentElement.scrollHeight
+        }
+      });
+      document.dispatchEvent(event);
     });
     
-    // 创建植物图鉴按钮
-    this.createPlantHerbariumButton();
+    console.log('🖱️ 成就系统事件转发已设置');
   },
   
   // 检查是否发现新植物

@@ -1,5 +1,5 @@
 <!-- 森林图书馆主题脚本注入 -->
-{% if theme.forest_theme.enable %}
+{% if theme and theme.forest_theme and theme.forest_theme.enable %}
   <!-- 森林主题核心脚本 -->
   <script src="{{ url_for('/js/forest/forest-theme.js') }}" defer></script>
   
@@ -24,7 +24,7 @@
   </script>
   
   <!-- 音频系统配置注入 -->
-  {%- if theme.forest_theme.features.audio %}
+  {%- if theme.forest_theme.features and theme.forest_theme.features.audio %}
   <script>
     // 音频系统配置
     window.FOREST_AUDIO_CONFIG = {
@@ -35,7 +35,7 @@
   {%- endif %}
   
   <!-- 成就系统配置注入 -->
-  {%- if theme.forest_theme.features.achievements %}
+  {%- if theme.forest_theme.features and theme.forest_theme.features.achievements %}
   <script>
     // 成就系统配置
     window.FOREST_ACHIEVEMENTS_CONFIG = {
@@ -50,6 +50,15 @@
   
   <!-- 森林主题脚本初始化 -->
   {%- if theme.forest_theme.features %}
+  <!-- 功能配置注入 -->
+  <script>
+    window.FOREST_THEME_FEATURES = {
+      audio: {{ theme.forest_theme.features.audio | default(false) | dump }},
+      achievements: {{ theme.forest_theme.features.achievements | default(false) | dump }},
+      hidden_animals: {{ theme.forest_theme.features.hidden_animals | default(false) | dump }}
+    };
+  </script>
+  
   <script>
     // 等待DOM加载完成
     document.addEventListener('DOMContentLoaded', function() {
@@ -61,19 +70,19 @@
       // 初始化交互系统（延迟确保主题已加载）
       setTimeout(function() {
         if (typeof window.ForestInteractions !== 'undefined' && 
-            theme.forest_theme.features.hidden_animals) {
+            window.FOREST_THEME_FEATURES.hidden_animals) {
           window.ForestInteractions.init();
         }
         
         // 初始化音频系统
         if (typeof window.ForestAudio !== 'undefined' && 
-            theme.forest_theme.features.audio) {
+            window.FOREST_THEME_FEATURES.audio) {
           window.ForestAudio.init();
         }
         
         // 初始化成就系统
         if (typeof window.ForestAchievements !== 'undefined' && 
-            theme.forest_theme.features.achievements) {
+            window.FOREST_THEME_FEATURES.achievements) {
           window.ForestAchievements.init();
         }
       }, 300);

@@ -2,6 +2,10 @@
 // 遵循森林绿色调色板：primary #5E8C31, secondary #9ACD32, accent #87CEEB
 // 避免使用黄色元素
 
+// CSS特性检测建议
+// 需要CSS Grid支持（2017+浏览器），如不支持可使用Flexbox回退
+// 需要 backdrop-filter 支持（可选增强）
+
 .forest-achievements-container {
   margin: 2rem 0;
   padding: 1.5rem;
@@ -264,6 +268,464 @@
         margin-top: 0.5rem;
       }
     }
+  }
+}
+
+// 成就通知样式
+.forest-achievement-notification {
+  position: fixed;
+  bottom: 90px; // 音频按钮上方
+  right: 30px;
+  width: 300px;
+  max-width: calc(100vw - 100px);
+  background: rgba(94, 140, 49, 0.95); // #5E8C31
+  border: 1px solid #9ACD32;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 9997;
+  backdrop-filter: blur(10px);
+  animation: achievement-slide-in 0.3s ease;
+  transform: translateY(0);
+  opacity: 1;
+  transition: opacity 0.5s ease;
+
+  &.hiding {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .notification-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .achievement-icon {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .achievement-title {
+      flex: 1;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.3;
+
+      .achievement-name {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 4px;
+      }
+
+      .achievement-status {
+        display: block;
+        font-size: 14px;
+        color: #C8D4C0;
+        font-weight: normal;
+      }
+    }
+  }
+
+  .notification-body {
+    color: #E8F4E8;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(30, 40, 25, 0.3);
+    border-radius: 8px;
+    border-left: 3px solid #87CEEB;
+
+    .achievement-description {
+      margin-bottom: 8px;
+    }
+
+    .achievement-reward {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9ACD32;
+      font-weight: 500;
+
+      .reward-emoji {
+        font-size: 16px;
+      }
+    }
+
+    .achievement-progress {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #C8D4C0;
+
+      .progress-bar {
+        height: 6px;
+        background: rgba(154, 205, 50, 0.2);
+        border-radius: 3px;
+        margin-top: 4px;
+        overflow: hidden;
+
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #5E8C31, #9ACD32);
+          border-radius: 3px;
+          transition: width 0.5s ease;
+        }
+      }
+    }
+  }
+
+  .notification-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #949C8F;
+
+    .achievement-date {
+      font-style: italic;
+    }
+
+    .close-notification {
+      background: none;
+      border: none;
+      color: #87CEEB;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 4px;
+
+      &:hover {
+        background: rgba(135, 206, 235, 0.1);
+      }
+    }
+  }
+}
+
+// 成就通知入场动画
+@keyframes achievement-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 成就图鉴按钮
+.forest-achievements-toggle {
+  position: fixed;
+  bottom: 90px; // 音频按钮上方
+  right: 30px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(94, 140, 49, 0.9);
+  border: 2px solid #9ACD32;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000; // 确保在音频按钮和面板上方
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  user-select: none;
+
+  &:hover {
+    transform: scale(1.1);
+    background: rgba(94, 140, 49, 0.95);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  .achievements-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #87CEEB;
+    color: white;
+    font-size: 12px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid white;
+    font-weight: bold;
+  }
+}
+
+// 成就图鉴界面
+.forest-achievements-herbarium {
+  // Flexbox回退
+  display: flex;
+  
+  @supports (display: grid) {
+    // Grid增强布局 - 保留现有样式
+  }
+  
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  background: rgba(30, 40, 25, 0.98);
+  border: 2px solid #5E8C31;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  z-index: 9995;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  
+  @supports (backdrop-filter: blur(5px)) {
+    backdrop-filter: blur(20px);
+  }
+  
+  @supports not (backdrop-filter: blur(5px)) {
+    background: rgba(0, 0, 0, 0.85); // 降级透明度
+  }
+
+  &.visible {
+    display: flex;
+    animation: herbarium-fade-in 0.3s ease;
+  }
+
+  .herbarium-header {
+    padding: 20px;
+    background: rgba(46, 81, 22, 0.9);
+    border-bottom: 1px solid #5E8C31;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+      color: white;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .close-herbarium {
+      background: none;
+      border: none;
+      color: #87CEEB;
+      font-size: 20px;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: rgba(135, 206, 235, 0.1);
+      }
+    }
+  }
+
+  .herbarium-progress {
+    padding: 16px 20px;
+    background: rgba(40, 50, 35, 0.8);
+
+    .progress-text {
+      color: #C8D4C0;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(154, 205, 50, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #5E8C31, #9ACD32);
+        border-radius: 4px;
+        transition: width 0.5s ease;
+      }
+    }
+  }
+
+  .herbarium-categories {
+    display: flex;
+    padding: 12px 20px;
+    gap: 8px;
+    border-bottom: 1px solid rgba(94, 140, 49, 0.3);
+    background: rgba(40, 50, 35, 0.6);
+
+    .category-tab {
+      padding: 8px 16px;
+      background: rgba(94, 140, 49, 0.2);
+      border: 1px solid rgba(94, 140, 49, 0.4);
+      border-radius: 20px;
+      color: #C8D4C0;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(94, 140, 49, 0.3);
+      }
+
+      &.active {
+        background: #5E8C31;
+        color: white;
+        border-color: #5E8C31;
+      }
+    }
+  }
+
+  .herbarium-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+
+    .achievement-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: rgba(50, 60, 45, 0.8);
+      border-radius: 12px;
+      border: 1px solid rgba(94, 140, 49, 0.3);
+      transition: all 0.3s ease;
+
+      &:hover {
+        border-color: #5E8C31;
+        background: rgba(94, 140, 49, 0.1);
+      }
+
+      &.unlocked {
+        border-color: #9ACD32;
+        background: rgba(94, 140, 49, 0.15);
+      }
+
+      &.locked {
+        opacity: 0.7;
+      }
+
+      .achievement-icon {
+        font-size: 32px;
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 16px;
+      }
+
+      .achievement-info {
+        flex: 1;
+
+        .achievement-name {
+          color: white;
+          font-size: 18px;
+          font-weight: 600;
+          margin-bottom: 4px;
+        }
+
+        .achievement-description {
+          color: #C8D4C0;
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+
+        .achievement-progress {
+          .progress-bar {
+            height: 6px;
+            background: rgba(154, 205, 50, 0.1);
+            border-radius: 3px;
+            margin: 8px 0;
+            overflow: hidden;
+
+            .progress-fill {
+              height: 100%;
+              background: linear-gradient(90deg, #5E8C31, #9ACD32);
+              border-radius: 3px;
+            }
+          }
+
+          .progress-text {
+            color: #949C8F;
+            font-size: 12px;
+          }
+
+          .achievement-date {
+            color: #87CEEB;
+            font-size: 12px;
+            font-style: italic;
+          }
+        }
+      }
+
+      .achievement-status {
+        font-size: 24px;
+        margin-left: 16px;
+      }
+    }
+
+    .no-achievements {
+      text-align: center;
+      padding: 40px;
+      color: #949C8F;
+      font-size: 16px;
+    }
+  }
+
+  .herbarium-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(94, 140, 49, 0.3);
+    text-align: center;
+
+    .reset-achievements {
+      padding: 8px 16px;
+      background: rgba(135, 206, 235, 0.1);
+      border: 1px solid #87CEEB;
+      border-radius: 20px;
+      color: #87CEEB;
+      cursor: pointer;
+      font-size: 14px;
+
+      &:hover {
+        background: rgba(135, 206, 235, 0.2);
+      }
+    }
+  }
+}
+
+// 图鉴淡入动画
+@keyframes herbarium-fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
   }
 }
 

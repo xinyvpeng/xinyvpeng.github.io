@@ -52,6 +52,13 @@ const ForestAudio = {
         volume: 0.1,
         loop: false,
         description: '点击交互音效'
+      },
+      achievement: {
+        name: '成就解锁',
+        path: '/audio/achievement.mp3',
+        volume: 0.3,
+        loop: false,
+        description: '成就解锁庆祝音效'
       }
     }
   },
@@ -60,11 +67,13 @@ const ForestAudio = {
   audioContext: null,
   sounds: {},
   gainNodes: {},
+  loadingPromises: {}, // 跟踪正在加载的音频Promise
   isInitialized: false,
   isPlaying: false,
   
   // 初始化音频系统
   init() {
+    console.log('🎧 开始初始化音频系统...');
     if (this.isInitialized) {
       console.log('🎧 音频系统已初始化');
       return;
@@ -77,15 +86,24 @@ const ForestAudio = {
     }
     
     // 检查浏览器支持
-    if (!window.AudioContext && !window.webkitAudioContext) {
+    const audioContextSupported = !!(window.AudioContext || window.webkitAudioContext);
+    const getUserMediaSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    
+    if (!audioContextSupported) {
       console.warn('🎧 浏览器不支持Web Audio API，音频功能不可用');
       this.showUnsupportedMessage();
+      this.config.enabled = false;
       return;
     }
     
     // 创建音频上下文
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     this.audioContext = new AudioContextClass();
+    
+    // 检查自动播放策略
+    if (typeof this.audioContext.resume !== 'function') {
+      console.warn('🎧 音频上下文不支持resume()，移动端体验可能受限');
+    }
     
     // 加载用户偏好
     this.loadPreferences();
@@ -98,6 +116,9 @@ const ForestAudio = {
     
     this.isInitialized = true;
     console.log('🎧 森林音频系统已初始化');
+    
+    // 预加载常用音效
+    this.preloadPrioritySounds();
     
     // 如果用户启用了音频，则开始播放环境音效
     if (this.config.enabled) {
@@ -235,9 +256,14 @@ const ForestAudio = {
     });
   },
   
-  // 加载音效
-  loadSound(soundId) {
-    return new Promise((resolve, reject) => {
+  // 加载音效（带懒加载队列）
+  loadSound(soundId, priority = 'normal') {
+    // 如果已经在加载队列中，返回现有Promise
+    if (this.loadingPromises[soundId]) {
+      return this.loadingPromises[soundId];
+    }
+    
+    const loadPromise = new Promise((resolve, reject) => {
       if (!this.config.sounds[soundId]) {
         reject(new Error(`音效不存在: ${soundId}`));
         return;
@@ -302,6 +328,25 @@ const ForestAudio = {
       
       request.send();
     });
+    
+    this.loadingPromises[soundId] = loadPromise;
+    
+    // 加载完成后清理Promise引用
+    loadPromise.finally(() => {
+      delete this.loadingPromises[soundId];
+    });
+    
+    return loadPromise;
+  },
+  
+  // 预加载常用音效
+  preloadPrioritySounds() {
+    const prioritySounds = ['click', 'achievement'];
+    prioritySounds.forEach(soundId => {
+      this.loadSound(soundId, 'high').catch(() => {
+        console.warn(`🎧 预加载音效失败: ${soundId}`);
+      });
+    });
   },
   
   // 生成占位符音效（简单合成音效）
@@ -316,12 +361,12 @@ const ForestAudio = {
         for (let i = 0; i < data.length; i++) {
           const t = i / this.audioContext.sampleRate;
           // 随机产生鸟鸣声
-          if (Math.random() < 0.001) {
+          if (Math.random() < 0.002) { // 提高鸟鸣频率
             const freq = 800 + Math.random() * 800;
             const duration = 0.1 + Math.random() * 0.2;
             for (let j = 0; j < duration * this.audioContext.sampleRate && i + j < data.length; j++) {
               const t2 = j / this.audioContext.sampleRate;
-              data[i + j] = Math.sin(2 * Math.PI * freq * t2) * Math.exp(-t2 * 10);
+              data[i + j] = 0.5 * Math.sin(2 * Math.PI * freq * t2) * Math.exp(-t2 * 10);
             }
             i += duration * this.audioContext.sampleRate;
           }
@@ -331,7 +376,7 @@ const ForestAudio = {
       case 'wind':
         // 风声：低频噪声
         for (let i = 0; i < data.length; i++) {
-          data[i] = (Math.random() * 2 - 1) * 0.1;
+          data[i] = (Math.random() * 2 - 1) * 0.5;
         }
         break;
         
@@ -339,7 +384,7 @@ const ForestAudio = {
         // 雨声：随机滴答声
         for (let i = 0; i < data.length; i++) {
           if (Math.random() < 0.01) {
-            const amplitude = 0.05 + Math.random() * 0.1;
+            const amplitude = 0.2 + Math.random() * 0.4;
             const decay = 0.01 + Math.random() * 0.02;
             for (let j = 0; j < 100 && i + j < data.length; j++) {
               data[i + j] = amplitude * Math.exp(-j * decay);
@@ -364,58 +409,67 @@ const ForestAudio = {
     if (!this.audioContext || !this.config.enabled) return;
     
     // 确保音频上下文已恢复（移动端限制）
-    if (this.audioContext.state === 'suspended') {
-      this.audioContext.resume();
-    }
+    const resumeAudio = () => {
+      if (this.audioContext.state === 'suspended') {
+        return this.audioContext.resume();
+      }
+      return Promise.resolve();
+    };
     
-    const sound = this.sounds[soundId];
-    if (!sound) {
-      // 尝试加载
-      this.loadSound(soundId)
-        .then(() => this.playSound(soundId, loop))
-        .catch(error => console.warn(`🎧 播放音效失败: ${error}`));
-      return;
-    }
-    
-    // 停止当前播放的相同音效
-    if (sound.source) {
-      sound.source.stop();
-    }
-    
-    // 创建新的音频源
-    const source = this.audioContext.createBufferSource();
-    source.buffer = sound.buffer;
-    
-    // 使用现有增益节点
-    const gainNode = this.gainNodes[soundId];
-    if (!gainNode) return;
-    
-    // 设置增益值
-    gainNode.gain.value = sound.config.volume;
-    
-    // 连接：source -> gainNode -> masterGainNode
-    source.connect(gainNode);
-    
-    // 设置循环
-    source.loop = loop !== null ? loop : sound.config.loop;
-    
-    // 开始播放
-    source.start(0);
-    
-    // 保存引用
-    sound.source = source;
-    
-    // 更新播放状态
-    this.isPlaying = true;
-    this.updatePlayButtonState();
-    
-    // 设置结束回调（仅非循环音效）
-    if (!source.loop) {
-      source.onended = () => {
-        sound.source = null;
-      };
-    }
+    resumeAudio().then(() => {
+      const sound = this.sounds[soundId];
+      if (!sound) {
+        // 尝试加载
+        this.loadSound(soundId)
+          .then(() => this.playSound(soundId, loop))
+          .catch(error => console.warn(`🎧 播放音效失败: ${error}`));
+        return;
+      }
+      
+      // 停止当前播放的相同音效
+      if (sound.source) {
+        sound.source.stop();
+      }
+      
+      // 创建新的音频源
+      const source = this.audioContext.createBufferSource();
+      source.buffer = sound.buffer;
+      
+      // 使用现有增益节点
+      const gainNode = this.gainNodes[soundId];
+      if (!gainNode) return;
+      
+      // 设置增益值
+      gainNode.gain.value = sound.config.volume;
+      
+      // 连接：source -> gainNode -> masterGainNode
+      source.connect(gainNode);
+      
+      // 设置循环
+      source.loop = loop !== null ? loop : sound.config.loop;
+      
+      // 开始播放
+      source.start(0);
+      
+      // 保存引用
+      sound.source = source;
+      
+      // 更新播放状态
+      this.isPlaying = true;
+      this.updatePlayButtonState();
+      
+      // 设置结束回调（仅非循环音效）
+      if (!source.loop) {
+        source.onended = () => {
+          sound.source = null;
+        };
+      }
+    }).catch(error => {
+      console.warn('🎧 恢复音频上下文失败:', error);
+    });
   },
+    
+
   
   // 停止音效
   stopSound(soundId) {
@@ -431,22 +485,29 @@ const ForestAudio = {
     if (!this.audioContext || !this.config.enabled) return;
     
     // 恢复音频上下文（移动端限制）
-    if (this.audioContext.state === 'suspended') {
-      this.audioContext.resume();
-    }
-    
-    // 播放所有启用的音效
-    Object.keys(this.config.sounds).forEach(soundId => {
-      const soundConfig = this.config.sounds[soundId];
-      if (soundConfig.loop && this.getSoundEnabledState(soundId)) {
-        this.playSound(soundId, true);
+    const resumeAudio = () => {
+      if (this.audioContext.state === 'suspended') {
+        return this.audioContext.resume();
       }
-    });
+      return Promise.resolve();
+    };
     
-    this.isPlaying = true;
-    this.config.enabled = true;
-    this.updatePlayButtonState();
-    console.log('🎧 环境音效已开始播放');
+    resumeAudio().then(() => {
+      // 播放所有启用的音效
+      Object.keys(this.config.sounds).forEach(soundId => {
+        const soundConfig = this.config.sounds[soundId];
+        if (soundConfig.loop && this.getSoundEnabledState(soundId)) {
+          this.playSound(soundId, true);
+        }
+      });
+      
+      this.isPlaying = true;
+      this.config.enabled = true;
+      this.updatePlayButtonState();
+      console.log('🎧 环境音效已开始播放');
+    }).catch(error => {
+      console.warn('🎧 恢复音频上下文失败:', error);
+    });
   },
   
   // 停止所有音效
@@ -477,15 +538,15 @@ const ForestAudio = {
     return this.config.enabled;
   },
   
-  // 设置主音量
-  setMasterVolume(volume) {
-    if (volume < 0) volume = 0;
-    if (volume > 1) volume = 1;
-    
-    this.config.masterVolume = volume;
-    this.masterGainNode.gain.value = volume;
-    this.saveSettings();
-  },
+  // 设置主音量（旧版本 - 已由新版本替代）
+  // setMasterVolume(volume) {
+  //   if (volume < 0) volume = 0;
+  //   if (volume > 1) volume = 1;
+  //   
+  //   this.config.masterVolume = volume;
+  //   this.masterGainNode.gain.value = volume;
+  //   this.saveSettings();
+  // },
   
   // 设置单个音效音量
   setSoundVolume(soundId, volume) {
@@ -652,6 +713,13 @@ const ForestAudio = {
     }
   },
   
+  // 播放成就音效
+  playAchievementSound() {
+    if (this.config.enabled && this.config.sounds.achievement) {
+      this.playSound('achievement');
+    }
+  },
+  
   // 更新播放按钮状态
   updatePlayButtonState() {
     const toggleBtn = document.getElementById('forest-audio-toggle');
@@ -680,6 +748,7 @@ const ForestAudio = {
   
   // 创建UI控制面板（新版本）
   createAudioControls() {
+    console.log('🎧 创建音频控制UI...');
     // 检查是否已存在
     if (document.getElementById('forest-audio-toggle')) {
       return;
@@ -836,14 +905,22 @@ const ForestAudio = {
   setupEventListeners() {
     const { toggleBtn, controlsPanel, masterSlider, masterValue, closeBtn } = this.uiElements;
     
-    // 切换按钮点击
-    toggleBtn.addEventListener('click', () => {
-      const isVisible = controlsPanel.classList.contains('visible');
-      if (isVisible) {
-        this.hideControls();
-      } else {
+    // 切换按钮点击 - 单击切换播放/暂停
+    let clickTimer = null;
+    toggleBtn.addEventListener('click', (e) => {
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        // 双击：显示控制面板
         this.showControls();
+        return;
       }
+      
+      clickTimer = setTimeout(() => {
+        clickTimer = null;
+        // 单击：切换播放
+        this.togglePlayback();
+      }, 250); // 250ms内第二次点击视为双击
     });
     
     // 关闭按钮
@@ -931,8 +1008,11 @@ const ForestAudio = {
     this.uiElements.toggleBtn.classList.remove('active');
   },
   
-  // 设置主音量（新UI版本）
+  // 设置主音量
   setMasterVolume(volume) {
+    if (volume < 0) volume = 0;
+    if (volume > 1) volume = 1;
+    
     this.config.masterVolume = volume;
     if (this.masterGainNode) {
       this.masterGainNode.gain.value = volume;

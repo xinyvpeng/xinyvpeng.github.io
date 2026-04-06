@@ -88,7 +88,7 @@ const ForestTheme = {
       toggleBtn.className = 'forest-theme-toggle';
       toggleBtn.setAttribute('aria-label', '切换主题');
       
-      // 添加到页面
+      // 添加到页面右上角
       const header = document.querySelector('.header') || document.body;
       header.appendChild(toggleBtn);
     }
