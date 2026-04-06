@@ -133,11 +133,19 @@ const ForestTheme = {
   // 检查是否支持减少动画
   supportsReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  },
+  
+  // 获取当前主题（供其他模块使用）
+  getCurrentTheme() {
+    return this.currentTheme;
   }
 };
 
-// 自动初始化
+// 全局导出
 if (typeof window !== 'undefined') {
+  window.ForestTheme = ForestTheme;
+  
+  // 自动初始化
   document.addEventListener('DOMContentLoaded', () => {
     ForestTheme.init();
   });
