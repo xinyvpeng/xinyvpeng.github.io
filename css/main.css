@@ -1385,7 +1385,7 @@ pre code {
   transition: all 0.2s ease-in-out;
 }
 .links-of-author a::before {
-  background: #ff87ff;
+  background: #8717ab;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -5333,6 +5333,66 @@ html {
   .forest-bookmark-toggle:hover {
     transform: none !important;
   }
+}
+.posts-collapse .post-header {
+  margin-bottom: 1.2rem !important;
+  padding-bottom: 0.8rem !important;
+  border-bottom: 1px solid rgba(var(--border-color-rgb), 0.15) !important;
+  display: flex !important;
+  align-items: baseline !important;
+}
+.posts-collapse .post-header:last-child {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+.posts-collapse .post-meta-container {
+  display: inline-block !important;
+  margin-right: 1.5rem !important;
+  min-width: 4rem !important;
+}
+.posts-collapse .post-meta-container time {
+  font-size: 1.1rem !important;
+  color: var(--text-secondary) !important;
+  font-weight: 500 !important;
+  opacity: 0.9 !important;
+}
+.posts-collapse .post-title {
+  display: inline-block !important;
+  flex: 1 !important;
+}
+.posts-collapse .post-title .post-title-link {
+  font-size: 1.1rem !important;
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+  line-height: 1.6 !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+.posts-collapse .post-title .post-title-link:hover {
+  color: var(--primary-forest-medium) !important;
+  text-decoration: underline !important;
+  text-decoration-color: var(--primary-forest-medium) !important;
+  text-decoration-thickness: 2px !important;
+}
+.posts-collapse .collection-year,
+.posts-collapse .collection-title {
+  font-size: 1.6rem !important;
+  color: var(--text-heading) !important;
+  margin-bottom: 1.5rem !important;
+  border-bottom: 2px solid rgba(var(--primary-forest-medium-rgb), 0.2) !important;
+  padding-bottom: 0.5rem !important;
+}
+.posts-collapse .collection-year .collection-header,
+.posts-collapse .collection-title .collection-header {
+  font-weight: 600 !important;
+}
+.posts-collapse .collection-month {
+  font-size: 1.4rem !important;
+  color: var(--text-subtitle) !important;
+  margin-bottom: 1rem !important;
+  margin-top: 2rem !important;
+  padding-left: 0.5rem !important;
+  border-left: 4px solid var(--primary-forest-medium) !important;
 }
 @keyframes simple-fade-in {
   to {
