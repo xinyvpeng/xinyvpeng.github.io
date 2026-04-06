@@ -17,6 +17,7 @@
   --bg-medium: #1a2512;                 // 中等背景
   --bg-light: #26311d;                  // 浅背景
   --bg-card: #162014;                   // 卡片背景（微亮悬浮）
+  --bg-card-light: #FDFDF5;             // 浅色卡片背景（呼吸感增强）
   --content-bg-color: #1a2316;          // 内容区域背景
   --bg-sidebar: #1a2512;                // 侧边栏背景
   --bg-image: none;                     // 背景图片（暂时不使用）
@@ -41,6 +42,8 @@
   --primary-forest-medium-rgb: 94, 140, 49; // 清新绿RGB
   --border-color-rgb: 45, 58, 40;       // 大地色RGB
   --bg-sidebar-light-rgb: 232, 241, 233; // 侧边栏浅色背景RGB
+  --bg-card-light-rgb: 253, 253, 245;   // 浅色卡片背景RGB
+  --bg-card-rgb: 22, 32, 20;            // 卡片背景RGB
 }
 
 // 夜间模式变量覆盖
@@ -54,6 +57,7 @@
   --bg-medium: #1C3D2E;                 // 夜晚森林色
   --bg-light: #263F50;
   --bg-card: #141c0e;
+  --bg-card-light: #141c0e;             // 夜间模式浅色卡片背景
   --content-bg-color: #161e10;
   --bg-sidebar: #141c0e;
   
@@ -72,6 +76,8 @@
   --text-accent-rgb: 212, 212, 220;     // 月光银RGB
   --text-link-rgb: 138, 127, 207;       // 迷雾紫RGB
   --bg-sidebar-dark-rgb: 28, 61, 46;     // 夜间模式侧边栏背景RGB
+  --bg-card-light-rgb: 20, 28, 14;      // 夜间模式浅色卡片背景RGB
+  --bg-card-rgb: 20, 28, 14;            // 夜间模式卡片背景RGB
 }
 
 // 应用CSS变量到基础元素
@@ -635,48 +641,157 @@ a {
   }
 }
 
-// 主内容区域
+// 主内容区域卡片增强
 .main-inner {
-  background-color: unquote('rgba(var(--bg-card), 0.85)');
-  backdrop-filter: blur(16px);
-  border-radius: 24px;
-  padding: 3rem;
-  margin: 3rem auto;
+  background-color: unquote('rgba(var(--bg-card-light-rgb), 0.88)');
+  backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 32px;
+  padding: 4rem;
+  margin: 4rem auto;
   box-shadow: 
-    0 16px 48px var(--shadow-color),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border-color);
+    0 24px 64px rgba(13, 20, 10, 0.2),
+    0 8px 32px unquote('rgba(var(--primary-forest-medium-rgb), 0.15)'),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
   max-width: 1200px;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 
+      0 32px 80px rgba(13, 20, 10, 0.3),
+      0 12px 48px unquote('rgba(var(--primary-forest-medium-rgb), 0.25)'),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.4)');
+  }
   
   @media (max-width: 768px) {
+    padding: 2.5rem;
+    margin: 2rem auto;
+    border-radius: 28px;
+  }
+  
+  @media (max-width: 480px) {
     padding: 2rem;
-    margin: 1.5rem auto;
+    margin: 1.5rem 1rem;
+    border-radius: 24px;
+  }
+}
+
+// 文章卡片增强（呼吸感+悬浮感）
+.post-block {
+  margin-bottom: 3rem;
+  padding: 3.5rem;
+  background: linear-gradient(145deg, 
+    unquote('rgba(var(--bg-card-rgb), 0.95)') 0%, 
+    unquote('rgba(var(--bg-card-rgb), 0.98)') 100%);
+  backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+  border-radius: 28px;
+  box-shadow: 
+    0 8px 32px rgba(13, 20, 10, 0.25),
+    0 2px 12px unquote('rgba(var(--primary-forest-medium-rgb), 0.1)'),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  position: relative;
+  
+  // 顶部装饰线
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      var(--primary-forest-light) 0%, 
+      var(--accent-sunlight) 50%, 
+      var(--primary-forest-light) 100%);
+    border-radius: 28px 28px 0 0;
+    opacity: 0.6;
+  }
+  
+  &:hover {
+    transform: translateY(-8px) scale(1.01);
+    border-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.4)');
+    box-shadow: 
+      0 16px 48px rgba(13, 20, 10, 0.35),
+      0 4px 24px unquote('rgba(var(--primary-forest-medium-rgb), 0.2)'),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    
+    &::before {
+      opacity: 0.9;
+      background: linear-gradient(90deg, 
+        var(--primary-forest-light) 0%, 
+        var(--accent-sunlight) 50%, 
+        var(--primary-forest-light) 100%);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    border-radius: 24px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 2rem;
+    margin-bottom: 2rem;
     border-radius: 20px;
   }
 }
 
-// 文章卡片增强
-.post-block {
-  margin-bottom: 2.5rem;
-  padding: 2.5rem;
-  background: linear-gradient(145deg, 
-    rgba(26, 35, 22, 0.95) 0%, 
-    rgba(22, 32, 20, 0.98) 100%);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  box-shadow: 
-    0 4px 16px var(--shadow-color),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-  
-  &:hover {
-    transform: translateY(-4px);
-    border-color: unquote('rgba(var(--text-accent-rgb), 0.5)');
+// 夜间模式卡片调整
+[data-theme="dark"],
+[data-theme="night"] {
+  .main-inner {
+    background-color: unquote('rgba(var(--bg-card-rgb), 0.9)');
+    border-color: unquote('rgba(var(--text-link-rgb), 0.3)');
     box-shadow: 
-      0 12px 40px rgba(13, 20, 10, 0.3),
-      0 4px 20px rgba(212, 160, 23, 0.15),
+      0 24px 64px rgba(12, 26, 47, 0.3),
+      0 8px 32px unquote('rgba(var(--text-link-rgb), 0.15)'),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    
+    &:hover {
+      border-color: unquote('rgba(var(--text-link-rgb), 0.5)');
+      box-shadow: 
+        0 32px 80px rgba(12, 26, 47, 0.4),
+        0 12px 48px unquote('rgba(var(--text-link-rgb), 0.2)'),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+  }
+  
+  .post-block {
+    background: linear-gradient(145deg, 
+      unquote('rgba(var(--bg-card-rgb), 0.9)') 0%, 
+      unquote('rgba(var(--bg-card-rgb), 0.95)') 100%);
+    border-color: unquote('rgba(var(--text-link-rgb), 0.3)');
+    box-shadow: 
+      0 8px 32px rgba(12, 26, 47, 0.3),
+      0 2px 12px unquote('rgba(var(--text-link-rgb), 0.1)'),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    
+    &::before {
+      background: linear-gradient(90deg, 
+        var(--text-accent) 0%, 
+        var(--text-link) 50%, 
+        var(--text-accent) 100%);
+    }
+    
+    &:hover {
+      border-color: unquote('rgba(var(--text-link-rgb), 0.5)');
+      box-shadow: 
+        0 16px 48px rgba(12, 26, 47, 0.4),
+        0 4px 24px unquote('rgba(var(--text-link-rgb), 0.2)'),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      
+      &::before {
+        background: linear-gradient(90deg, 
+          var(--text-accent) 0%, 
+          var(--text-link) 50%, 
+          var(--text-accent) 100%);
+      }
+    }
   }
 }
 
