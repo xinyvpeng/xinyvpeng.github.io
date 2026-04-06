@@ -262,6 +262,67 @@ const ForestTheme = {
   // 检查是否支持减少动画
   supportsReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  },
+  
+  // 测试主题切换（供控制台调试使用）
+  testThemeSwitch() {
+    console.log('🌲 开始主题切换测试...');
+    console.log('🌲 当前主题:', this.currentTheme);
+    console.log('🌲 按钮状态:', document.getElementById('forest-theme-toggle'));
+    console.log('🌲 HTML属性:', {
+      'data-theme': document.documentElement.getAttribute('data-theme'),
+      'data-mode': document.documentElement.getAttribute('data-mode')
+    });
+    
+    // 测试切换
+    const newTheme = this.currentTheme === 'day' ? 'night' : 'day';
+    console.log('🌲 测试切换到:', newTheme);
+    this.applyTheme(newTheme);
+    
+    // 检查CSS变量
+    setTimeout(() => {
+      const root = document.documentElement;
+      const style = getComputedStyle(root);
+      console.log('🌲 测试结果 - CSS变量:', {
+        '--bg-deep': style.getPropertyValue('--bg-deep').trim(),
+        '--text-primary': style.getPropertyValue('--text-primary').trim(),
+        '--theme-mode': style.getPropertyValue('--theme-mode').trim()
+      });
+      console.log('🌲 测试结果 - 计算样式:', {
+        'body背景': getComputedStyle(document.body).backgroundColor,
+        'body文字': getComputedStyle(document.body).color
+      });
+    }, 100);
+  },
+  
+  // 手动验证主题系统
+  diagnose() {
+    console.log('🌲 === 森林主题诊断报告 ===');
+    console.log('🌲 1. 系统状态:', {
+      'currentTheme': this.currentTheme,
+      'localStorage': localStorage.getItem('forest-library-theme'),
+      'prefersDark': window.matchMedia('(prefers-color-scheme: dark)').matches
+    });
+    
+    console.log('🌲 2. DOM状态:', {
+      'data-theme': document.documentElement.getAttribute('data-theme'),
+      'data-mode': document.documentElement.getAttribute('data-mode'),
+      'classList': Array.from(document.documentElement.classList)
+    });
+    
+    console.log('🌲 3. 按钮状态:', {
+      '元素': document.getElementById('forest-theme-toggle'),
+      '可见性': document.getElementById('forest-theme-toggle') ? 
+        window.getComputedStyle(document.getElementById('forest-theme-toggle')).display : '无按钮'
+    });
+    
+    console.log('🌲 4. CSS变量状态:', {
+      '--bg-deep': getComputedStyle(document.documentElement).getPropertyValue('--bg-deep').trim(),
+      '--text-primary': getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+      '--theme-mode': getComputedStyle(document.documentElement).getPropertyValue('--theme-mode').trim()
+    });
+    
+    console.log('🌲 === 诊断完成 ===');
   }
 };
 
