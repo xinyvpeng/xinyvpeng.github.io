@@ -28,15 +28,56 @@ const ForestTheme = {
     this.applyTheme(this.currentTheme);
     console.log('🌲 森林主题系统已初始化，当前主题:', this.currentTheme);
     
-    // 调试信息
+    // 立即检查按钮状态
+    this.checkToggleButton();
+    
+    // 延迟再次检查，确保按钮可见
     setTimeout(() => {
-      const toggleBtn = document.getElementById('forest-theme-toggle');
-      console.log('🌲 主题切换按钮:', toggleBtn ? '已找到' : '未找到');
-      if (toggleBtn) {
-        console.log('🌲 按钮位置:', toggleBtn.getBoundingClientRect());
-        console.log('🌲 按钮样式:', window.getComputedStyle(toggleBtn).display);
-      }
-    }, 1000);
+      this.checkToggleButton();
+    }, 500);
+  },
+  
+  // 检查并修复切换按钮
+  checkToggleButton() {
+    const toggleBtn = document.getElementById('forest-theme-toggle');
+    console.log('🌲 检查主题切换按钮:', toggleBtn ? '已找到' : '未找到');
+    
+    if (!toggleBtn) {
+      console.warn('🌲 主题切换按钮未找到，尝试重新创建...');
+      this.setupThemeToggle();
+      return;
+    }
+    
+    // 检查按钮是否可见
+    const rect = toggleBtn.getBoundingClientRect();
+    const style = window.getComputedStyle(toggleBtn);
+    console.log('🌲 按钮位置:', rect);
+    console.log('🌲 按钮样式:', {
+      display: style.display,
+      visibility: style.visibility,
+      opacity: style.opacity,
+      zIndex: style.zIndex,
+      position: style.position
+    });
+    
+    // 如果按钮不可见，尝试修复
+    if (rect.width === 0 || rect.height === 0 || style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+      console.warn('🌲 按钮不可见，尝试修复...');
+      toggleBtn.style.display = 'flex';
+      toggleBtn.style.visibility = 'visible';
+      toggleBtn.style.opacity = '1';
+      toggleBtn.style.zIndex = '9999';
+      toggleBtn.style.position = 'fixed';
+      toggleBtn.style.top = '20px';
+      toggleBtn.style.right = '20px';
+    }
+    
+    // 确保按钮在视图中
+    if (rect.top < 0 || rect.left < 0 || rect.bottom > window.innerHeight || rect.right > window.innerWidth) {
+      console.warn('🌲 按钮在视图外，调整位置...');
+      toggleBtn.style.top = '20px';
+      toggleBtn.style.right = '20px';
+    }
   },
 
   // 加载用户偏好
@@ -65,7 +106,7 @@ const ForestTheme = {
     
     if (theme === 'night') {
       root.setAttribute('data-theme', 'night');
-      root.setAttribute('data-theme', 'dark'); // NexT主题可能使用'dark'
+      root.setAttribute('data-mode', 'dark'); // 兼容NexT主题
       root.classList.add('theme-dark', 'theme-night');
       
       // 尝试禁用NexT的自动暗色模式检测
@@ -80,6 +121,7 @@ const ForestTheme = {
     } else {
       // 日间模式
       root.setAttribute('data-theme', 'day');
+      root.setAttribute('data-mode', 'light'); // 兼容NexT主题
       root.classList.add('theme-day');
       
       try {
@@ -126,10 +168,22 @@ const ForestTheme = {
       toggleBtn.id = 'forest-theme-toggle';
       toggleBtn.className = 'forest-theme-toggle';
       toggleBtn.setAttribute('aria-label', '切换主题');
+      toggleBtn.setAttribute('tabindex', '0'); // 确保可通过键盘访问
       
-      // 添加到页面右上角
-      const header = document.querySelector('.header') || document.body;
-      header.appendChild(toggleBtn);
+      // 强制应用关键样式，防止CSS加载延迟
+      toggleBtn.style.display = 'flex';
+      toggleBtn.style.alignItems = 'center';
+      toggleBtn.style.justifyContent = 'center';
+      toggleBtn.style.position = 'fixed';
+      toggleBtn.style.top = '20px';
+      toggleBtn.style.right = '20px';
+      toggleBtn.style.zIndex = '9999';
+      toggleBtn.style.cursor = 'pointer';
+      
+      // 添加到文档末尾，确保在DOM最上层
+      document.body.appendChild(toggleBtn);
+      
+      console.log('🌲 主题切换按钮已创建并添加到页面');
     }
     
     // 更新按钮状态
@@ -138,8 +192,20 @@ const ForestTheme = {
     // 添加点击事件
     toggleBtn.addEventListener('click', () => {
       const newTheme = this.currentTheme === 'day' ? 'night' : 'day';
+      console.log('🌲 切换主题:', this.currentTheme, '->', newTheme);
       this.applyTheme(newTheme);
       this.updateToggleButton();
+    });
+    
+    // 添加键盘支持（Enter键和空格键）
+    toggleBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const newTheme = this.currentTheme === 'day' ? 'night' : 'day';
+        console.log('🌲 键盘切换主题:', this.currentTheme, '->', newTheme);
+        this.applyTheme(newTheme);
+        this.updateToggleButton();
+      }
     });
   },
 
@@ -172,11 +238,6 @@ const ForestTheme = {
   // 检查是否支持减少动画
   supportsReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  },
-  
-  // 获取当前主题（供其他模块使用）
-  getCurrentTheme() {
-    return this.currentTheme;
   }
 };
 
