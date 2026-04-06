@@ -1794,3 +1794,119 @@ html {
   }
 }
 
+// 树桩切换按钮
+.forest-bookmark-toggle {
+  position: fixed
+  bottom: 100px  // 在日夜切换按钮上方
+  right: 20px
+  width: 56px
+  height: 56px
+  border-radius: 50%
+  background: linear-gradient(135deg, rgba(139, 90, 43, 0.9), rgba(166, 124, 82, 0.8))
+  border: 2px solid rgba(255, 255, 255, 0.2)
+  color: rgba(255, 255, 255, 0.95)
+  font-size: 24px
+  cursor: pointer
+  z-index: 9998
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3),
+              0 0 0 1px rgba(139, 90, 43, 0.5) inset
+  display: flex
+  align-items: center
+  justify-content: center
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)
+  
+  // 树桩年轮纹理
+  &::before {
+    content: ''
+    position: absolute
+    width: 40px
+    height: 40px
+    border-radius: 50%
+    border: 2px solid rgba(255, 255, 255, 0.15)
+    box-shadow: 
+      0 0 0 6px rgba(255, 255, 255, 0.1),
+      0 0 0 12px rgba(255, 255, 255, 0.05)
+  }
+  
+  &:hover {
+    transform: scale(1.1) rotate(15deg)
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4),
+                0 0 0 2px rgba(255, 255, 255, 0.3) inset
+  }
+  
+  &:active {
+    transform: scale(0.95) rotate(15deg)
+  }
+}
+
+// 萤火虫通知
+.forest-notification {
+  position: fixed
+  top: 20px
+  right: 20px
+  background: linear-gradient(135deg, rgba(94, 140, 49, 0.95), rgba(126, 166, 79, 0.9))
+  color: rgba(255, 255, 255, 0.95)
+  padding: 12px 20px
+  border-radius: 10px
+  z-index: 10001
+  box-shadow: 0 4px 20px rgba(94, 140, 49, 0.4),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+              0 0 20px rgba(158, 206, 106, 0.6)  // 发光效果
+  backdrop-filter: blur(10px)
+  border: 1px solid rgba(158, 206, 106, 0.5)
+  animation: firefly-notification 3s ease forwards
+  font-family: var(--font-sans)
+  font-size: 14px
+  font-weight: 500
+  max-width: 300px
+  
+  // 萤火虫闪烁动画
+  @keyframes firefly-notification {
+    0% {
+      opacity: 0
+      transform: translateY(-20px) scale(0.9)
+      box-shadow: 0 4px 20px rgba(94, 140, 49, 0.4),
+                  0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+                  0 0 20px rgba(158, 206, 106, 0.6)
+    }
+    20% {
+      opacity: 1
+      transform: translateY(0) scale(1)
+      box-shadow: 0 4px 20px rgba(94, 140, 49, 0.4),
+                  0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+                  0 0 20px rgba(158, 206, 106, 0.6)
+    }
+    80% {
+      opacity: 1
+      transform: translateY(0) scale(1)
+      box-shadow: 0 4px 20px rgba(94, 140, 49, 0.4),
+                  0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+                  0 0 20px rgba(158, 206, 106, 0.6)
+    }
+    100% {
+      opacity: 0
+      transform: translateY(-20px) scale(0.9)
+      box-shadow: 0 4px 20px rgba(94, 140, 49, 0),
+                  0 0 0 1px rgba(255, 255, 255, 0) inset,
+                  0 0 20px rgba(158, 206, 106, 0)
+    }
+  }
+}
+
+// 减少动画支持
+@media (prefers-reduced-motion: reduce) {
+  .forest-bookmark-prompt,
+  .forest-bookmark-sidebar,
+  .forest-bookmark-item,
+  .forest-bookmark-toggle,
+  .forest-notification {
+    animation-duration: 0.01ms !important
+    animation-iteration-count: 1 !important
+    transition-duration: 0.01ms !important
+  }
+  
+  .forest-bookmark-toggle:hover {
+    transform: none !important
+  }
+}
+
