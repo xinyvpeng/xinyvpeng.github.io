@@ -1466,37 +1466,23 @@ html {
   --font-sans: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif  // 正文字体
 }
 
-// 蘑菇提示框样式
+// 蘑菇提示框样式（简化版）
 .forest-bookmark-prompt {
   position: fixed
   z-index: 10000
-  background: linear-gradient(135deg, rgba(94, 140, 49, 0.95), rgba(126, 166, 79, 0.9))
-  border-radius: 12px 12px 4px 12px  // 蘑菇形状：圆顶+短柄
+  background: rgba(94, 140, 49, 0.95)
+  border-radius: 8px
   padding: 12px 16px
-  box-shadow: 0 4px 20px var(--bookmark-shadow), 
-              0 0 0 1px rgba(255, 255, 255, 0.1) inset
-  backdrop-filter: blur(10px)
-  border: 1px solid var(--bookmark-border)
-  animation: prompt-fade-in 0.3s ease forwards
+  box-shadow: 0 4px 12px rgba(94, 140, 49, 0.2)
+  border: 1px solid rgba(94, 140, 49, 0.5)
   font-family: var(--font-sans)
   min-width: 200px
   max-width: 300px
-  
-  &::before {
-    content: ''
-    position: absolute
-    bottom: -8px
-    right: 20px
-    width: 0
-    height: 0
-    border-left: 8px solid transparent
-    border-right: 8px solid transparent
-    border-top: 8px solid rgba(94, 140, 49, 0.95)
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1))
-  }
+  opacity: 0
+  animation: simple-fade-in 0.2s ease forwards
   
   &.prompt-fade-out {
-    animation: prompt-fade-out 0.2s ease forwards
+    animation: simple-fade-out 0.15s ease forwards
   }
 }
 
@@ -1519,8 +1505,6 @@ html {
   
   &:hover {
     background: white
-    transform: translateY(-1px)
-    box-shadow: 0 3px 8px rgba(94, 140, 49, 0.3)
   }
 }
 
@@ -1529,27 +1513,20 @@ html {
   color: rgba(255, 255, 255, 0.8)
   
   &:hover {
-    background: rgba(255, 255, 255, 0.1)
     color: white
   }
 }
 
-// 提示动画
-@keyframes prompt-fade-in {
-  from {
-    opacity: 0
-    transform: translateY(10px) scale(0.95)
-  }
+// 简化动画
+@keyframes simple-fade-in {
   to {
     opacity: 1
-    transform: translateY(0) scale(1)
   }
 }
 
-@keyframes prompt-fade-out {
+@keyframes simple-fade-out {
   to {
     opacity: 0
-    transform: translateY(-10px) scale(0.95)
   }
 }
 
@@ -1561,38 +1538,14 @@ html {
   bottom: 0
   width: 300px
   z-index: 9999
-  background: linear-gradient(
-    135deg,
-    rgba(139, 90, 43, 0.95),
-    rgba(166, 124, 82, 0.9),
-    rgba(190, 155, 120, 0.85)
-  )
-  backdrop-filter: blur(15px)
+  background: rgba(139, 90, 43, 0.95)
   border-left: 1px solid rgba(139, 90, 43, 0.5)
-  box-shadow: -4px 0 30px rgba(0, 0, 0, 0.2),
-              0 0 0 1px rgba(255, 255, 255, 0.05) inset
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15)
   transform: translateX(100%)
-  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)
   display: none
   
   &.sidebar-open {
     transform: translateX(0)
-  }
-  
-  // 树皮纹理效果
-  &::before {
-    content: ''
-    position: absolute
-    top: 0
-    left: 0
-    right: 0
-    bottom: 0
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 1px, transparent 2px),
-      radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 1px, transparent 2px)
-    background-size: 40px 40px
-    opacity: 0.3
-    pointer-events: none
   }
 }
 
@@ -1688,41 +1641,17 @@ html {
   }
 }
 
-// 树叶书签项
+// 树叶书签项（简化版）
 .forest-bookmark-item {
-  background: linear-gradient(135deg, var(--bookmark-bg-light), var(--bookmark-bg-dark))
+  background: var(--bookmark-bg-light)
   border: 1px solid var(--bookmark-border)
-  border-radius: 12px  // 圆角
+  border-radius: 8px
   padding: 16px
   margin-bottom: 12px
-  position: relative
-  transition: all 0.2s ease
   cursor: pointer
-  backdrop-filter: blur(5px)
-  
-  // 树叶边缘锯齿效果
-  &::after {
-    content: ''
-    position: absolute
-    top: 0
-    left: 0
-    right: 0
-    bottom: 0
-    border-radius: 12px
-    background: linear-gradient(45deg, transparent 48%, var(--bookmark-border) 50%, transparent 52%)
-    background-size: 20px 20px
-    opacity: 0.1
-    pointer-events: none
-  }
   
   &:hover {
-    transform: translateY(-3px)
-    box-shadow: 0 6px 20px var(--bookmark-shadow)
-    border-color: var(--bookmark-primary)
-    
-    &::after {
-      opacity: 0.15
-    }
+    background: var(--bookmark-bg-dark)
   }
 }
 
@@ -1757,7 +1686,6 @@ html {
   font-size: 13px
   font-weight: 500
   cursor: pointer
-  transition: all 0.2s ease
   display: flex
   align-items: center
   gap: 4px
@@ -1775,7 +1703,6 @@ html {
   
   &:hover {
     background: rgba(94, 140, 49, 0.25)
-    transform: translateY(-1px)
   }
 }
 
@@ -1790,11 +1717,10 @@ html {
   
   &:hover {
     background: rgba(220, 100, 100, 0.2)
-    transform: translateY(-1px)
   }
 }
 
-// 树桩切换按钮
+// 树桩切换按钮（简化版）
 .forest-bookmark-toggle {
   position: fixed
   bottom: 100px  // 在日夜切换按钮上方
@@ -1802,93 +1728,58 @@ html {
   width: 56px
   height: 56px
   border-radius: 50%
-  background: linear-gradient(135deg, rgba(139, 90, 43, 0.9), rgba(166, 124, 82, 0.8))
+  background: rgba(139, 90, 43, 0.9)
   border: 2px solid rgba(255, 255, 255, 0.2)
   color: rgba(255, 255, 255, 0.95)
   font-size: 24px
   cursor: pointer
   z-index: 9998
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3),
-              0 0 0 1px rgba(139, 90, 43, 0.5) inset
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2)
   display: flex
   align-items: center
   justify-content: center
-  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)
-  
-  // 树桩年轮纹理
-  &::before {
-    content: ''
-    position: absolute
-    width: 40px
-    height: 40px
-    border-radius: 50%
-    border: 2px solid rgba(255, 255, 255, 0.15)
-    box-shadow: 
-      0 0 0 6px rgba(255, 255, 255, 0.1),
-      0 0 0 12px rgba(255, 255, 255, 0.05)
-  }
   
   &:hover {
-    transform: scale(1.1) rotate(15deg)
-    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4),
-                0 0 0 2px rgba(255, 255, 255, 0.3) inset
-  }
-  
-  &:active {
-    transform: scale(0.95) rotate(15deg)
+    background: rgba(139, 90, 43, 1)
   }
 }
 
-// 萤火虫通知
+// 萤火虫通知（简化版）
 .forest-notification {
   position: fixed
   top: 20px
   right: 20px
-  background: linear-gradient(135deg, rgba(94, 140, 49, 0.95), rgba(126, 166, 79, 0.9))
+  background: rgba(94, 140, 49, 0.9)
   color: rgba(255, 255, 255, 0.95)
   padding: 12px 20px
   border-radius: 10px
   z-index: 10001
-  box-shadow: 0 4px 20px rgba(94, 140, 49, 0.4),
-              0 0 0 1px rgba(255, 255, 255, 0.2) inset,
-              0 0 20px rgba(158, 206, 106, 0.6)  // 发光效果
-  backdrop-filter: blur(10px)
-  border: 1px solid rgba(158, 206, 106, 0.5)
-  animation: firefly-notification 3s ease forwards
+  box-shadow: 0 4px 12px rgba(94, 140, 49, 0.2)
+  border: 1px solid rgba(94, 140, 49, 0.5)
   font-family: var(--font-sans)
   font-size: 14px
   font-weight: 500
   max-width: 300px
+  opacity: 0
+  animation: simple-fade-in-out 3s ease forwards
   
-  // 萤火虫闪烁动画
-  @keyframes firefly-notification {
+  // 简化动画
+  @keyframes simple-fade-in-out {
     0% {
       opacity: 0
-      transform: translateY(-20px) scale(0.9)
-      box-shadow: 0 4px 20px rgba(94, 140, 49, 0.4),
-                  0 0 0 1px rgba(255, 255, 255, 0.2) inset,
-                  0 0 20px rgba(158, 206, 106, 0.6)
+      transform: translateY(-10px)
     }
     20% {
       opacity: 1
-      transform: translateY(0) scale(1)
-      box-shadow: 0 4px 20px rgba(94, 140, 49, 0.4),
-                  0 0 0 1px rgba(255, 255, 255, 0.2) inset,
-                  0 0 20px rgba(158, 206, 106, 0.6)
+      transform: translateY(0)
     }
     80% {
       opacity: 1
-      transform: translateY(0) scale(1)
-      box-shadow: 0 4px 20px rgba(94, 140, 49, 0.4),
-                  0 0 0 1px rgba(255, 255, 255, 0.2) inset,
-                  0 0 20px rgba(158, 206, 106, 0.6)
+      transform: translateY(0)
     }
     100% {
       opacity: 0
-      transform: translateY(-20px) scale(0.9)
-      box-shadow: 0 4px 20px rgba(94, 140, 49, 0),
-                  0 0 0 1px rgba(255, 255, 255, 0) inset,
-                  0 0 20px rgba(158, 206, 106, 0)
+      transform: translateY(-10px)
     }
   }
 }
