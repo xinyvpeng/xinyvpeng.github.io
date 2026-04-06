@@ -44,9 +44,9 @@ const ForestInteractions = {
       icon: '📖' // 使用书签图标替代叶子，更明确
     },
     
-    // 隐藏的森林生物 - 禁用（后续逐步添加）
+    // 隐藏的森林生物 - 启用作为小彩蛋
     hiddenAnimals: {
-      enabled: false,
+      enabled: true,
       count: 3, // 每篇文章隐藏的动物数量
       animals: ['squirrel', 'owl', 'deer'], // 动物类型
       showOnHover: true // 悬停显示

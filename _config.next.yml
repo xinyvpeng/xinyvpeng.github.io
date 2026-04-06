@@ -211,3 +211,4 @@ forest_theme:
   # List of JavaScript files to load (relative to site root)
   scripts:
     - /js/forest/forest-theme.js
+    - /js/forest/forest-interactions.js
