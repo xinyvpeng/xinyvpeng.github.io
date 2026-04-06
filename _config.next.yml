@@ -208,7 +208,30 @@ math:
 # Scripts will be automatically injected via body-end.njk
 forest_theme:
   enable: true
+  
+  # 功能开关
+  features:
+    audio: true                    # 启用音频系统
+    achievements: true             # 启用成就系统
+    hidden_animals: true           # 启用隐藏动物
+    bookmarks: false               # 书签系统暂不启用
+    
+  # 音频系统配置
+  audio:
+    enabled: false                 # 默认静音
+    default_preset: 'morning'      # 默认预设：morning/rainforest/stream
+    
+  # 成就系统配置
+  achievements:
+    enabled: true
+    show_notifications: true
+    show_progress_indicator: true
+    max_plants: 12                 # 植物总数
+    achievement_sound: true        # 成就解锁音效
+  
   # List of JavaScript files to load (relative to site root)
   scripts:
     - /js/forest/forest-theme.js
     - /js/forest/forest-interactions.js
+    - /js/forest/forest-audio.js
+    - /js/forest/forest-achievements.js  # 新成就系统

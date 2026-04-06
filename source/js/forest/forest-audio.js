@@ -70,9 +70,16 @@ const ForestAudio = {
       return;
     }
     
+    // 读取全局配置
+    if (window.FOREST_AUDIO_CONFIG) {
+      this.config.enabled = window.FOREST_AUDIO_CONFIG.enabled;
+      console.log('🎧 使用配置中的音频设置');
+    }
+    
     // 检查浏览器支持
     if (!window.AudioContext && !window.webkitAudioContext) {
       console.warn('🎧 浏览器不支持Web Audio API，音频功能不可用');
+      this.showUnsupportedMessage();
       return;
     }
     
@@ -102,6 +109,17 @@ const ForestAudio = {
     
     // 设置页面可见性变化处理和快捷键
     this.setupVisibilityHandler();
+  },
+  
+  // 显示不支持消息
+  showUnsupportedMessage() {
+    const toggleBtn = document.getElementById('forest-audio-toggle');
+    if (toggleBtn) {
+      toggleBtn.style.display = 'none';
+    }
+    
+    // 可选：在控制台显示更详细的信息
+    console.info('🎧 音频功能需要Web Audio API支持，当前浏览器不支持此功能');
   },
   
   // 加载用户偏好设置

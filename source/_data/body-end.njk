@@ -22,4 +22,62 @@
       }
     });
   </script>
+  
+  <!-- 音频系统配置注入 -->
+  {%- if theme.forest_theme.features.audio %}
+  <script>
+    // 音频系统配置
+    window.FOREST_AUDIO_CONFIG = {
+      enabled: {{ theme.forest_theme.audio.enabled | default(false) }},
+      default_preset: '{{ theme.forest_theme.audio.default_preset | default("morning") }}'
+    };
+  </script>
+  {%- endif %}
+  
+  <!-- 成就系统配置注入 -->
+  {%- if theme.forest_theme.features.achievements %}
+  <script>
+    // 成就系统配置
+    window.FOREST_ACHIEVEMENTS_CONFIG = {
+      enabled: {{ theme.forest_theme.achievements.enabled | default(false) }},
+      show_notifications: {{ theme.forest_theme.achievements.show_notifications | default(true) }},
+      show_progress_indicator: {{ theme.forest_theme.achievements.show_progress_indicator | default(true) }},
+      max_plants: {{ theme.forest_theme.achievements.max_plants | default(12) }},
+      achievement_sound: {{ theme.forest_theme.achievements.achievement_sound | default(true) }}
+    };
+  </script>
+  {%- endif %}
+  
+  <!-- 森林主题脚本初始化 -->
+  {%- if theme.forest_theme.features %}
+  <script>
+    // 等待DOM加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化主题系统
+      if (typeof window.ForestTheme !== 'undefined') {
+        window.ForestTheme.init();
+      }
+      
+      // 初始化交互系统（延迟确保主题已加载）
+      setTimeout(function() {
+        if (typeof window.ForestInteractions !== 'undefined' && 
+            theme.forest_theme.features.hidden_animals) {
+          window.ForestInteractions.init();
+        }
+        
+        // 初始化音频系统
+        if (typeof window.ForestAudio !== 'undefined' && 
+            theme.forest_theme.features.audio) {
+          window.ForestAudio.init();
+        }
+        
+        // 初始化成就系统
+        if (typeof window.ForestAchievements !== 'undefined' && 
+            theme.forest_theme.features.achievements) {
+          window.ForestAchievements.init();
+        }
+      }, 300);
+    });
+  </script>
+  {%- endif %}
 {% endif %}
