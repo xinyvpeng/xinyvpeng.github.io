@@ -149,6 +149,21 @@ const ForestTheme = {
       'currentTheme': this.currentTheme
     });
     
+    // 验证CSS变量是否生效
+    setTimeout(() => {
+      const computedBg = getComputedStyle(root).getPropertyValue('--bg-deep').trim();
+      const computedText = getComputedStyle(root).getPropertyValue('--text-primary').trim();
+      console.log('🌲 CSS变量验证:', {
+        '--bg-deep': computedBg,
+        '--text-primary': computedText,
+        '期望--bg-deep': theme === 'night' ? '#1e3a8a' : '#1a3a1a',
+        '期望--text-primary': theme === 'night' ? '#f0f0e6' : '#1a1a1a'
+      });
+      
+      // 强制重排以确保样式更新
+      void root.offsetWidth;
+    }, 50);
+    
     // 触发主题变化事件
     this.dispatchThemeChange(theme);
   },
