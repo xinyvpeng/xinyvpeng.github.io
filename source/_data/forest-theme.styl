@@ -29,6 +29,7 @@
   --bg-card-light: #F8F8F8;             // 浅灰色卡片背景（中性，减少黄色调）
   --content-bg-color: #1a2316;          // 内容区域背景
   --bg-sidebar: #1a2512;                // 侧边栏背景
+  --sidebar-width: 320px;                // 侧边栏宽度
   --bg-image: url('/images/forest-background.png'); // 背景图片
   
   // 文字颜色 - 按照用户配色方案优化（森林图书馆清新活力版）
@@ -73,6 +74,7 @@
   --bg-card-light: #141c0e;             // 夜间模式浅色卡片背景
   --content-bg-color: #161e10;
   --bg-sidebar: #141c0e;
+  --sidebar-width: 320px;                // 侧边栏宽度
   
   // 文字颜色 - 深色模式适配
   --text-heading: #FFFFFF;              // 标题：白色（深色背景最高对比度）
@@ -402,6 +404,9 @@ body {
 
 // 侧边栏适配 - 覆盖Next主题的黑色背景
 .sidebar {
+  width: var(--sidebar-width) !important;
+  max-width: var(--sidebar-width) !important;
+  min-width: var(--sidebar-width) !important;
   background: unquote('rgba(var(--bg-sidebar-light-rgb), 0.85)') !important;
   backdrop-filter: blur(24px) saturate(200%) !important;
   border-right: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.2)') !important;
@@ -1688,6 +1693,146 @@ html {
   
   .forest-bookmark-toggle:hover {
     transform: none !important
+  }
+}
+
+// ============================================================================
+// 归档页面样式调整
+// ============================================================================
+
+// 归档页面（使用 .posts-collapse 选择器）
+.posts-collapse {
+  // 文章头部容器
+  .post-header {
+    margin-bottom: 1.2rem !important;
+    padding-bottom: 0.8rem !important;
+    border-bottom: 1px solid unquote('rgba(var(--border-color-rgb), 0.15)') !important;
+    display: flex !important;
+    align-items: baseline !important;
+    
+    &:last-child {
+      border-bottom: none !important;
+      margin-bottom: 0 !important;
+    }
+  }
+  
+  // 日期容器 - 与标题保持相同字体大小
+  .post-meta-container {
+    display: inline-block !important;
+    margin-right: 1.5rem !important;
+    min-width: 4rem !important;
+    
+    time {
+      font-size: 1.1rem !important;  // 与正文字体大小相同
+      color: var(--text-secondary) !important;
+      font-weight: 500 !important;
+      opacity: 0.9 !important;
+    }
+  }
+  
+  // 标题样式 - 与日期保持相同字体大小
+  .post-title {
+    display: inline-block !important;
+    flex: 1 !important;
+    
+    .post-title-link {
+      font-size: 1.1rem !important;  // 与正文字体大小相同
+      color: var(--text-primary) !important;
+      font-weight: 500 !important;
+      line-height: 1.6 !important;
+      text-decoration: none !important;
+      transition: color 0.2s ease !important;
+      
+      &:hover {
+        color: var(--primary-forest-medium) !important;
+        text-decoration: underline !important;
+        text-decoration-color: var(--primary-forest-medium) !important;
+        text-decoration-thickness: 2px !important;
+      }
+    }
+  }
+  
+  // 年/月标题样式保持原样
+  .collection-year,
+  .collection-title {
+    font-size: 1.6rem !important;
+    color: var(--text-heading) !important;
+    margin-bottom: 1.5rem !important;
+    border-bottom: 2px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.2)') !important;
+    padding-bottom: 0.5rem !important;
+    
+    .collection-header {
+      font-weight: 600 !important;
+    }
+  }
+  
+   // 月份标题（如果有）
+  .collection-month {
+    font-size: 1.4rem !important;
+    color: var(--text-subtitle) !important;
+    margin-bottom: 1rem !important;
+    margin-top: 2rem !important;
+    padding-left: 0.5rem !important;
+    border-left: 4px solid var(--primary-forest-medium) !important;
+  }
+}
+
+// ============================================================================
+// 主题切换按钮样式
+// ============================================================================
+
+.forest-theme-toggle {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: unquote('rgba(var(--primary-forest-medium-rgb), 0.15)') !important;
+  border: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.3)') !important;
+  color: var(--primary-forest-medium) !important;
+  font-size: 1.5rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(10px) saturate(180%) !important;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+  
+  &:hover {
+    background: unquote('rgba(var(--primary-forest-medium-rgb), 0.25)') !important;
+    transform: scale(1.1) rotate(15deg) !important;
+    box-shadow: 
+      0 6px 20px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.2) inset !important;
+  }
+  
+  &:active {
+    transform: scale(0.95) !important;
+  }
+  
+  // 在夜间模式下的样式
+  [data-theme="night"] & {
+    background: unquote('rgba(var(--text-accent-rgb), 0.15)') !important;
+    border-color: unquote('rgba(var(--text-accent-rgb), 0.3)') !important;
+    color: var(--text-accent) !important;
+    
+    &:hover {
+      background: unquote('rgba(var(--text-accent-rgb), 0.25)') !important;
+    }
+  }
+  
+  // 移动端适配
+  @media (max-width: 768px) {
+    top: 10px !important;
+    right: 10px !important;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.3rem !important;
   }
 }
 

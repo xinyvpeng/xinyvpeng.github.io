@@ -21,10 +21,22 @@ const ForestTheme = {
 
   // 初始化主题系统
   init() {
+    console.log('🌲 开始初始化森林主题系统...');
     this.loadUserPreference();
+    console.log('🌲 当前主题偏好:', this.currentTheme);
     this.setupThemeToggle();
     this.applyTheme(this.currentTheme);
-    console.log('🌲 森林主题系统已初始化');
+    console.log('🌲 森林主题系统已初始化，当前主题:', this.currentTheme);
+    
+    // 调试信息
+    setTimeout(() => {
+      const toggleBtn = document.getElementById('forest-theme-toggle');
+      console.log('🌲 主题切换按钮:', toggleBtn ? '已找到' : '未找到');
+      if (toggleBtn) {
+        console.log('🌲 按钮位置:', toggleBtn.getBoundingClientRect());
+        console.log('🌲 按钮样式:', window.getComputedStyle(toggleBtn).display);
+      }
+    }, 1000);
   },
 
   // 加载用户偏好
@@ -47,9 +59,36 @@ const ForestTheme = {
     const root = document.documentElement;
     
     // 移除旧主题属性，添加新主题属性
+    // 支持多种主题属性格式，确保与NexT主题兼容
     root.removeAttribute('data-theme');
+    root.classList.remove('theme-dark', 'theme-night');
+    
     if (theme === 'night') {
       root.setAttribute('data-theme', 'night');
+      root.setAttribute('data-theme', 'dark'); // NexT主题可能使用'dark'
+      root.classList.add('theme-dark', 'theme-night');
+      
+      // 尝试禁用NexT的自动暗色模式检测
+      try {
+        if (window.NexT && window.NexT.utils) {
+          // NexT主题的暗色模式API
+          window.NexT.utils.setTheme('dark');
+        }
+      } catch (e) {
+        console.log('🌲 NexT主题集成:', e.message);
+      }
+    } else {
+      // 日间模式
+      root.setAttribute('data-theme', 'day');
+      root.classList.add('theme-day');
+      
+      try {
+        if (window.NexT && window.NexT.utils) {
+          window.NexT.utils.setTheme('light');
+        }
+      } catch (e) {
+        console.log('🌲 NexT主题集成:', e.message);
+      }
     }
     
     // 更新CSS变量

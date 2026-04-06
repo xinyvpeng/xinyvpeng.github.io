@@ -10,7 +10,7 @@ scheme: Mist
 
 # Custom colors
 custom_file_path:
-  style: source/_data/styles.styl
+  style: source/_data/forest-theme.styl
   font: source/_data/fonts.styl
   bodyEnd: source/_data/body-end.njk
 
@@ -22,7 +22,7 @@ colors:
 
 # Dark Mode
 darkmode:
-  enable: true
+  enable: false  # 禁用NexT主题的暗色模式，使用森林主题系统
   # Override dark mode setting for chat services
   # Available values: true | false | auto
   chat: auto
@@ -69,9 +69,7 @@ menu:
 # Social Links
 social:
   GitHub: https://github.com/xinyvpeng || fab fa-github
-  Twitter: https://twitter.com/yourusername || fab fa-twitter
   Email: mailto:xinyvpeng@163.com || fa fa-envelope
-  RSS: /atom.xml || fa fa-rss
 
 # 社交链接显示设置
 social_icons:
