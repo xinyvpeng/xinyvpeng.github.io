@@ -28,8 +28,8 @@
   <script>
     // 音频系统配置
     window.FOREST_AUDIO_CONFIG = {
-      enabled: {{ theme.forest_theme.audio.enabled | default(false) }},
-      default_preset: '{{ theme.forest_theme.audio.default_preset | default("morning") }}'
+      enabled: {{ theme.forest_theme.audio.enabled | default(false) | dump }},
+      default_preset: {{ theme.forest_theme.audio.default_preset | default("morning") | dump }}
     };
   </script>
   {%- endif %}
@@ -39,11 +39,11 @@
   <script>
     // 成就系统配置
     window.FOREST_ACHIEVEMENTS_CONFIG = {
-      enabled: {{ theme.forest_theme.achievements.enabled | default(false) }},
-      show_notifications: {{ theme.forest_theme.achievements.show_notifications | default(true) }},
-      show_progress_indicator: {{ theme.forest_theme.achievements.show_progress_indicator | default(true) }},
-      max_plants: {{ theme.forest_theme.achievements.max_plants | default(12) }},
-      achievement_sound: {{ theme.forest_theme.achievements.achievement_sound | default(true) }}
+      enabled: {{ theme.forest_theme.achievements.enabled | default(false) | dump }},
+      show_notifications: {{ theme.forest_theme.achievements.show_notifications | default(true) | dump }},
+      show_progress_indicator: {{ theme.forest_theme.achievements.show_progress_indicator | default(true) | dump }},
+      max_plants: {{ theme.forest_theme.achievements.max_plants | default(12) | dump }},
+      achievement_sound: {{ theme.forest_theme.achievements.achievement_sound | default(true) | dump }}
     };
   </script>
   {%- endif %}
