@@ -21,7 +21,7 @@ const ForestAudio = {
       wind: {
         name: '风声', 
         path: '/audio/wind.mp3',
-        volume: 0.3,
+        volume: 0.2,  // 降低音量，避免风声音效过长过大
         loop: true,
         description: '轻柔的森林微风'
       },
@@ -277,19 +277,6 @@ const ForestAudio = {
       
       const soundConfig = this.config.sounds[soundId];
       const audioPath = soundConfig.path;
-      
-      // 如果音频路径指向不存在的本地文件，直接使用合成音效避免404错误
-      if (audioPath && audioPath.startsWith('/audio/') && audioPath.endsWith('.mp3')) {
-        console.log(`🎧 跳过网络请求，直接生成合成音效: ${soundConfig.name}`);
-        const placeholderBuffer = this.generatePlaceholderSound(soundId);
-        this.sounds[soundId] = {
-          buffer: placeholderBuffer,
-          config: soundConfig,
-          source: null
-        };
-        resolve(this.sounds[soundId]);
-        return;
-      }
       
       // 使用XMLHttpRequest加载音频（规范要求）
       const request = new XMLHttpRequest();
