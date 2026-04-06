@@ -97,6 +97,7 @@ const ForestTheme = {
 
   // 应用主题到页面
   applyTheme(theme) {
+    console.log('🌲 应用主题:', theme);
     const root = document.documentElement;
     
     // 移除旧主题属性，添加新主题属性
@@ -139,6 +140,14 @@ const ForestTheme = {
     // 保存偏好
     this.currentTheme = theme;
     localStorage.setItem('forest-library-theme', theme);
+    
+    // 调试：显示应用后的属性
+    console.log('🌲 主题应用完成:', {
+      'data-theme': root.getAttribute('data-theme'),
+      'data-mode': root.getAttribute('data-mode'),
+      'classList': Array.from(root.classList),
+      'currentTheme': this.currentTheme
+    });
     
     // 触发主题变化事件
     this.dispatchThemeChange(theme);
