@@ -99,52 +99,121 @@ const ForestAudio = {
     
     // 创建UI控制面板
     this.createAudioControls();
+    
+    // 设置页面可见性变化处理和快捷键
+    this.setupVisibilityHandler();
   },
   
-  // 加载用户偏好
+  // 加载用户偏好设置
   loadPreferences() {
-    const savedPrefs = localStorage.getItem('forest-audio-preferences');
-    if (savedPrefs) {
-      try {
-        const prefs = JSON.parse(savedPrefs);
-        this.config.enabled = prefs.enabled || false;
-        this.config.masterVolume = prefs.masterVolume || 0.5;
+    try {
+      const savedSettings = localStorage.getItem('forest-audio-settings');
+      if (savedSettings) {
+        this.userSettings = JSON.parse(savedSettings);
         
-        // 更新各个音效的音量
-        if (prefs.soundVolumes) {
-          Object.keys(prefs.soundVolumes).forEach(soundId => {
-            if (this.config.sounds[soundId]) {
-              this.config.sounds[soundId].volume = prefs.soundVolumes[soundId];
+        // 应用保存的设置
+        if (this.userSettings.enabled !== undefined) {
+          this.config.enabled = this.userSettings.enabled;
+        }
+        
+        if (this.userSettings.masterVolume !== undefined) {
+          this.config.masterVolume = this.userSettings.masterVolume;
+        }
+        
+        if (this.userSettings.enabledSounds) {
+          // 更新音效启用状态
+          Object.keys(this.config.sounds).forEach(soundId => {
+            if (this.userSettings.enabledSounds[soundId] !== undefined) {
+              // 设置已保存在用户设置中
             }
           });
         }
-      } catch (e) {
-        console.warn('🎧 无法加载音频偏好，使用默认设置', e);
+        
+        if (this.userSettings.soundVolumes) {
+          // 更新音效音量
+          Object.entries(this.userSettings.soundVolumes).forEach(([soundId, volume]) => {
+            if (this.config.sounds[soundId]) {
+              this.config.sounds[soundId].volume = volume;
+            }
+          });
+        }
+        
+        console.log('🎧 用户音频设置已加载');
+      } else {
+        this.userSettings = {
+          enabled: this.config.enabled,
+          masterVolume: this.config.masterVolume,
+          enabledSounds: {},
+          soundVolumes: {}
+        };
       }
+    } catch (error) {
+      console.warn('🎧 加载音频设置失败，使用默认设置', error);
+      this.userSettings = {
+        enabled: this.config.enabled,
+        masterVolume: this.config.masterVolume,
+        enabledSounds: {},
+        soundVolumes: {}
+      };
     }
   },
   
-  // 保存用户偏好
-  savePreferences() {
-    const soundVolumes = {};
+  // 保存用户设置
+  saveSettings() {
+    if (!this.userSettings) return;
+    
+    // 更新当前状态到用户设置
+    this.userSettings.enabled = this.config.enabled;
+    this.userSettings.masterVolume = this.config.masterVolume;
+    
+    // 更新音效启用状态
+    if (!this.userSettings.enabledSounds) {
+      this.userSettings.enabledSounds = {};
+    }
+    
     Object.keys(this.config.sounds).forEach(soundId => {
-      soundVolumes[soundId] = this.config.sounds[soundId].volume;
+      const soundItem = document.querySelector(`[data-sound-id="${soundId}"]`);
+      if (soundItem) {
+        const isEnabled = soundItem.querySelector('.sound-checkbox').classList.contains('checked');
+        this.userSettings.enabledSounds[soundId] = isEnabled;
+      }
     });
     
-    const prefs = {
-      enabled: this.config.enabled,
-      masterVolume: this.config.masterVolume,
-      soundVolumes
-    };
+    // 更新音效音量
+    if (!this.userSettings.soundVolumes) {
+      this.userSettings.soundVolumes = {};
+    }
     
-    localStorage.setItem('forest-audio-preferences', JSON.stringify(prefs));
+    Object.entries(this.config.sounds).forEach(([soundId, soundConfig]) => {
+      this.userSettings.soundVolumes[soundId] = soundConfig.volume;
+    });
+    
+    // 保存最后状态
+    this.userSettings.lastState = this.isPlaying ? 'playing' : 'paused';
+    
+    try {
+      localStorage.setItem('forest-audio-settings', JSON.stringify(this.userSettings));
+    } catch (error) {
+      console.warn('🎧 保存音频设置失败', error);
+    }
   },
   
-  // 创建主音量增益节点
+  // 创建主音量控制
   createMasterGain() {
-    this.masterGain = this.audioContext.createGain();
-    this.masterGain.gain.value = this.config.masterVolume;
-    this.masterGain.connect(this.audioContext.destination);
+    if (!this.audioContext) return;
+    
+    this.masterGainNode = this.audioContext.createGain();
+    this.masterGainNode.gain.value = this.config.masterVolume;
+    this.masterGainNode.connect(this.audioContext.destination);
+    
+    // 将所有音效连接到主增益节点
+    Object.keys(this.gainNodes).forEach(soundId => {
+      const gainNode = this.gainNodes[soundId];
+      if (gainNode) {
+        gainNode.disconnect();
+        gainNode.connect(this.masterGainNode);
+      }
+    });
   },
   
   // 设置音效缓冲区（懒加载）
@@ -156,46 +225,58 @@ const ForestAudio = {
       this.sounds[soundId] = null; // null表示未加载
       this.gainNodes[soundId] = this.audioContext.createGain();
       this.gainNodes[soundId].gain.value = this.config.sounds[soundId].volume;
-      this.gainNodes[soundId].connect(this.masterGain);
+      this.gainNodes[soundId].connect(this.masterGainNode);
     });
   },
   
-  // 加载单个音效
-  async loadSound(soundId) {
-    if (!this.config.sounds[soundId]) {
-      console.error(`🎧 音效 "${soundId}" 不存在`);
-      return false;
-    }
-    
-    // 如果已加载，直接返回
-    if (this.sounds[soundId]) {
-      return true;
-    }
-    
-    const soundConfig = this.config.sounds[soundId];
-    
-    try {
-      // 注意：实际项目中需要提供音频文件
-      // 这里使用占位符，实际使用时应取消注释以下代码：
-      /*
-      const response = await fetch(soundConfig.path);
-      const arrayBuffer = await response.arrayBuffer();
-      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-      this.sounds[soundId] = audioBuffer;
-      */
+  // 加载音效
+  loadSound(soundId) {
+    return new Promise((resolve, reject) => {
+      if (!this.config.sounds[soundId]) {
+        reject(new Error(`音效不存在: ${soundId}`));
+        return;
+      }
       
-      // 临时：生成一个简单的合成音效作为占位符
-      this.sounds[soundId] = this.generatePlaceholderSound(soundId);
+      // 如果已经加载，直接返回
+      if (this.sounds[soundId]) {
+        resolve(this.sounds[soundId]);
+        return;
+      }
       
-      console.log(`🎧 音效 "${soundConfig.name}" 加载成功`);
-      return true;
-    } catch (error) {
-      console.error(`🎧 音效 "${soundConfig.name}" 加载失败:`, error);
+      const soundConfig = this.config.sounds[soundId];
+      const audioPath = soundConfig.path;
       
-      // 生成占位符音效
-      this.sounds[soundId] = this.generatePlaceholderSound(soundId);
-      return true;
-    }
+      // 尝试使用fetch加载音频
+      fetch(audioPath)
+        .then(response => {
+          if (response.ok) {
+            return response.arrayBuffer();
+          } else {
+            throw new Error(`加载音频失败: ${response.status}`);
+          }
+        })
+        .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
+        .then(buffer => {
+          this.sounds[soundId] = {
+            buffer: buffer,
+            config: soundConfig,
+            source: null
+          };
+          console.log(`🎧 音效加载成功: ${soundConfig.name}`);
+          resolve(this.sounds[soundId]);
+        })
+        .catch(error => {
+          console.warn(`🎧 音效加载失败，使用占位符: ${error}`);
+          // 生成占位符音效
+          const placeholderBuffer = this.generatePlaceholderSound(soundId);
+          this.sounds[soundId] = {
+            buffer: placeholderBuffer,
+            config: soundConfig,
+            source: null
+          };
+          resolve(this.sounds[soundId]);
+        });
+    });
   },
   
   // 生成占位符音效（简单合成音效）
@@ -254,96 +335,104 @@ const ForestAudio = {
   },
   
   // 播放音效
-  playSound(soundId, options = {}) {
-    if (!this.isInitialized || !this.config.enabled) {
-      return null;
-    }
+  playSound(soundId, loop = null) {
+    if (!this.audioContext || !this.config.enabled) return;
     
-    if (!this.config.sounds[soundId]) {
-      console.error(`🎧 音效 "${soundId}" 不存在`);
-      return null;
-    }
-    
-    // 确保音频上下文已恢复（浏览器策略）
+    // 确保音频上下文已恢复（移动端限制）
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
     
-    // 如果音效未加载，先加载
-    if (!this.sounds[soundId]) {
-      this.loadSound(soundId).then(() => {
-        this.playSound(soundId, options);
-      });
-      return null;
+    const sound = this.sounds[soundId];
+    if (!sound) {
+      // 尝试加载
+      this.loadSound(soundId)
+        .then(() => this.playSound(soundId, loop))
+        .catch(error => console.warn(`🎧 播放音效失败: ${error}`));
+      return;
     }
     
-    const soundConfig = this.config.sounds[soundId];
+    // 停止当前播放的相同音效
+    if (sound.source) {
+      sound.source.stop();
+    }
+    
+    // 创建新的音频源
     const source = this.audioContext.createBufferSource();
-    source.buffer = this.sounds[soundId];
+    source.buffer = sound.buffer;
     
-    // 连接增益节点
-    source.connect(this.gainNodes[soundId]);
+    // 使用现有增益节点
+    const gainNode = this.gainNodes[soundId];
+    if (!gainNode) return;
     
-    // 设置播放选项
-    if (options.volume !== undefined) {
-      this.gainNodes[soundId].gain.value = options.volume;
-    } else {
-      this.gainNodes[soundId].gain.value = soundConfig.volume;
-    }
+    // 设置增益值
+    gainNode.gain.value = sound.config.volume;
+    
+    // 连接：source -> gainNode -> masterGainNode
+    source.connect(gainNode);
     
     // 设置循环
-    source.loop = options.loop !== undefined ? options.loop : soundConfig.loop;
+    source.loop = loop !== null ? loop : sound.config.loop;
     
     // 开始播放
-    source.start();
+    source.start(0);
     
-    // 如果不是循环播放，设置停止时间
-    if (!source.loop && options.duration) {
-      source.stop(this.audioContext.currentTime + options.duration);
+    // 保存引用
+    sound.source = source;
+    
+    // 更新播放状态
+    this.isPlaying = true;
+    this.updatePlayButtonState();
+    
+    // 设置结束回调（仅非循环音效）
+    if (!source.loop) {
+      source.onended = () => {
+        sound.source = null;
+      };
     }
-    
-    return source;
   },
   
-  // 停止播放音效
+  // 停止音效
   stopSound(soundId) {
-    // 由于我们使用BufferSource，每次播放都是新的实例
-    // 无法停止特定音效，可以通过设置音量为0来实现
-    if (this.gainNodes[soundId]) {
-      this.gainNodes[soundId].gain.value = 0;
+    const sound = this.sounds[soundId];
+    if (sound && sound.source) {
+      sound.source.stop();
+      sound.source = null;
     }
   },
   
-  // 开始播放环境音效
+  // 开始环境音效
   startAmbientSounds() {
-    if (!this.isInitialized) {
-      this.init();
-      return;
+    if (!this.audioContext || !this.config.enabled) return;
+    
+    // 恢复音频上下文（移动端限制）
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
     }
     
-    if (this.isPlaying) {
-      return;
-    }
-    
-    // 播放循环环境音效
+    // 播放所有启用的音效
     Object.keys(this.config.sounds).forEach(soundId => {
       const soundConfig = this.config.sounds[soundId];
-      if (soundConfig.loop && soundId !== 'click') {
-        this.playSound(soundId);
+      if (soundConfig.loop && this.getSoundEnabledState(soundId)) {
+        this.playSound(soundId, true);
       }
     });
     
     this.isPlaying = true;
-    console.log('🎧 环境音效开始播放');
+    this.config.enabled = true;
+    this.updatePlayButtonState();
+    console.log('🎧 环境音效已开始播放');
   },
   
   // 停止所有音效
   stopAllSounds() {
-    Object.keys(this.gainNodes).forEach(soundId => {
-      this.gainNodes[soundId].gain.value = 0;
+    Object.keys(this.sounds).forEach(soundId => {
+      this.stopSound(soundId);
     });
     
     this.isPlaying = false;
+    this.config.enabled = false;
+    this.updatePlayButtonState();
     console.log('🎧 所有音效已停止');
   },
   
@@ -357,7 +446,7 @@ const ForestAudio = {
       this.stopAllSounds();
     }
     
-    this.savePreferences();
+    this.saveSettings();
     // this.updateControlPanel(); // 旧UI函数已弃用
     
     return this.config.enabled;
@@ -369,8 +458,8 @@ const ForestAudio = {
     if (volume > 1) volume = 1;
     
     this.config.masterVolume = volume;
-    this.masterGain.gain.value = volume;
-    this.savePreferences();
+    this.masterGainNode.gain.value = volume;
+    this.saveSettings();
   },
   
   // 设置单个音效音量
@@ -383,8 +472,11 @@ const ForestAudio = {
     if (volume > 1) volume = 1;
     
     this.config.sounds[soundId].volume = volume;
-    this.gainNodes[soundId].gain.value = volume;
-    this.savePreferences();
+    // 更新增益节点
+    if (this.gainNodes[soundId]) {
+      this.gainNodes[soundId].gain.value = volume;
+    }
+    this.saveSettings();
   },
   
   // 创建UI控制面板（旧版本 - 已弃用，由createAudioControls替代）
@@ -533,6 +625,32 @@ const ForestAudio = {
     if (this.config.enabled) {
       this.playSound('click');
     }
+  },
+  
+  // 更新播放按钮状态
+  updatePlayButtonState() {
+    const toggleBtn = document.getElementById('forest-audio-toggle');
+    if (!toggleBtn) return;
+    
+    if (this.isPlaying) {
+      toggleBtn.classList.remove('muted');
+      toggleBtn.classList.add('playing');
+      toggleBtn.innerHTML = '🎶';
+    } else {
+      toggleBtn.classList.add('muted');
+      toggleBtn.classList.remove('playing');
+      toggleBtn.innerHTML = '🎵';
+    }
+  },
+  
+  // 切换播放状态
+  togglePlayback() {
+    if (this.isPlaying) {
+      this.stopAllSounds();
+    } else {
+      this.startAmbientSounds();
+    }
+    this.saveSettings();
   },
   
   // 创建UI控制面板（新版本）
@@ -753,6 +871,29 @@ const ForestAudio = {
     });
   },
   
+  // 页面可见性变化处理（节能模式）
+  setupVisibilityHandler() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && this.isPlaying) {
+        // 页面隐藏时暂停
+        this.wasPlayingBeforeHide = true;
+        this.stopAllSounds();
+      } else if (!document.hidden && this.wasPlayingBeforeHide) {
+        // 页面重新显示时恢复
+        this.wasPlayingBeforeHide = false;
+        this.startAmbientSounds();
+      }
+    });
+    
+    // 添加全局播放/暂停快捷键（Ctrl+Shift+M 或 Cmd+Shift+M）
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'M') {
+        e.preventDefault();
+        this.togglePlayback();
+      }
+    });
+  },
+  
   // 显示控制面板
   showControls() {
     this.uiElements.controlsPanel.classList.add('visible');
@@ -768,8 +909,8 @@ const ForestAudio = {
   // 设置主音量（新UI版本）
   setMasterVolume(volume) {
     this.config.masterVolume = volume;
-    if (this.masterGain) {
-      this.masterGain.gain.value = volume;
+    if (this.masterGainNode) {
+      this.masterGainNode.gain.value = volume;
     }
     this.saveSettings();
   },
@@ -935,10 +1076,7 @@ const ForestAudio = {
     console.log(`🎧 已应用预设：${presetName}`);
   },
   
-  // 保存用户设置（临时占位）
-  saveSettings() {
-    console.log('🎧 保存设置（Task 3将实现完整功能）');
-  },
+
   
   // 销毁音频系统
   destroy() {
