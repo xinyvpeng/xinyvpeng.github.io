@@ -121,12 +121,7 @@ const ForestAudio = {
         }
         
         if (this.userSettings.enabledSounds) {
-          // 更新音效启用状态
-          Object.keys(this.config.sounds).forEach(soundId => {
-            if (this.userSettings.enabledSounds[soundId] !== undefined) {
-              // 设置已保存在用户设置中
-            }
-          });
+          // 音效启用状态已从存储中加载，将在UI初始化时应用
         }
         
         if (this.userSettings.soundVolumes) {
@@ -206,14 +201,7 @@ const ForestAudio = {
     this.masterGainNode.gain.value = this.config.masterVolume;
     this.masterGainNode.connect(this.audioContext.destination);
     
-    // 将所有音效连接到主增益节点
-    Object.keys(this.gainNodes).forEach(soundId => {
-      const gainNode = this.gainNodes[soundId];
-      if (gainNode) {
-        gainNode.disconnect();
-        gainNode.connect(this.masterGainNode);
-      }
-    });
+    // 所有音效将在setupSoundBuffers中连接到主增益节点
   },
   
   // 设置音效缓冲区（懒加载）
@@ -246,28 +234,33 @@ const ForestAudio = {
       const soundConfig = this.config.sounds[soundId];
       const audioPath = soundConfig.path;
       
-      // 尝试使用fetch加载音频
-      fetch(audioPath)
-        .then(response => {
-          if (response.ok) {
-            return response.arrayBuffer();
-          } else {
-            throw new Error(`加载音频失败: ${response.status}`);
-          }
-        })
-        .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
-        .then(buffer => {
-          this.sounds[soundId] = {
-            buffer: buffer,
-            config: soundConfig,
-            source: null
-          };
-          console.log(`🎧 音效加载成功: ${soundConfig.name}`);
-          resolve(this.sounds[soundId]);
-        })
-        .catch(error => {
-          console.warn(`🎧 音效加载失败，使用占位符: ${error}`);
-          // 生成占位符音效
+      // 使用XMLHttpRequest加载音频（规范要求）
+      const request = new XMLHttpRequest();
+      request.open('GET', audioPath, true);
+      request.responseType = 'arraybuffer';
+      
+      request.onload = () => {
+        if (request.status === 200) {
+          this.audioContext.decodeAudioData(request.response, (buffer) => {
+            this.sounds[soundId] = {
+              buffer: buffer,
+              config: soundConfig,
+              source: null
+            };
+            console.log(`🎧 音效加载成功: ${soundConfig.name}`);
+            resolve(this.sounds[soundId]);
+          }, (error) => {
+            console.warn(`🎧 解码音频失败，使用占位符: ${error}`);
+            const placeholderBuffer = this.generatePlaceholderSound(soundId);
+            this.sounds[soundId] = {
+              buffer: placeholderBuffer,
+              config: soundConfig,
+              source: null
+            };
+            resolve(this.sounds[soundId]);
+          });
+        } else {
+          console.warn(`🎧 加载音频失败，使用占位符: ${request.status}`);
           const placeholderBuffer = this.generatePlaceholderSound(soundId);
           this.sounds[soundId] = {
             buffer: placeholderBuffer,
@@ -275,7 +268,21 @@ const ForestAudio = {
             source: null
           };
           resolve(this.sounds[soundId]);
-        });
+        }
+      };
+      
+      request.onerror = () => {
+        console.warn(`🎧 网络错误，无法加载音频，使用占位符`);
+        const placeholderBuffer = this.generatePlaceholderSound(soundId);
+        this.sounds[soundId] = {
+          buffer: placeholderBuffer,
+          config: soundConfig,
+          source: null
+        };
+        resolve(this.sounds[soundId]);
+      };
+      
+      request.send();
     });
   },
   
