@@ -1385,7 +1385,7 @@ pre code {
   transition: all 0.2s ease-in-out;
 }
 .links-of-author a::before {
-  background: #8717ab;
+  background: #fff609;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -5393,6 +5393,51 @@ html {
   margin-top: 2rem !important;
   padding-left: 0.5rem !important;
   border-left: 4px solid var(--primary-forest-medium) !important;
+}
+.forest-theme-toggle {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: rgba(var(--primary-forest-medium-rgb), 0.15) !important;
+  border: 1px solid rgba(var(--primary-forest-medium-rgb), 0.3) !important;
+  color: var(--primary-forest-medium) !important;
+  font-size: 1.5rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(10px) saturate(180%) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.1) inset !important;
+}
+.forest-theme-toggle:hover {
+  background: rgba(var(--primary-forest-medium-rgb), 0.25) !important;
+  transform: scale(1.1) rotate(15deg) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.2) inset !important;
+}
+.forest-theme-toggle:active {
+  transform: scale(0.95) !important;
+}
+[data-theme="night"] .forest-theme-toggle {
+  background: rgba(var(--text-accent-rgb), 0.15) !important;
+  border-color: rgba(var(--text-accent-rgb), 0.3) !important;
+  color: var(--text-accent) !important;
+}
+[data-theme="night"] .forest-theme-toggle:hover {
+  background: rgba(var(--text-accent-rgb), 0.25) !important;
+}
+@media (max-width: 768px) {
+  .forest-theme-toggle {
+    top: 10px !important;
+    right: 10px !important;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.3rem !important;
+  }
 }
 @keyframes simple-fade-in {
   to {
