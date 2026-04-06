@@ -211,14 +211,14 @@ forest_theme:
   
   # 功能开关
   features:
-    audio: true                    # 启用音频系统
-    achievements: true             # 启用成就系统
-    hidden_animals: true           # 启用隐藏动物
-    bookmarks: false               # 书签系统暂不启用
+    audio: true                    # 音频系统
+    achievements: true             # 成就系统
+    hidden_animals: true           # 隐藏动物
+    bookmarks: false               # 书签系统（暂不启用）
     
   # 音频系统配置
   audio:
-    enabled: false                 # 默认静音
+    enabled: false                 # 默认静音，用户手动开启
     default_preset: 'morning'      # 默认预设：morning/rainforest/stream
     
   # 成就系统配置
@@ -228,6 +228,9 @@ forest_theme:
     show_progress_indicator: true
     max_plants: 12                 # 植物总数
     achievement_sound: true        # 成就解锁音效
+    notification_duration: 5       # 通知显示秒数
+    celebration_animations: true   # 庆祝动画开关
+    enable_keyboard_shortcuts: true # 快捷键(Ctrl+Shift+H打开图鉴)
   
   # List of JavaScript files to load (relative to site root)
   scripts:
