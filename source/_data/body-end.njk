@@ -2,12 +2,10 @@
 {% if theme.forest_theme.enable %}
   <!-- 森林主题核心脚本 -->
   <script src="{{ url_for('/js/forest/forest-theme.js') }}" defer></script>
-  <!-- 书签系统交互脚本 -->
-  <script src="{{ url_for('/js/forest/forest-interactions.js') }}" defer></script>
   
   {% if theme.forest_theme.scripts %}
     {% for script in theme.forest_theme.scripts %}
-      {% if script != '/js/forest/forest-theme.js' and script != '/js/forest/forest-interactions.js' %}
+      {% if script != '/js/forest/forest-theme.js' %}
         <script src="{{ url_for(script) }}" defer></script>
       {% endif %}
     {% endfor %}

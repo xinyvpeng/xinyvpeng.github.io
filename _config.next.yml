@@ -211,7 +211,3 @@ forest_theme:
   # List of JavaScript files to load (relative to site root)
   scripts:
     - /js/forest/forest-theme.js
-    # 注释掉可能产生黄色特效的其他模块
-    # - /js/forest/forest-particles.js
-    # - /js/forest/forest-audio.js
-    - /js/forest/forest-interactions.js
