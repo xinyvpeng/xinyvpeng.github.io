@@ -1137,92 +1137,7 @@ custom_file_path:
   }
 }
 
-// 蘑菇提示框样式
-.forest-bookmark-prompt {
-  position: fixed
-  z-index: 10000
-  background: linear-gradient(135deg, rgba(94, 140, 49, 0.95), rgba(126, 166, 79, 0.9))
-  border-radius: 12px 12px 4px 12px  // 蘑菇形状：圆顶+短柄
-  padding: 12px 16px
-  box-shadow: 0 4px 20px var(--bookmark-shadow), 
-              0 0 0 1px rgba(255, 255, 255, 0.1) inset
-  backdrop-filter: blur(10px)
-  border: 1px solid var(--bookmark-border)
-  animation: prompt-fade-in 0.3s ease forwards
-  font-family: var(--font-sans)
-  min-width: 200px
-  max-width: 300px
-  
-  &::before {
-    content: ''
-    position: absolute
-    bottom: -8px
-    right: 20px
-    width: 0
-    height: 0
-    border-left: 8px solid transparent
-    border-right: 8px solid transparent
-    border-top: 8px solid rgba(94, 140, 49, 0.95)
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1))
-  }
-  
-  &.prompt-fade-out {
-    animation: prompt-fade-out 0.2s ease forwards
-  }
-}
 
-// 蘑菇提示按钮
-.forest-bookmark-add-btn, .forest-bookmark-cancel-btn {
-  border: none
-  padding: 8px 16px
-  border-radius: 6px
-  font-size: 14px
-  font-weight: 500
-  cursor: pointer
-  transition: all 0.2s ease
-  font-family: var(--font-sans)
-  margin-right: 8px
-}
-
-.forest-bookmark-add-btn {
-  background: rgba(255, 255, 255, 0.9)
-  color: var(--bookmark-primary)
-  
-  &:hover {
-    background: white
-    transform: translateY(-1px)
-    box-shadow: 0 3px 8px rgba(94, 140, 49, 0.3)
-  }
-}
-
-.forest-bookmark-cancel-btn {
-  background: transparent
-  color: rgba(255, 255, 255, 0.8)
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.1)
-    color: white
-  }
-}
-
-// 提示动画
-@keyframes prompt-fade-in {
-  from {
-    opacity: 0
-    transform: translateY(10px) scale(0.95)
-  }
-  to {
-    opacity: 1
-    transform: translateY(0) scale(1)
-  }
-}
-
-@keyframes prompt-fade-out {
-  to {
-    opacity: 0
-    transform: translateY(-10px) scale(0.95)
-  }
-}
 
 // 隐藏的森林动物
 .forest-hidden-animal {
@@ -1530,8 +1445,8 @@ html {
 
 // 书签颜色变量
 :root {
-  --bookmark-primary: var(--color-primary, #5E8C31)        // 主绿色
-  --bookmark-secondary: var(--color-secondary, #87CEEB)    // 天空蓝
+  --bookmark-primary: var(--primary-forest-medium, #5E8C31)        // 主绿色
+  --bookmark-secondary: var(--accent-sky-blue, #87CEEB)    // 天空蓝
   --bookmark-bg-light: rgba(158, 206, 106, 0.15)          // 浅绿背景
   --bookmark-bg-dark: rgba(94, 140, 49, 0.1)              // 深绿背景
   --bookmark-text: var(--text-primary, #1A1A1A)           // 深色文字
@@ -1541,13 +1456,100 @@ html {
 }
 
 [data-theme="night"] {
-  --bookmark-primary: var(--color-primary-night, #3A8A7F)
-  --bookmark-secondary: var(--color-secondary-night, #8A7FCF)
+  --bookmark-primary: #3A8A7F
+  --bookmark-secondary: #8A7FCF
   --bookmark-bg-light: rgba(58, 138, 127, 0.15)
   --bookmark-bg-dark: rgba(58, 138, 127, 0.1)
   --bookmark-text: var(--text-primary-night, #D4D4DC)
   --bookmark-shadow: rgba(58, 138, 127, 0.3)
   --bookmark-border: rgba(58, 138, 127, 0.4)
   --font-sans: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif  // 正文字体
+}
+
+// 蘑菇提示框样式
+.forest-bookmark-prompt {
+  position: fixed
+  z-index: 10000
+  background: linear-gradient(135deg, rgba(94, 140, 49, 0.95), rgba(126, 166, 79, 0.9))
+  border-radius: 12px 12px 4px 12px  // 蘑菇形状：圆顶+短柄
+  padding: 12px 16px
+  box-shadow: 0 4px 20px var(--bookmark-shadow), 
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset
+  backdrop-filter: blur(10px)
+  border: 1px solid var(--bookmark-border)
+  animation: prompt-fade-in 0.3s ease forwards
+  font-family: var(--font-sans)
+  min-width: 200px
+  max-width: 300px
+  
+  &::before {
+    content: ''
+    position: absolute
+    bottom: -8px
+    right: 20px
+    width: 0
+    height: 0
+    border-left: 8px solid transparent
+    border-right: 8px solid transparent
+    border-top: 8px solid rgba(94, 140, 49, 0.95)
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1))
+  }
+  
+  &.prompt-fade-out {
+    animation: prompt-fade-out 0.2s ease forwards
+  }
+}
+
+// 蘑菇提示按钮
+.forest-bookmark-add-btn, .forest-bookmark-cancel-btn {
+  border: none
+  padding: 8px 16px
+  border-radius: 6px
+  font-size: 14px
+  font-weight: 500
+  cursor: pointer
+  transition: all 0.2s ease
+  font-family: var(--font-sans)
+  margin-right: 8px
+}
+
+.forest-bookmark-add-btn {
+  background: rgba(255, 255, 255, 0.9)
+  color: var(--bookmark-primary)
+  
+  &:hover {
+    background: white
+    transform: translateY(-1px)
+    box-shadow: 0 3px 8px rgba(94, 140, 49, 0.3)
+  }
+}
+
+.forest-bookmark-cancel-btn {
+  background: transparent
+  color: rgba(255, 255, 255, 0.8)
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1)
+    color: white
+  }
+}
+
+// 提示动画
+@keyframes prompt-fade-in {
+  from {
+    opacity: 0
+    transform: translateY(10px) scale(0.95)
+  }
+  to {
+    opacity: 1
+    transform: translateY(0) scale(1)
+  }
+}
+
+@keyframes prompt-fade-out {
+  to {
+    opacity: 0
+    transform: translateY(-10px) scale(0.95)
+  }
 }
 
