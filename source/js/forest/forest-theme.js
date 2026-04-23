@@ -6,6 +6,7 @@
 const ForestTheme = {
   // 主题状态
   currentTheme: 'day',
+  isInitialized: false,
   themes: {
     day: {
       name: 'day',
@@ -21,6 +22,9 @@ const ForestTheme = {
 
   // 初始化主题系统
   init() {
+    if (this.isInitialized) return;
+    this.isInitialized = true;
+
     console.log('🌲 开始初始化森林主题系统...');
     this.loadUserPreference();
     console.log('🌲 当前主题偏好:', this.currentTheme);
