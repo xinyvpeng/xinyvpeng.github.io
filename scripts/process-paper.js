@@ -27,10 +27,15 @@ async function processPaper(paperFolder) {
     const text = await extractTextFromPDF(pdfPath);
     console.log(`Extracted ${text.length} characters from PDF`);
     
+    const textFilePath = path.join(paperPath, 'extracted-text.txt');
+    fs.writeFileSync(textFilePath, text, 'utf-8');
+    console.log(`Saved extracted text to: ${textFilePath}`);
+    
     return {
       paperFolder,
       pdfFile,
       text,
+      textFilePath,
       paperPath
     };
   } catch (error) {
