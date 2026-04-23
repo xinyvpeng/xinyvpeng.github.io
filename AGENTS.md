@@ -9,6 +9,8 @@
 - **样式:** Stylus (通过 NexT injects 机制注入)
 - **部署:** GitHub Pages (xinyvpeng.github.io)
 - **域名:** ran-i.cn
+- **源码分支:** `source` (远程), 本地开发在 `main` 分支
+- **部署分支:** `main` (远程, 由 `hexo deploy` 推送构建产物)
 
 ## 项目结构
 
@@ -52,6 +54,9 @@ npx hexo deploy
 
 # 清理缓存
 npx hexo clean
+
+# 推送源码到远程 (远程 main 为构建产物, source 为源码)
+git push origin main:source
 ```
 
 ## 设计主题
