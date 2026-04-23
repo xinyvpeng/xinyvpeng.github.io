@@ -1,0 +1,2225 @@
+2804 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+NeuPAN: Direct Point Robot Navigation With
+End-to-End Model-Based Learning
+Ruihua Han 	, Shuai Wang 	, Senior Member, IEEE, Shuaijun Wang 	, Zeqing Zhang 	, Member, IEEE,
+Jianjun Chen 	, Shijie Lin 	, Chengyang Li 	, Chengzhong Xu 	, Fellow, IEEE, Yonina C. Eldar 	, Fellow, IEEE,
+Qi Hao 	, and Jia Pan 	, Senior Member, IEEE
+Abstract—Navigating a nonholonomic robot in a cluttered,
+unknown environment requires accurate perception and pre-
+cise motion control for real-time collision avoidance. This arti-
+cle presents neural proximal alternating-minimization network
+(NeuPAN): a real-time, highly accurate, map-free, easy-to-deploy,
+and environment-invariant robot motion planner. Leveraging a
+tightly coupled perception-to-control framework, NeuPAN has two
+key innovations compared to existing approaches: first, it directly
+maps raw point cloud data to a latent distance feature space for
+collision-free motion generation, avoiding error propagation from
+the perception to control pipeline; second, it is interpretable from
+an end-to-end model-based learning perspective. The crux of Neu-
+PAN is solving an end-to-end mathematical model with numerous
+point-level constraints using a plug-and-play proximal alternating-
+minimization network, incorporating neurons in the loop. This
+Received 16 November 2024; accepted 4 February 2025. Date of publication
+26 March 2025; date of current version 21 April 2025. This work was sup-
+ported in part by the HKSARRGC and GRF under Grant 11202119 and Grant
+11207818, in part by the Innovation and HKSAR Technology Commission under
+the InnoHK initiative, Hong Kong Research Grants Council through NSFC/RGC
+Joint Research Scheme under Grant N HKU705/24, in part by the National
+Natural Science Foundation of China under Grant 62261160654 and Grant
+62371444, in part by the Shenzhen Key Laboratory of Robotics and Computer
+Vision under Grant ZDSYS20220330160557001, and in part by the Shenzhen
+Science and Technology Program under Grant RCYX20231211090206005 and
+Grant JCYJ20241202124934046. This article was recommended for publication
+by Associate Editor A. H. Qureshi and Editor D. Hsu upon evaluation of the
+reviewers’ comments. (Corresponding authors: Shuai Wang; Qi Hao; Jia Pan.)
+Ruihua Han is with the Department of Computer Science, University of Hong
+Kong, 000000, Hong Kong, and also with the Department of Computer Science
+and Engineering, Southern University of Science and Technology, Shenzhen
+518055, China (e-mail: hanrh@connect.hku.hk).
+Shuai Wang is with the Shenzhen Institutes of Advanced Technology, Chinese
+Academy of Sciences, Shenzhen 100045, China (e-mail: s.wang@siat.ac.cn).
+Shuaijun Wang and Jianjun Chen are with the Department of Computer
+Science and Engineering, Southern University of Science and Technology,
+Shenzhen 518055, China.
+Zeqing Zhang, Shijie Lin, and Jia Pan are with the Department of Com-
+puter Science, University of Hong Kong, 000000, Hong Kong (e-mail:
+jpan@cs.hku.hk).
+Chengyang Li is with the Robotics and Autonomous Systems Thrust, Hong
+Kong University of Science and Technology Guangzhou, Guangzhou 511455,
+China.
+Chengzhong Xu is with the IOTSC, University of Macau, Macau 999078,
+China.
+Yonina C. Eldar is with the Weizmann Institute of Science, Rehovot 7621613,
+Israel.
+Qi Hao is with the Sifakis Research Institute for Trustworthy Autonomous
+Systems, Southern University of Science and Technology, Shenzhen 518055,
+China, and also with the Department of Computer Science and Engineering,
+Southern University of Science and Technology, Shenzhen 518055, China (e-
+mail: haoq@sustech.edu.cn).
+This article has supplementary downloadable material available at
+https://doi.org/10.1109/TRO.2025.3554252, provided by the authors.
+Digital Object Identifier 10.1109/TRO.2025.3554252
+allows NeuPAN to generate real-time, physically interpretable mo-
+tions. It seamlessly integrates data and knowledge engines, and its
+network parameters can be fine-tuned via backpropagation. We
+evaluate NeuPAN on a ground mobile robot, a wheel-legged robot,
+and an autonomous vehicle, in extensive simulated and real-world
+environments. Results demonstrate that NeuPAN outperforms ex-
+isting baselines in terms of accuracy, efficiency, robustness, and
+generalization capabilities across various environments, including
+the cluttered sandbox, office, corridor, and parking lot. We show
+that NeuPAN works well in unknown and unstructured environ-
+ments with arbitrarily shaped objects, transforming impassable
+paths into passable ones.
+Index Terms—Direct point robot navigation, model-based
+learning, optimization-based collision avoidance (OBCA).
+I. I NTRODUCTION
+REAL-TIME navigation of robots in densely confined en-
+vironments is crucial for a broad range of applications,
+including household robotics, logistics, and autonomous driv-
+ing. In contrast to wide-open environments, the aforementioned
+cluttered scenarios require robot perceptions (i.e., providing
+necessary information about the environment) and motions (i.e.,
+computing a sequence of feasible actions to connect the current
+and target states) to be very accurate under kinematic constraints;
+otherwise, efficiency or safety could be greatly compromised.
+The situation becomes even more nontrivial if the navigation
+system needs to work properly in previously unseen environ-
+ments.
+Existing approaches fail to address the problem because of the
+following reasons: 1) Compressing a high-dimensional sensor
+space (e.g., massive points per second) into a low-dimensional
+action space (e.g., throttle and steer) while guaranteeing inter-
+pretability and preventing error propagation is nontrivial [1], [2];
+2) The navigation problem is PSPACE hard, and existing solu-
+tions [3], [4], [5] have to balance the tradeoff between accuracy
+and complexity, resulting in either inexact motions, leading to
+conservative policies, or delayed motions, increasing the risk
+of collisions; 3) The solution should be stable, complete, and
+user-friendly, involving little hand-engineering and retraining
+for new robots and environments [6], [7]. The above system,
+algorithm, and engineering issues make dense-scenario naviga-
+tion with only onboard computation resources a long-standing
+challenge.
+To 	address 	these 	issues, 	this 	article 	proposes 	Neu-
+PAN, 	a 	direct 	point, 	end-to-end, 	model-based 	learning
+1941-0468 © 2025 IEEE. All rights reserved, including rights for text and data mining, and training of artificial intelligence and similar technologies.
+Personal use is permitted, but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 1 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2805
+Fig. 1. 	Wheel-legged robot mapless navigation in the office empowered by NeuPAN: (a) robot navigates along a naive straight path without a prior map; (b)
+robot navigates through narrow gaps; (< 6 cm); (c) NeuPAN utilizes a “direct point-in action-out” manner at a high frequency; (d) NeuPAN can handle arbitrarily
+shaped (moving) objects; (e) robot trajectory.
+approach designed to achieve a real-time, highly accu-
+rate (e.g., over 2× improvement compared to state-of-the-
+art approaches), map-free, easy-to-deploy, and environment-
+invariant collision avoidance. Particularly, our solution em-
+ploys 	light 	detection 	and 	ranging 	(LiDAR) 	sensors 	to
+provide obstacle points because of their ability to deliver direct,
+active, and accurate depth measurements of environments, as
+well as their insensitivity to illumination variations and motion
+blur. Building upon these inherent features of LiDAR scans
+and empowered by NeuPAN, a wheel-legged robot can navigate
+through narrow gaps without a prior map while avoiding colli-
+sions with arbitrarily shaped dynamic objects, as demonstrated
+in Fig. 1.
+The key contributions that lead to the superior performance
+of our system are as follows.
+1) In contrast to existing approaches that convert point clouds
+to convex sets or occupancy grids, and adopt inexact
+minimum distances, NeuPAN directly processes massive
+raw points and computes the point flow based on predictive
+ego motion. Then, a neural encoder is leveraged to map
+the point flow to a corresponding latent distance feature
+(LDF) space, which represents the exact distance from
+the ego robot to the obstacle points within the receding
+horizon.
+2) The LDFs are seamlessly incorporated into the motion
+planner as a norm regularizer added to the loss function,
+accounting for the reward for departing from obstacles.
+The predictive states and actions generated by the motion
+planner are fed back to the front-end for recomputation of
+the point flow. This forms a tightly coupled loop between
+perception and control.
+3) To gain deeper insights into NeuPAN, we formulate an
+end-to-end mathematical program with point-level con-
+straints. We demonstrate that NeuPAN is equivalent to
+solving this problem using the plug-and-play (PnP) prox-
+imal alternating-minimization (PAN) algorithm. To the
+best of the authors knowledge, this marks the first approach
+where a navigation algorithm is interpreted from a model-
+based learning perspective, thereby seamlessly integrating
+data-driven systems with rigorous mathematical models.
+4) We conduct various experiments to evaluate the effec-
+tiveness of the developed NeuPAN system. Exhaustive
+benchmark comparisons in various simulated scenarios
+show that NeuPAN achieves consistently higher success
+rates with shorter navigation time than those of state-
+of-the-art robot navigation systems. We finally show the
+effectiveness of NeuPAN in real-world dynamic, cluttered,
+and unstructured environments including the sandbox,
+office, corridor, and parking lot on ground mobile robots,
+wheel-legged robots, and passenger autonomous vehicles.
+Experiment videos and more details can be found on our
+project page. 1
+The rest of this article is organized as follows. Section II
+reviews related work. Section III states the problem. Section IV
+describes the system architecture. Subsequently, Section V
+presents the neural encoder network and the neural regularized
+motion planner (NRMP). Section VI presents simulation and
+real-world experiments. Finally, Section VII concludes this ar-
+ticle.
+II. RELATED WORK
+A. Modular Versus End-to-End
+Modular approaches, which divide navigation into distinct
+modules (e.g., an object detector and a motion planner in the
+simplest case), are the most widely adopted frameworks due
+to its reliability and ease of debugging [8], [9], [10]. However,
+these approaches suffer from error propagation from perception
+to control modules: 1) At the front-end perception layer, the
+detected object representation (e.g. bounding box) generated
+by even the best detector can deviate from the ground truth,
+necessitating the incorporation of a larger safety distance in the
+motion planner to guarantee worst-case collision avoidance. 2)
+At the intermediate representation layer, the box or convex sets
+cannot exactly match real-world objects that may possess arbi-
+trary nonconvex shapes; These errors in individual layers will
+add up together to the navigation pipeline, making the modular
+approach prone to getting stuck in cluttered environments.
+1 [Online]. Available: https://hanruihua.github.io/neupan_project/
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 2 of 21 --
+
+2806 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+To mitigate the error propagation inherent in the modular
+approach, recent robot navigation is experiencing a paradigm
+shift toward an end-to-end approach, which directly maps sensor
+inputs to motion outputs [7], [11], [12]. Earlier end-to-end solu-
+tions focused on using a single close-box deep neural network
+(DNN) to learn the mapping but were later found difficult to
+train and not generalizable to unseen situations. The emerging
+end-to-end approach adopts multiple blocks but differs from
+the modular approach in three aspects: 1) it exchanges features
+(e.g., encoder outputs) instead of explicit representations (e.g.,
+bounding boxes) among modules; 2) the interaction among
+modules is bidirectional instead of unidirectional; 3) the entire
+system can be trained in an end-to-end manner. Such generalized
+end-to-end approaches have shown effectiveness in vision-based
+autonomous driving and encoder-based robot manipulation. For
+instance, the unified autonomous driving framework consists of
+backbone, perception, prediction, and planning modules, with
+task queries as interfaces connecting each node [13].
+The majority of the industry practice has exploited end-to-end
+approaches for autonomous driving tasks, which leverage vision
+transformers to generate bird’s eye view [14] for occupancy
+mapping [15] that is directly used for subsequent planning. Sim-
+ilar insights have been obtained for robot manipulation, which
+can be accomplished by a motion planning network (MPNet)
+consisting of a neural encoder and a motion planner [16]. The
+limitation of these purely data-driven techniques lies in their lack
+of interpretability. This makes it difficult to adjust the network
+parameters for new robot platforms. When generalizing to a new
+environment, they often require extensive hand-engineering and
+prolonged training and usually need to be accompanied by other
+conservative strategies to guarantee safety. These methods also
+demand significant data collection and annotation efforts.
+B. Model-Based Versus Learning-Based
+Algorithms determine the inference mapping of each module
+in modular or end-to-end frameworks. Existing algorithms can
+be categorized into model-based and learning-based.
+Model-based algorithms utilize mathematical or statisti-
+cal formulations that represent the underlying physics, prior
+information, and domain knowledge. Classical model-based
+algorithms include graph search-based, sampling-based, and
+optimization-based. Graph search-based techniques, e.g., A∗,
+approximate the configuration space as a discrete grid space
+to search the path with minimum cost [17]. Sampling-based
+techniques, e.g., rapidly exploring random tree (RRT) or RRT∗,
+probe the configuration space with a sampling strategy [18]. The
+fast-likelihood-based collision avoidance method (Falco) [19],
+maximizes the likelihood to reach the goal in determining the
+next navigation actions. Optimization-based techniques gener-
+ate trajectories through minimizing cost functions under dynam-
+ics and kinematic constraints [1], [9].
+In the context of dense-scenario navigation, optimization-
+based techniques, such as model predictive control (MPC),
+are more attractive due to their ability to compute the current
+optimal input to produce the best possible behavior in the future,
+resulting in high-performance trajectories. One main drawback
+of optimization-based techniques is their high computational
+cost, which limits their real-time applications. Particularly, the
+number of collision avoidance constraints is proportional to the
+number of obstacles (spatial), and the length of the receding
+horizon (temporal). In cluttered environments, where the shape
+of obstacles is also taken into account, the computation time is
+further multiplied by the number of surfaces from each obstacle.
+To overcome the nonconvex collision avoidance constraints, the
+optimization-based collision avoidance (OBCA) algorithm is
+developed in [1] for full-shape control objects, which adopts du-
+ality to reformulate the exact distance-based collision avoidance
+constraints. Moreover, full-shape robot navigation is further
+accelerated by a space-time decomposition algorithm in [20].
+However, the frequency of these algorithms is not satisfactory
+when dealing with a dozen of objects. On the other hand, most
+existing works forgo exact distances and adopt inexact ones,
+such as center-point distances, approximate signed distances, or
+spatial–temporal corridors [21], [22]. In addition, it is possible
+to convert hard constraints into soft regularizers for speed-up,
+as exemplified by the ESDF-free Gradient-based local (EGO)
+planner, which removes the collision avoidance constraints by
+adding penalty terms [23]. While inexact algorithms achieve a
+high frequency (e.g., up to 100 Hz), they are not suitable for
+dense-scenario navigation, as discussed earlier in Section I.
+In contrast to model-based approaches, learning algorithms
+dispense with analytical models by extracting features from data.
+This is particularly useful in complex systems where analytical
+models are not known. Consequently, learning algorithms are
+promising for end-to-end navigation tasks. In this direction,
+reinforcement learning (RL) is a major paradigm [26]. The idea
+of RL is to learn a neural network policy by interacting with the
+environment and maximizing cumulative action rewards [27].
+In particular, RL has been widely used for the dynamic colli-
+sion avoidance (so-called CARL-based approaches), where the
+motion information of obstacles is mapped to the robot actions
+directly, such as collision avoidance with deep refinforcement
+learning (CADRL) [28], long short-term memory-reinforcement
+learning(LSTM-RL) [29], social aware reinforcement learning
+(SARL) [6], relational graph learning (RGL) [30], and adap-
+tive environment modeling based collision avoidance with re-
+finforcement learning (AEMCARL) [24]. However, the per-
+formance of RL-based methods is influenced by the training
+dataset’s distribution. Therefore, these methods are promising
+in simulation but often challenging to implement in real-world
+settings. In addition, finding a suitable reward function for
+dense-scenario navigation is often difficult.
+As mentioned in Section II-A, learning-based algorithms
+lack interpretability. Hence, an emerging paradigm involves
+the cross-fertilization of model-based and learning-based al-
+gorithms. This has led to a variety of model-based learning
+approaches in robot navigation. In particular, a direct way is
+to use learning algorithms to imitate complex dynamics or
+numerical procedures by transforming iterative computations
+into a feedforward procedure. This is achieved by learning
+from solvers’ demonstrations using DNNs. Examples include
+the neural PID in [31] and the neural MPC in [32]. On the other
+hand, learning-based algorithms are adopted to generate can-
+didate trajectories, reducing the solution space for subsequent
+model-based algorithms, e.g., MPNet [16], MPC-MPNet [25],
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 3 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2807
+TABLE I
+C HARACTERISTICS C OMPARISON OF NEU PAN AND EXISTING NAVIGATION APPROACHES
+NFMPC [33], and MPPI [34]. Note that trajectory generation is
+often learned from classical sampling-based approaches. Lastly,
+learning algorithms can be used to adjust the hyperparameters
+involved in model-based algorithms. For instance, the cost and
+dynamics terms of MPC can be learned by differentiating param-
+eters with respect to the policy function through the optimization
+problem [35], [36].
+Our framework, NeuPAN, also belongs to the model-based
+learning approach. However, in contrast to the aforementioned
+works that are partially interpretable, NeuPAN is end-to-end
+interpretable from perception to control. This is achieved by
+solving an end-to-end optimization problem with numerous
+point-level constraints using the PnP PAN. This makes NeuPAN
+suitable for dense-scenario collision avoidance with nonholo-
+nomic robots, whereas existing results [7], [22], [23] usually
+consider holonomic drones or nonholonomic robots in wide-
+open scenarios. Similar to [35], [36], parameters within the
+costs and constraints of NeuPAN can be trained via function
+differentiation in an end-to-end fashion. Hence, NeuPAN enjoys
+easy-to-deploy and environment-invariant features.
+C. Comprehensive Comparison With Existing Solutions
+Comprehensive comparison with celebrated navigation ap-
+proaches is provided in Table I. In particular, Timed-Elastic-
+Band (TEB) [3], OBCA [1], regularized dual alternating di-
+rection method of multipliers (RDA) [20], spatial-temporal
+trajectory (STT) [22], AEMCARL [24], and Falco [19] are
+modular approaches. Their inputs are grids, poses, boxes, or
+sets generated by a pre-established grid map or a front-end
+object detector. All these methods involve error propagation.
+In contrast to AEMCARL which treats the ego robot as a point
+(or ball), TEB, OBCA, RDA, STT, and Falco consider the shape
+of the ego robot and obstacles. However, TEB, STT, and Falco
+involve approximations when computing the distance. OBCA
+and RDA are the most accurate approaches but require high
+computational latency, e.g., up to second-level (i.e., less than
+1 Hz). On the other hand, Hybrid-RL [7], MPC-MPNet [25],
+and NeuPAN (ours) are end-to-end approaches. By treating
+raw LiDAR points as inputs, these methods are free from error
+propagation. Hybrid-RL adopts a single network for point input
+and action output. Despite its high-level integration, Hybrid-RL
+suffers from poor generalization capability. MPC-MPNet, and
+NeuPAN adopt two networks, one for encoding and the other for
+planning: MPC-MPNet uses a neural encoder to map points into
+voxel features; NeuPAN uses a neural encoder to map points
+and predictive ego motions into LDFs. All of them consider
+the shape of objects; however, due to the discretization from
+points to voxels, MPC-MPNet cannot compute the exact dis-
+tances between two shapes. They also lack generalization as the
+trajectory generator is scenario-dependent and needs retraining
+for new robots. Our NeuPAN overcomes these drawbacks, at the
+cost of a slightly higher computational load.
+NeuPAN is the first approach that builds the end-to-end
+mathematical model (i.e., point-in and action-out), and uses
+model-based learning to solve it. As such, NeuPAN is fully
+explainable. Owing to this new feature, NeuPAN generates very
+accurate, end-to-end, physically interpretable motions in real
+time. This empowers autonomous systems to work in dense
+unstructured environments, which are previously considered
+impassable and not suitable for autonomous operations, trig-
+gering new applications, such as cluttered-room housekeeper
+and limited-space parking. Compared to existing end-to-end
+methods, [7], [11], [12], [13], [14], [15], [16], NeuPAN provides
+mathematical guarantee and leads to much lower uncertainty and
+higher generalization capability. Compared to existing model-
+based motion planning methods [1], [16], [20], [22], NeuPAN
+is more accurate, since conventional motion planning belongs
+to modular approaches and involves error propagation. There
+also exist other model-based learning methods [16], [31], [32],
+[33], [34] for robot navigation. However, these methods are not
+end-to-end, e.g., the authors in [31] and [32] considered state-in
+action-out, and the authors in considered point-in trajectory-out.
+Li et al. [25] considered point-in action-out, by bridging [16]
+with a back-end controller. However, such a bridge loses math-
+ematical guarantee and no longer solve the inherent end-to-end
+model. The methods [16], [25] also leverage neural encoder like
+transformer to compress the sensor data, and this neural encoder
+has no interpretability.
+III. PROBLEM STATEMENT
+We consider an end-to-end navigation approach with points
+in and actions out for full-dimensional robots based on the MPC
+framework. To reach the goal state through a control sequence,
+a perception-to-control optimization problem over a receding
+horizon H = {t, . . . , t + H} is solved iteratively at each time
+step t.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 4 of 21 --
+
+2808 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+1) Robot kinematics: Given the control vector ut, the current
+state st and subsequent state st+1 should adhere to the discrete-
+time kinematic model
+st+1 = st + f (st, ut)Δt 	(1)
+where Δt is the time slot between two states. We assume that the
+function f (st, ut) is linear with respect to the state st and control
+vector ut. In scenarios involving nonlinear dynamics, these
+functions can be approximated using linearization techniques,
+such as the Taylor series expansion. Accordingly, this constraint
+can be rewritten in a linear form
+st+1 = Atst + Btut + ct 	(2)
+where (At, Bt, ct) are coefficient matrices at time step t. Ex-
+amples for Ackermann and differential models are provided
+in Appendix A (see Supplementary Material). Particularly, the
+state st at initial time point under the MPC framework can be
+measured by odometry or provided by the localization system.
+Due to physical limits, the control vector ut should belong to a
+feasible control that set limits on the absolute values and rates
+of changes. This yields the following constraints:
+umin  uh  umax
+amin  uh+1 − uh  amax 	∀h ∈ H. 	(3)
+Consequently, we define the kinematic feasible set F as the set
+of all states and control vectors that satisfy the above constraints
+(2) and (3). 2
+2) Robot model: The space occupied by the ego robot at the
+origin of the coordinate system can be represented by a compact
+convex set C. Based on the conic inequality representation [37],
+C is given by
+C = {x ∈ Rn|Gx  K h} 	(4)
+where G ∈ Rl×n and h ∈ Rl represent the rotations and transla-
+tions of surfaces with respect to the zero point, respectively, and
+l is the minimum number of surfaces that can represent the shape
+of ego robot. Symbol K is a proper cone, with its partial ordering
+on Rn defined as: x  K y ⇐⇒ y − x ∈ K. For instance, for
+a polygonal robot, K = Rn
++ and l corresponds to the number
+of hyperplanes. Consequently, given the state st, the occupied
+space at tth time frame, denoted by the convex compact set Zt3
+Zt(st) = {Rt(st)x + tt(st)|x ∈ C} 	(5)
+where Rt(st) ∈ Rn×n is the rotation matrix representing the
+orientation of the robot and tt(st) ∈ Rn is the translation vector
+denoting the position of the robot. For instance, for a state in the
+2-D space with position and orientation angle st = [xt, yt, θt]T ,
+the rotation and translation matrices can be obtained by
+R(st) =
+[
+cos θt 	− sin θt
+sin θt 	cos θt
+]
+, 	t(st) =
+[
+xt
+yt
+]
+. 	(6)
+3) Point-level collision avoidance constraints: We adopt a
+set of points to represent the obstacles in the environment at
+2 Note that st = st, where st is the current robot state in each horizon.
+3 Nonconvex objects can be represented as unions of convex objects.
+time t, denoted by Pt = {p1
+t , . . . , pi
+t, . . . , pM
+t }, where pi
+t ∈ Rn
+is the n-dimensional position of the ith point in the global
+coordinate system, and M is the total number of points. The
+set of obstacle points can be obtained directly from raw LiDAR
+scans in real-time. Therefore, conventional operations, such as
+object detection or occupancy grid maps are not required. Con-
+sequently, the minimum distance between two nonintersecting
+sets, the robot Zt(st) and the tth Pt can be expressed as
+dist(Zt(st), Pt) = min
+e { ‖e‖2| (Zt(st) + e) ∩ Pt = ∅}
+= min{D1,t(Zt(st), p1
+t ), . . . , DM,t(Zt(st), pM
+t )} 	(7)
+where e denotes the smallest translation vector that brings
+these two sets into contact, as introduced in [1] and [38].
+Di,t(Z(st), pi
+t) denotes the exact minimum distance between
+the point pi
+t and the robot Zt(st).
+The computation of distance Di,t is a convex optimization
+problem given by
+min
+x
+∥
+∥Rt(st)x + tt(st) − pi
+t
+∥
+∥2
+2
+s.t . 	Gx Kh. 	(8)
+We refer to the above convex optimization problem as the primal
+representation for computing the minimum distance. Accord-
+ingly, we have the point-level collision avoidance constraints
+dist(Zt(st), Pt) ≥ dmin 	(9)
+where dmin is a safety distance. Generally, these collision avoid-
+ance constraints are nonconvex and nondifferentiable [1].
+4) Objective function: Given the start state sstart and the
+goal state sgoal , our objective is to find a control sequence
+U = {u0, . . . , uT } and associated trajectory S = {s0, . . . , sT },
+such that {S, U } ∈ F, s0 = sstart and ‖sT − sgoal‖2 ≤ , where
+ is the navigation tolerance, while avoiding the obstacles in
+the environment. We adopt the naive straight line connecting
+sstart and sgoal (same as [38]) as the initialization, 4 with a list
+of interpolating points {s
+0, s
+1, · · · } on the line. In the case
+of multiple goal states, the initial path contains multiple line
+segments. A desired speed u
+speed is used as the initial value for
+the robot to maintain. In our case, the cost function C0(S, U)
+is constructed as the distance between the output and naive
+trajectories over the horizon H = {t, t + 1, . . . , t + H}
+C0(S, U) =
+t+H	∑
+h=t
+(∥
+∥q ◦ (sh+1 − s
+h+1)∥
+∥2
+2
++ ∥
+∥p ◦ (uspeed,h − u
+speed)∥
+∥2
+2
+)
+(10)
+where {q, p} are weighted parameters. A larger value of q
+encourages the robot to follow the initialized trajectory more
+closely, while a larger value of p control the robot to maintain
+the desired speed. {s
+h+1, ∀h ∈ H} is selected from the naive
+path according to the closest distance criteria.
+4 For Ackermann kinematics, Dubins, or Reeds-Shepp paths can be adopted
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 5 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2809
+Fig. 2. 	System architecture of NeuPAN, a perception-to-control end-to-end approach for navigation, consists of two main blocks: learning-based and model-based.
+5) Problem formulation: The direct point robot navigation
+problem is formulated as the following model predictive per-
+ception and control (MPPC) optimization problem over horizon
+H:
+P : 	min
+{S,U}∈F C0(S, U) 	(11a)
+subject to 	dist(Zh(sh), Ph) ≥ dmin 	∀h ∈ H. 	(11b)
+Technical Challenge: P represents the direct point robot nav-
+igation problem. The input includes the point cloud Pt, naive
+path {s
+0, s
+1, · · · }, and desired speed u
+speed . The output is the
+optimized control vector and associated trajectory {S, U}. The
+collision avoidance constraints in P are bilevel, involving inner-
+level distance computations, and large-scale, as the number
+of point-level constraints, M H, can reach thousands. Existing
+model-based approaches convert Pt to convex sets[1], [20],
+voxels [19], or grids [3] for constraint reduction. However, this
+would lead to degradation of solution accuracy.
+IV. NEUPAN SYSTEM ARCHITECTURE
+To retain the most accurate, complete, and dense information
+about the environments, we propose to directly process Pt,
+resulting in an end-to-end perception-to-control approach for un-
+structured and unknown environments. The system architecture
+is illustrated in Fig. 2. Below, we first introduce the mathematical
+interpretation behind NeuPAN. Then, we provide the detailed
+descriptions of the system.
+A. Mathematical Interpretation
+1) Strong Duality Transformation: To overcome the non-
+convexity and nondifferentiability of the collision avoidance
+constraints (9), we transform the exact minimum distance com-
+putation problem (8) to its dual problem under the strong duality
+property, as in [1], [20]
+Di
+t = max
+λi
+t,μi
+t
+μi
+t
+(G˜pi
+t(st) − h)
+s.t . 	μi
+t  K ∗ 0, ∥
+∥λi
+t
+∥
+∥∗  1, μi
+t
+G + λi
+t
+R(st) = 0 	(12)
+where K ∗ represents the dual cone of K, and ‖ · ‖∗ denotes
+the dual norm. ˜pi
+t(st) = Rt(st)[pi
+t − tt(st)] represents the
+position of the obstacle point in the ego robot coordinate system.
+Fig. 3. 	Geometric interpretation of LDFs M and L. Red sides represent the
+closest robot edge(s) to the obstacle point. λi
+t represents the normal vector of
+the separation hyperplane. Elements of μi
+t with positive value represent the
+collision related red sides.
+M = {μi
+t ∈ Rl} and L = {λi
+t ∈ Rn} are introduced as the
+Lagrange multipliers associated with the inequality and equality
+constraints respectively. Each point ˜pi
+t is associated with a pair
+of μi
+t and λi
+t.
+The geometric representation of M and L for a polygonal
+robot is shown in Fig. 3. It can be seen that the minimum distance
+Di
+t is determined by the obstacle point ˜pi
+t and the closest edge(s)
+of the ego robot (depicted as one or two red sides in the figure).
+For μi
+t, the elements corresponding to these red sides (related
+to collision) have positive values, while the other elements
+should be zero (unrelated to collision). For λi
+t, it represents the
+normal vector of the separation hyperplane between the obstacle
+point ˜pi
+t and the ego robot at time step t. Intuitively, (μi
+t, λi
+t)
+represent the matching and ranging from each obstacle point to
+its nearest robot edge. This representation sparsifies the distance
+computations by pruning unmatched edges for each obstacle
+point. Based on the above intuition, we define M and L as LDF,
+and the set of all LDFs under the constraints in (12) can be
+denoted by {M, L} ∈ G.
+Leveraging the dual transformation and LDFs, we can refor-
+mulate the original problem P as an equivalent augmented dual
+form Q over [S, U, M, L], which is a biconvex optimization
+problem
+Q : 	min
+{S,U}∈F,{M,L}∈G C0(S, U) + Cr (S, M, L)
+︸ 	︷︷ 	︸
+:=Ce2e(S,U,M,L)
+(13)
+where
+Cr (S, M, L) = ρ1
+2
+t+H	∑
+h=t
+M	∑
+i=0
+∥
+∥min(I(sh, μi
+h, λi
+h), 0)∥
+∥2
+2
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 6 of 21 --
+
+2810 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+Fig. 4. 	Relationship between problems P, Q, Q1, and Q 2.
++ ρ2
+2
+t+H	∑
+h=t
+M	∑
+i=0
+∥
+∥E(sh, μi
+h, λi
+h)∥
+∥2
+2
+and ρ1 and ρ2 are penalty parameters. The penalty functions I
+and E are
+I(sh, μi
+h, λi
+h) = λi
+h
+(th(sh) − pi
+h) − μi
+h
+h − dmin 	(14)
+E(sh, μi
+h, λi
+h) = μi
+h
+G + λi
+h
+R(sh). 	(15)
+As shown in Appendix B (see Supplementary Material), the
+optimal solution to Q is also optimal to P. It can be seen that the
+bilevel collision avoidance constraints of P are transformed into
+biconvex distance costs. Intuitively, this transformation assigns
+a distance cost to these edge(s), which converts constraints into
+costs, facilitating subsequent problem decomposition.
+2) Problem Decomposition: To facilitate the problem solv-
+ing, Q is decomposed into the following two subproblems Q1
+and Q2.
+1) Q1: Involving variables M and L while keeping S and U
+fixed, detailed in Section V-A.
+2) Q2: Involving variables S and U while keeping M and L
+fixed, detailed in Section V-B.
+These subproblems are solved alternately in each iteration.
+Specifically, as illustrated in Fig. 4 , subproblem Q1 is a mo-
+tion aware model predictive perception (MAMPP) problem to
+generate [M, L] for Q2. Subproblem Q2 is a perception regu-
+larized model predictive control (PRMPC) problem to generate
+new [S, U]. This iterative process continues until convergence,
+yielding the final solution [S ∗, U ∗]. The optimal control vector
+is derived by U ∗ at the t + 1 time step, and S ∗ will work as
+the initial value of S for the next iteration. The convergence
+and complexity analysis of the proposed algorithm are provided
+in Section V-C. Intuitively, Q1 encodes the point cloud and
+robot shape into LDFs [M, L], which is a high-dimension but
+easy-to-unfold problem. Meanwhile, Q2 maps the LDFs from
+Q1 to robot action associated with predictive trajectories, which
+is a low-dimension but complex optimization problem. This
+decomposition allows for efficient handling of the large number
+of direct point collision avoidance constraints by dividing the
+problem into more manageable components.
+B. NeuPAN System
+As shown in Fig. 2, in each MPPC horizon, NeuPAN trans-
+forms raw points to point flow ˜	P F by the preprocess block,
+incorporating the motion feedback, then to LDFs by the learning-
+based block addressing problem Q1, and finally to robot control
+actions by the model-based block addressing Q2. The solution
+(i.e., containing robot actions and associated trajectories) gener-
+ated by the model-based block is fed back to the preprocess block
+for regeneration of point flow, which forms a tightly coupled
+closed-loop between perception and control. Below we present
+the structure of each block.
+1) Model-Unfolded Learning-Based Block: We first prepro-
+cess the inputs by transforming the coordinates of obstacle points
+Pt, from the global coordinate system to the robot’s local coor-
+dinate system within the MPPC receding horizon framework.
+Given a set of obstacle points Pt = {p1
+t , . . . , pM
+t } and their
+associated velocities Vt = {v1
+t , . . . , vM
+t } at time t, the point
+flow over the horizon H in the global coordinate system should
+be
+P Ft =
+⎡
+⎢
+⎢
+⎣
+p1
+t 	· · · 	pM
+t
+... . . . ...
+p1
+t+H 	· · · 	pM
+t+H
+⎤
+⎥
+⎥
+⎦ 	(16)
+where pi
+t+1 = pi
+t + vi
+tΔt, i = 1, . . . , M , and Δt is the sample
+time. To transform this point flow P Ft into the robot’s local
+coordinate system ˜	P Ft, we apply the rotation matrix R(st) and
+translation matrix t(st), calculated from the ego robot’s state
+st as introduced in (5). Thus, the point flow ˜	P Ft in the robot’s
+local coordinate system should be
+˜	P Ft =
+⎡
+⎢
+⎢
+⎣
+˜p1
+t 	· · · 	˜pM
+t
+... . . . ...
+˜p1
+t+H 	· · · 	˜pM
+t+H
+⎤
+⎥
+⎥
+⎦ 	(17)
+where ˜pi
+h+1 = R(sh)−1(pi
+h − t(sh)), for h = t, . . . , t + H.
+This transformed point flow ˜	P Ft is then fed into the deep
+unfolded neural encoder (DUNE), which leverages a neural
+encoder to map the point flow ˜	P Ft to generate the LDFs
+M = {μi
+t ∈ Rl} and L = {λi
+t ∈ Rn} with {M, L} ∈ G. The
+encoder is denoted as DUNE, since it can be interpreted as
+unfolding penalty inexact block coordinate descent (PIBCD)
+into the DNN. Consequently, this network is both simple and
+fast, capable of handling thousands or more input points. This
+block is detailed in Section V-A.
+2) Learnable Model-Based Block: The model-based block
+seamlessly incorporates the LDFs into a motion planning
+optimization problem as a rigorously derived regularizer,
+Cr (S, M, L), imposed on the loss function C0, accounting for
+the reward of collision avoidance. With this regularizer, we
+can safely remove the numerous point-level collision avoidance
+constraints, which is in contrast to conventional approximation
+or regularization methods [21], [22], [23] that may lead to
+approximation error. The resultant problem is neural regular-
+ized, hence its associated solver is called NRMP. By leveraging
+functional differentiation, NRMP is also learnable, supporting
+autotuning of parameters in an end-to-end manner. This block
+is detailed in Section V-B.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 7 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2811
+3) End-to-End Algorithm: Our framework belongs to the
+generalized end-to-end approach because of the following rea-
+sons. 1) Our primal optimization problem is an end-to-end
+MPPC problem, which takes raw sensor data (i.e., points) as in-
+put and directly generates actions as output, aligning with typical
+end-to-end methods, such as those in [13] and [39], where system
+components are jointly optimized to achieve the final objective.
+2) The MPPC problem is solved by intertwined optimization
+of MAMPP (i.e., DUNE) and PRMPC (i.e., NRMP), which is
+derived from an equivalent transformation of the primal end-
+to-end MPPC problem. Intuitively, obstacle points are directly
+mapped to explainable LDFs to generate control commands,
+without involving any intermediate feature extraction steps. 3)
+The system can be trained by end-to-end backpropagation to
+find the fine-tuned parameters in optimization block (detailed in
+Section VI-A3), aligning with typical end-to-end methods [13],
+[39]. This enables our approach to directly learn from provided
+rewards, thereby overcoming the domain variations issues.
+V. NEUPAN ENCODER AND PLANNER DESIGN
+A. Deep Unfolded Neural Encoder
+This section presents DUNE, which corresponds to solving
+Q1 using, for example, {S = S[k−1], U = U[k−1]} at the kth
+iteration. The nature of this subproblem is to convert each
+point to its corresponding LDF. The benefits of using such a
+transformation for the front-end are twofold: 1) LDFs can be
+directly incorporated into the subsequent NRMP network; 2)
+Mapping from points to LDFs can be realized by interpretable
+neural networks, as shown later. To explain how DUNE works,
+we will first derive the mathematical model of mapping from
+points to LDFs. Specifically, to guarantee collision avoidance
+at any time within the receding horizon of length H, it is
+necessary to compute the optimal {μi
+t
+∗ } for any t ∈ [t, t + H]
+and i ∈ [0, M ]. The inference mapping from points to LDFs
+for all points {i} and time slots {t} is thus to solve M × H
+problems in parallel, each having a similar formula as (18). This
+leads to a total computational complexity of O(M Hl3.5) by
+using CVXPY ECOS [40] and O(M Hl) by using a PIBCD
+algorithm, making it impossible for real-time applications, when
+M is in the range of thousands or more. To address this problem,
+we further unfold PIBCD into an explainable DNN, and obtain
+the architecture of DUNE, which can be viewed as a neural
+accelerated version of PIBCD.
+1) PIBCD for MAMPP Problem: The MAMPP problem Q1
+can be simplified as the penalizing form of (12)
+Q1 : min
+μi
+t,λi
+t
+CDUNE(μi
+t, λi
+t)
+s.t. μi
+t  K ∗ 0, ∥
+∥λi
+t
+∥
+∥∗  1 	(18)
+in which
+CDUNE(μi
+t, λi
+t) = − μi
+t
+(G˜pi
+t(st) − h)
++ ρ‖μi
+t
+G + λi
+t
+Rt(st)‖2
+2	
+︸ 	︷︷ 	︸
+penaltyterm
+(19)
+where ρ is a sufficiently large penalty parameter, e.g., ρ = 103.
+Due to strong convexity, (18) can be optimally solved via inexact
+block coordinate descent optimization, which updates μi
+t using
+gradient descent with λi
+t fixed, and vice versa.
+At the jth iteration of PIBCD, given the solution̂ μi
+t(j − 1)
+at the (j − 1)th iteration, the problem related to λi
+t is
+min
+λi
+t
+Ξj (λi
+t), s.t. ∥
+∥λi
+t
+∥
+∥∗  1 	(20)
+which is a quadratic minimization problem under norm ball
+constraints, with
+Ξj (λi
+t) = ‖̂μi
+t(j − 1)G + λi
+t
+Rt(st)‖2
+2.
+The associated one-step projected gradient descent update is
+λi
+t
+ ← Proj‖λi
+t‖ ∗ 1
+(
+λi
+t − εΔλi
+t Ξj (λi
+t)
+)
+(21)
+where ε is the step-size. With the updated λi
+t
+, the problem
+related to μi
+t is
+min
+μi
+t
+Θj (μi
+t)
+s.t . 	μi
+t  K ∗ 0 	(22)
+which is a quadratic minimization problem under box con-
+straints, with
+Θj (μi
+t) = ρ‖μi
+t
+G + λi
+t
+Rt(st)‖2
+2 − μi
+t
+(G˜pi
+t(st) − h).
+The associated one-step projected gradient descent update is
+μi
+t
+ ← Projμi
+t K∗ 0
+(
+μi
+t − εΔμi
+t Θj (μi
+t)
+)
+. 	(23)
+This completes one iteration. By settinĝ μi
+t(j) = μi
+t
+, we can
+proceed to solve the problem for the jth iteration. According
+to&nbsp;[41], the sequence {̂μi
+t(0),̂ μi
+t(1), · · · } generated by
+the above iterative procedure is convergent, and converges to
+the optimal solution of (18).
+To address the complexity issue while preserving inter-
+pretability, we propose a deep unfolding neural network to
+implement the point-LDF mapping. The detailed derivation is
+given below.
+2) Deep 	Unfolding 	Architecture: The 	sequence
+{̂μi
+t(0),̂ μi
+t(1), · · · } generated by the PIBCD can be viewed as
+sequential mappings
+̂
+μi
+t(0) g1
+−→̂ μi
+t(1) g2
+−→̂ μi
+t(2) · · · gJ
+−→̂ μi
+t(J). 	(24)
+These mappings {g1, g2, · · · } are all gradient mappings. More
+specifically, g only consists of gradients of quadratic functions,
+which are matrix multiplication operations. Consequently, each
+gi can be safely unfolded into neural network layers that also
+correspond to matrix multiplications. The required number of
+iterations J for PIBCD to converge determines the number of
+layers in the neural network. As such, deep unfolding takes a step
+towards interpretability by designing DNNs as learnt variations
+of iterative optimization algorithms.
+Based on the above observations, the architecture of the
+proposed DUNE is shown in Fig. 5. The first layer is an n × 32
+fully connected layer that reads the positions of M × H points in
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 8 of 21 --
+
+2812 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+Fig. 5. 	Structure of DUNE, which unfolds the PIBCD algorithm. DUNE is explainable, simple, and fast to train, and can be deployed across various scenarios
+without retraining, provided the robot’s shape remains unchanged.
+a batch manner from the point flow. Following the first fully con-
+nected layer, layer normalization and hyperbolic tangent func-
+tion (Tanh) activation are implemented. This layer is obtained by
+unfolding (21), which is a one-step gradient descent update pro-
+jected onto the l2 norm ball. The second layer is an 32 × 32 fully
+connected (FC) layer followed by rectified linear unit activation.
+This layer is obtained by unfolding (23), which is a one-step
+gradient descent update projected on the positive semidefinite
+cone (in the case of polygonal robots). By alternately repeating
+the first and second layers with 32 units alternatively (J = 3),
+the subsequent layers are constructed. Finally the output layer is
+a 32 × l FC layer to output̂ μi
+t, and the entire DUNE network is
+equivalent to unfolding the PIBCD method for solving Q1. This
+is because PIBCD is an algorithm that computes (21) and (23)
+alternatively, while DUNE is a network that computes unfolded
+layers of (21) and (23) alternatively. 5
+3) Loss Function Design: The neural network is trained
+using a labeled dataset derived from the PIBCD algorithm.
+Backpropagation is determined based on a loss function between
+the optimal solution, {̂μi
+t}, and the neural network’s solution,
+{μi
+t}. A naive choice of the loss function is the mean square
+error (MSE) between these two values. However, since the
+learnt {μi
+t} will be used in the subsequent motion planning as
+a regularizer for tackling the collision avoidance constraints,
+we must guarantee high accuracy of {μi
+t} in different vector
+5̂ λi
+t can be derived from output̂ μi
+t by the relationship in (12).̂ λi
+t =
+−̂ μi
+tGR(st).
+TABLE II
+HYPERPARAMETERS USED IN DUNE TRAINING
+directions and incorporate these MSEs into the loss functions.
+Based on these considerations, we formulate the loss function
+as follows:
+L( ˆ	μi, μi) = ‖̂μi − μi‖2
+2 + ‖fo(̂ μi) − fo(μi)‖2
+2
++ ‖fa(̂ μi) − fa(μi)‖2
+2 + ‖fb(̂ μi) − fb(μi)‖2
+2 	(25)
+where, fo(μi) = μi
+t
+(G˜pi
+t − h) is the objective function of
+problem (12). Functions fa(μi) = −μiGR
+t and fb(μi) =
+μiGR
+t ˜pi
+t − μih are associated with the neural regularizer
+function Cr , which will be introduced in Section V-B.
+4) DUNE Training: The hyperparameters for training the
+DUNE model are listed in Table II. For a robot with the given
+value [G, h] (decided by the shape size), the training process
+starts with generating Ng point positions ˜p randomly within a
+specific range [rl, rh] in each axis. Subsequently, Ng convex op-
+timization problems respecting to the variable μ are constructed
+by the known values of [G, h, ˜pi] and solved by the PIBCD
+algorithm or CVXPY ECOS, resulting in Ng optimal values μi∗.
+As such, each point position ˜pi has a one-to-one corresponding
+optimal solution μi, resulting in a labeled dataset T = {˜pi,̂ μi}
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 9 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2813
+Algorithm 1: Deep Unfolded Neural Encoder.
+for neural network training. The training process is conducted
+for e epochs with a batch size of Bn. The Adam optimizer is
+leveraged to update the network parameters using a learning rate
+of lr and decay rate of dr . In our experiment, the training process
+is conducted on a desktop computer with an AMD Ryzen 9 CPU
+and an NVIDIA GeForce GTX 4090 GPU. The training process
+takes approximately an hour to complete. The process is listed
+in Algorithm 1.
+Note that unlike typical deep learning models, which re-
+quire extensive data collection in real-world environments and
+may struggle with generalization due to the sim-to-real gap,
+our DUNE model is resilient to these challenges and can be
+trained rapidly because of its unique point representation and
+model-unfolded network structure. Furthermore, according to
+(12), the DUNE model is influenced solely by [G, h], which are
+determined by the shape size. Consequently, for a specific robot,
+the DUNE model can be deployed across various real-world
+environments without the need for retraining.
+B. Neural Regularized Motion Planner
+This section presents NRMP, which corresponds to solving
+the PRMPC problem Q2 with fixed M = {μi
+t} and L = {λi
+t}
+generated from the upstream DUNE. Owing to the efficient
+exact distance computation from DUNE, we can easily sort
+the importance of the obstacle points according to the distance.
+As such, we can reduce the computational complexity by only
+considering the M ′ closest points for the regularizer in each time
+step. This leads to the following problem:
+Q2 : 	min
+{S,U}∈F C0(S, U) + Cr (S, M, L)
+︸ 	︷︷ 	︸
+neuralregularizer
++ bk
+2
+t+H	∑
+h=t
+‖sh − sh‖2
+2
+︸ 	︷︷ 	︸
+proximalterm
+(26)
+where s is short for s[k−1] obtained from the last iteration of
+NeuPAN, and bk is the associated proximal coefficient at Neu-
+PAN iteration k. This subproblem aims to generate collision-free
+robot actions efficiently by LDF-integrated regularizers.
+1) Neural Regularizer: The regularization function based on
+(13) is
+Cr (S, M, L) = ρ1
+2
+t+H	∑
+h=t
+M ′
+∑
+i=0
+∥
+∥
+∥min(I(sh, μi
+h, λi
+h), 0)
+∥
+∥
+∥2
+2
++ ρ2
+2
+t+H	∑
+h=t
+M ′
+∑
+i=0
+∥
+∥
+∥E(sh, μi
+h, λi
+h)
+∥
+∥
+∥2
+2 .
+In particular, Cr has the following properties.
+i) Cr is a nonlinear but low-dimensional convex function
+of {st}.
+ii) Cr is a function of M = {μi
+t} and L = {λi
+t}, generated
+from the upstream neural encoder DUNE. That is why
+we call Cr “neural regularizer.”
+iii) In practice, based on the relationship between λi
+t and μi
+t
+guaranteed by DUNE, λi
+t = −μi
+tGR(st), Cr can be
+simplified by removing the penalty function E, i.e., by
+setting ρ2 = 0.
+Problem Q2 is a low-dimensional convex optimization pro-
+gram due to: convexity of norm function C0 in (10), linearity of
+F, and property (i) of Cr . Consequently, Q2 can be optimally
+solved via the off-the-shelf software for solving convex prob-
+lems, e.g., cvxpy ECOS. In practice, a static safety distance
+dmin may not be suitable for time-varying environments. As
+a consequence, dmin in Q2 needs to be dynamically adjusted.
+To achieve this goal, we propose to use a variable distance
+dt to replace dmin in penalty function I, where dt is within
+the range [dmin, dmax]. To encourage dt to approach dmin in
+highly confined spaces and to approach dmax in highly dy-
+namic environments, we propose a sparsity-induced distance
+regularizer C1(d) = −η ∑t+H
+h=t ‖dh‖1, where η is a weighting
+factor. As such, C1(d) introduces adaptation to collision [20].
+Consequently, this would involve manually tuning parameters
+P = {q, p, dmin, dmax, η} in C0, Cr , and C1. The next section
+will derive a learnable optimization method to fine tune P
+automatically.
+2) Learnable Optimization Network (LON): The weight pa-
+rameters in optimization problems are usually manually tuned,
+which is time-consuming and may not be optimal for chal-
+lenging scenarios. In order to enable automatic calibration of
+parameters in Q2 under new environments, we present a LON
+approach for solving Q2, which can learn from failures to find
+the proper parameters. The crux of LON is that it leverages
+differentiable convex optimization layers (cvxpylayers) [42]. As
+such, in contrast to traditional optimization solvers, LON offers
+the ability to differentiate through disciplined convex programs.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 10 of 21 --
+
+2814 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+Within these programs, parameters can be mapped directly to
+solutions, facilitating backpropagation calculations. Moreover,
+with cvxpylayers, the NRMP can be seamlessly integrated with
+the DUNE, as both of them support backpropagation, thereby
+enabling end-to-end training of the entire NeuPAN system.
+However, solving Q2 using LON is nontrivial, since cvxpy-
+layers require the optimization problem to satisfy disciplined
+parameterized program (DPP) form. To this end, this article
+proposes the following problem reconfiguration that recasts Q2
+into a DPP-friendly problem. In particular, to satisfy the DPP
+formats in [42], we reconfigure the non-DPP function C0 by
+introducing a set of DPP parameters {aγi
+t,bγi
+t}, which gives
+CDPP
+0 	(S, U) =
+t+H	∑
+h=t
+( ∥
+∥q ◦ sh −a γi
+h
+∥
+∥2
+2 + ∥
+∥p ◦ uh −b γi
+h
+∥
+∥2
+2
+)
+(27)
+where aγi
+h ← q ◦ sh and bγi
+h ← p ◦ u
+h are introduced as DPP
+parameters for backpropagation.6 On the other hand, we refor-
+mulate Cr in Q2 as
+CDPP
+r 	(S, U, L) = ρ1
+2
+H−1	∑
+h=0
+M	∑
+i=0
+∥
+∥min(IDPP(sh, μi
+h, λi
+h), 0)∥
+∥2
+2
++ ρ2
+2
+H−1	∑
+h=0
+M	∑
+i=0
+∥
+∥EDPP(sh, μi
+h, λi
+h)∥
+∥2
+2 	(28)
+where the DPP-reformulated I and E are
+IDPP = cγi
+ttt(st) −a ξi
+t − dt 	(29)
+EDPP = dγi
+t +c γi
+tRt(st) 	(30)
+with 	vector 	cγi
+t ← λi
+t
+,dγi
+t ← μi
+t
+G, 	and 	scalar 	aξi
+t ←
+λi
+t
+pi
+t + μi
+t
+h. 	Thus, 	the 	DPP 	parameters 	are 	P =
+{q, p, dmin, dmax, η, sh,aγi
+t,bγi
+t,cγi
+t,dγi
+t,aξi
+t }. 	Considering
+the 	impact 	on 	the 	generated 	behavior, 	we 	selected
+P ′ = {q, p, dmin, dmax, η}. as the learnable parameters in
+LON.
+With the above reconfiguration, problem Q2 becomes
+QDPP
+2 	: 	min
+{S,U}∈F CDPP
+0 	(S, U) + CDPP
+r 	(S, M, L) + C1(d)
++ bk
+2
+H−1	∑
+h=0
+‖sh − sh‖2
+2. 	(31)
+It can be proved that both CDPP
+0 	, CDPP
+r 	, and C1(d) satisfy the DPP
+regulation. Adding to the fact that other functions in set F are
+DPP-friendly, problem QDPP
+2 	is DPP compatible, whose param-
+eters can be optimized using the backpropagation. Specifically,
+a parameter, say x ∈ P ′, can be revised utilizing the gradient
+descent method, facilitated by a loss function L(P), as follows:
+x(k+1) = x(k) − α ∂L
+∂x (32)
+6 The symbol ← represents parameter substitution
+Algorithm 2: DPP-friendly NRMP.
+where α is the learning rate. The gradient is clipped within a
+range [gmin, gmax], with the maximum value of 1.0 to avoid the
+gradient explosion.
+3) Loss Function: The loss function L(P) is designed based
+on the cost function C0, Cr , and C1 presented in QDPP
+2 	and
+can be selected depending on a specific task. Particularly, the
+final loss function could be the combination of several atom
+loss functions: L(P ′) = ∑
+i=0 aiLi(P ′), where ai is the weight
+of the ith loss function. The key idea is to allow the LON to
+learn from failures to update the learnable parameters. Here, we
+provide three examples of the atom loss functions
+⎧
+⎨
+⎩
+L1(P ′) = ‖s − s ‖2
+2
+L2(P ′) = ‖u − u ‖2
+2
+L3(P ′) = −η ∑t+H
+h=t ‖dh‖1.
+1) If the robot strays from the destination, the L1(P ′) func-
+tion can be used to yield a larger q, and encourage the
+robot to return to the naive path.
+2) If the robot gets stuck in a congested environment, the
+L2(P ′) and L3(P ′) can be combined to yield a larger p
+but a smaller dmax , which creates an incentive for robot
+motion.
+3) If the robot collides with obstacles, the L1(P ′) and L3(P ′)
+can be combined to yield a smaller q, allowing the robot
+to temporarily leave the naive path, and a larger dmax
+producing more conservative movements.
+The NRMP block is summarized in Algorithm 2.
+C. Convergence and Complexity Analysis
+The entire NeuPAN procedure is summarized in Algorithm 3,
+which can be viewed as iterations between learning-based (i.e.,
+DUNE) and model-based (i.e., NRMP) algorithms. Specifically,
+given {S[k], U[k]} of state-action space at the kth iteration,
+NeuPAN generates the next-round solution {S[k+1], U[k+1]} as
+follows:
+{S[k], U[k]} DUNE
+−→ {M[k+1], L[k+1]} NRMP
+−→ {S[k+1], U[k+1]}.
+Consequently, starting from an initial guess {S[0], U[0]}, the
+sequence generated by NeuPAN is
+{S[0], U[0]} DUNE
+−→ {M[1], L[1]} NRMP
+−→ {S[1], U[1]}
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 11 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2815
+Algorithm 3: NeuPAN.
+DUNE
+−→ {M[2], L[2]} NRMP
+−→ {S[2], U[2]}
+DUNE
+−→ {M[3], L[3]} · · · . 	(33)
+Such model-based deep learning framework can be trained via
+end-to-end backpropagation. It can naturally exploit additional
+training data by adding neurons to DUNE and prior knowledge
+by adding constraints to NRMP.
+To see why NeuPAN works, the following theorem is estab-
+lished.
+Theorem 1: The sequence [{S[0], U[0]}, {S[1], U[1]}, · · · ] sat-
+isfies the following conditions.
+(i) Monotonicity: C[0]
+e2e ≥ C[1]
+e2e ≥ C[2]
+e2e ≥ · · · , where C[k]
+e2e =
+Ce2e(S[k], U[k], M[k], L[k]).
+(ii) Convergence: ‖C[k+1]
+e2e 	− C[k]
+e2e‖2 → 0 as k → ∞.
+(iii) Convergence to a critical point of Q.
+Proof: See Appendix C (see Supplementary Material). 	
+Part (i) of Theorem 1 states that adding the tightly-coupled
+feedback from the NRMP (i.e., motion) to the DUNE (i.e.,
+perception) is guaranteed to improve the performance of the
+NeuPAN system (under the criterion of solving P). Part (ii) of
+Theorem 1 means that we can safely iterate the loop, since the
+outputs converge and do not explode. Part (iii) of Theorem 1
+implies that the states and actions generated by NeuPAN must
+be at least a local optimal solution to Q, which is an equivalent
+problem to P. All the above insights indicate that the proposed
+algorithm has end-to-end mathematical guarantee, which is in
+contrast to all existing approaches.
+Based on Theorem 1, we can terminate NeuPAN until con-
+vergence. In practice, to save the computation time and enable
+Fig. 6. 	Three types of robot platforms used in our experiments: (a) ground
+mobile robot; (b) wheel-legged robot; (c) autonomous driving vehicle.
+real-time end-to-end robot navigation, we terminate the Neu-
+PAN iteration when the number of iterations reaches the limit,
+e.g., K = 3.
+Finally, we present the complexity analysis of NeuPAN. De-
+pending on the procedure listed in Algorithm 3, in each iteration,
+the scan flow is first generated from the scan data with a complex-
+ity of O(M H). Subsequently, DUNE consists of multiple neural
+layers at a computational cost of O(M HNn), where Nn is the
+number of neurons in the DUNE neural network. Next is the
+NRMP, which solves a DPP-based optimization problem with a
+complexity of O((H(n + 2))3.5). In summary, with the number
+of iterations required to converge being K, the total complexity
+of NeuPAN is O(K(M H(Nn + 1) + (H(n + 2))3.5)). It can
+be seen that the complexity is linear with M which corrobo-
+rates the facts that NeuPAN can tackle thousands of points in
+real-time.
+VI. EXPERIMENTS
+In this section, we present numerical results in an open source
+lightweight robot simulator, IR − SIM [43], to analyze the
+effectiveness and efficiency of NeuPAN. To further demonstrate
+the effectiveness and robustness of NeuPAN under practical set-
+tings, we also evaluate the performance of NeuPAN on different
+robot platforms in high-fidelity simulation environments and
+real-world test tracks.
+The adopted robot platforms include ground mobile robot,
+wheel-legged robot, and passenger autonomous vehicle, as de-
+picted in Fig. 6.
+1) The ground mobile robot shown in Fig. 6(a) is a cus-
+tomized, multimodal, small-size robot platform, whose
+motion kinematics can be switched between the differ-
+ential and Ackermann modes.
+2) The wheel-legged robot shown in Fig. 6(b) is a mid-size
+platform that integrates the functionalities of both wheeled
+and legged robots, thus enjoying the joint benefits of high-
+mobility and terrain-adaptability in complex scenarios.
+Compared to the ground robot in Fig. 6(a), wheel-legged
+robots involve higher motion uncertainties (e.g., body os-
+cillation), and thus requires more precise control to ensure
+stability.
+3) The passenger autonomous vehicle shown in Fig. 6(c) is
+a 4.675 m × 1.77 m × 1.5 m large-size vehicle platform
+for urban driving.
+All these platforms are equipped with LiDAR systems (2-D
+or 3-D), enabling them to obtain the point representation of the
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 12 of 21 --
+
+2816 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+TABLE III
+PERFORMANCE C OMPARISON OF NEU PAN AND RDA IN THE IR-SIM
+environment. Localization of these robots in unknown environ-
+ments is realized by Fast-lio2 [44] or Lego-Loam [45], [46]. All
+the experiments are conducted without any prior map, relying
+solely on goal positions, desired speed, and onboard LiDAR for
+autonomous navigation. Note that in real-world experiments,
+the moving obstacles (e.g., humans) have low speed (less than 1
+m/s), and we treat these obstacle points from laser scans as fixed
+during each MPPC horizon. 7
+We adopt the following performance metrics for evaluations.
+1) Success Rate: Success is defined as the robot completing
+the navigation task without any collision. This includes
+two conditions, i.e., route completion and collision avoid-
+ance. Route completion is considered a failure if the navi-
+gation time exceeds a predefined threshold (indicating that
+the robot gets stuck). Meanwhile, any collision between
+the robot and obstacles is also considered a failure. A sim-
+ilar definition of success is presented in [6]. The success
+rate is the ratio of successful cases out of the total number
+of test trials.
+2) Navigation Time: Navigation time refers to the amount
+of time for the robot to successfully complete the navi-
+gation task. It is measured by counting the time steps in
+the simulator or recording the timestamps in real-world
+experiments.
+3) Average Speed: Average speed is calculated over the entire
+navigation process, as recorded by the simulator or the
+odometry in real-world experiments.
+Higher success rate indicates better collision avoidance ability
+and effectiveness. Shorter navigation time and higher average
+speed indicate higher mobility and efficiency. To quantify the
+level of navigation difficulty in cluttered environments, we de-
+fine a metric termed the degree of narrowness (DoN), as follows:
+DoN = robot width
+minimum passable space width . 	(34)
+Higher DoN (closer to 1) means a narrower space and a higher
+difficulty for robot pass through; and vice versa.
+A. Experiment 1: Verification of NeuPAN in IR-SIM
+1) Comparison With RDA: We test and compare the per-
+formance of NeuPAN and RDA [20] using differential and
+Ackermann robots in three different scenarios composed of 11
+randomly generated convex, nonconvex, and dynamic obstacles
+Fig. 7. 	Scenarios with randomly generated obstacles used to evaluate NeuPAN
+and RDA. (a) Convex. (b) Nonconvex. (c) Dynamic.
+(speed: 1 m/s). To ensure fair comparisons between NeuPAN
+and RDA, the robots equipped with 2-D LiDAR are given the
+same start (i.e., [-1, 25]) and goal (i.e., [50, 25]) positions,
+with a desired speed of 4 m/s, as shown in Fig. 7. Quantitative
+comparison results over 100 trials are listed in Table III. We
+evaluate the success rate, average navigation time, and average
+speed for both NeuPAN and RDA. The results demonstrate that
+when handling the convex obstacles, the success rates of RDA
+and NeuPAN are close to each other under both differential and
+Ackermann kinematics. However, when handling nonconvex
+obstacles, RDA achieves the success rates of 59% and 71%,
+while NeuPAN achieves the success rates of 73% and 82%,
+under Ackermann and differential kinematics, respectively. This
+indicates that NeuPAN outperforms RDA by over 19% in terms
+of the success rate for nonconvex obstacles. This result demon-
+strates the importance of directly mapping raw points to actions
+via NeuPAN. This also quantitatively illustrates how much
+navigation performances could be improved by representing
+obstacles as dense points. In addition, NeuPAN achieves higher
+moving speed (6.0% improvement) and less navigation time
+(11.27% reduction) in all the simulated scenarios as shown in
+Table III, which verifies the high efficiency of NeuPAN. More
+demonstrations in IR-SIM can be found in Appendix D (see
+Supplementary Material).
+2) Impact of Obstacle Velocity: To show the effectiveness
+of our approach in handling moving obstacles with known
+point velocities, we compare the performance of NeuPAN and
+NeuPAN-vel (incorporating point velocities) in the dynamic
+7 In such a case, the movements of obstacles within a short MPPC horizon (i.e.,
+tens of milliseconds) is negligible, and treating obstacles as fixed objects does not
+impact the system performance. Furthermore, our high control frequency enables
+the robot to perform agile behaviors by reacting to changes in the positions of
+low-speed obstacles.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 13 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2817
+TABLE IV
+PERFORMANCE C OMPARISON OF NEU PAN AND NEU PAN-VEL IN THE IR-SIM
+scenario shown in Fig. 7(c). We consider four different scenarios,
+with the velocities of obstacles ranging from 1 to 4 m/s, and eval-
+uate the performance metrics of success rate, average navigation
+time, and average speed. All the results in Table. IV are obtained
+by averaging 100 trials. It can be seen that the performance
+of NeuPAN and NeuPAN-vel is comparable in lower-speed
+scenarios (e.g., obstacles with velocities 1 and 2 m/s). However,
+in the high-speed scenarios (e.g., obstacles with velocities 3 and
+4 m/s), NeuPAN-vel achieves higher success rates (with 10.96%
+and 35.42% improvements in the 3 and 4 m/s cases, respectively)
+and shorter navigation time (with 1.09% and 3.47% reductions
+in the 3 and 4 m/s cases, respectively), which demonstrates the
+effectiveness of incorporating point velocities into NeuPAN for
+handling moving obstacles.
+3) Verification of Fine-Tuning: The proposed NeuPAN is
+able to learn from rewards provided by the environments, thereby
+handling domain variations (e.g., sensor noises) through au-
+totuning. To see this, we consider a corridor scenario with
+DoN=0.67. Given start and goal positions [−5, 20] and [75, 20],
+respectively, the associated result is shown in Fig. 8. Initially,
+we configure NeuPAN with improper parameters and the robot
+experiences a collision in episode 0 [i.e., the first subfigure
+of Fig. 8(a)]. By back-propagation of failure using the loss
+function L3(P ′), the robot is able to make progress after 27
+and 38 training episodes [i.e., the second and third subfigures of
+Fig. 8(a)]. After 54 episodes of training, the robot successfully
+navigates through the scenario with proper parameters [the last
+subfigure of Fig. 8(a)].
+Subsequently, we test the well-trained NeuPAN in the same
+corridor scenario, but the robot LiDAR now involves sensor
+noises (i.e., Gaussian noise with standard deviation of 0.2 added
+to the ranging measurements). While the well-trained NeuPAN
+has the ability to tackle the noise-free case and pass the corridor,
+it struggles under the sensor noises and collides with obstacles,
+as shown in the left-hand side of Fig. 8(b). However, if we
+continue training NeuPAN for another 12 episodes, the robot
+again navigates through the corridor. Even if the sensor noise
+is too large, causing the inner corridor becomes impassable,
+NeuPAN can still find an alternative outer path [right-hand side
+of Fig. 8(b)]. This demonstrates the adaptability of NeuPAN in
+handling domain variations.
+The average training loss over the number of episodes is
+shown in Fig. 8(c). It can be seen that the loss decreases rapidly
+and converges to the minimal value under both perfect and
+noisy cases, which corroborates Fig. 8(a) and (b), and shows
+that the training speed is fast. This is due to the model-based
+Fig. 8. 	Robot trajectories and training loss change over episodes. (a) Robot
+trajectories with a noise-free equipped LiDAR. (b) Robot trajectories with
+LiDAR range perturbed by Gaussian noise (mean = 0, variance = 0.2).
+(c) Change of loss over episodes.
+learning nature of NeuPAN, which tunes only a small number
+of learnable parameters through back propagation as mentioned
+in Section V-B.
+B. Experiment 2: Validation of DUNE on Open Datasets
+In this section, real-world experiments are presented to verify
+the efficacy of our proposed DUNE block of NeuPAN as well
+as its advantage over existing methods adopting inexact dis-
+tances (see Supplementary Material Appendix E). We consider
+two open-source datasets: 1) KITTI [47], which is a popular
+real-world urban driving dataset [see Fig. 9(a)]; 2) SUSCAPE,8
+which is a large-scale multimodal dataset with more than 1000
+scenarios. This SUSCAPE dataset is collected and processed
+8 Online. Available: https://suscape.net/home.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 14 of 21 --
+
+2818 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+Fig. 9. 	Comparison of distance errors on KITTI and SUSCAPE datasets. (a) Object detection results by Pointpillars on KITTI. Blue and red boxes denote the
+detected result and the ground truth, respectively. (b) Perfect object detection results on SUSCAPE, where all boxes are labeled by human experts. (c) Average
+distance errors of cd, sd, and dd on KITTI and SUSCAPE. (d) Inference time comparison between DUNE and Pointpillars. (a) KITTI dataset. (b) SUSCAPE
+dataset. (c) Distance errors comparison. (d) Inference time comparison.
+based on the autonomous vehicle platform in Fig. 6(c). We
+calculate the minimum distance between the ego-vehicle and
+all surrounding objects based on three different rules: center
+point distance (cd), full shape set distance (sd), and our DUNE
+distance (dd). The computations of cd and sd based on the boxes
+of the object detectors are denoted by cd_d and sd_d. Here, we
+choose a celebrated point based detector Pointpillars [48], whose
+accuracy achieves 74.31% (moderate) for the car detection task.
+The distance error is defined by the difference between the
+calculated distance and the ground truth distance (computed
+based on the raw point cloud provided by the dataset). It can
+be seen from Fig. 9(a) and (c) that the distance error of DUNE
+block of NeuPAN is significantly smaller than the errors of the
+other approaches, which concisely quantify the benefit brought
+by direct point robot navigation. As such, we can effectively
+overcome the detection inaccuracies inherent in conventional
+object detection algorithms.
+Qualitative results in the SUSCAPE dataset are shown in
+Fig. 9(b) and the associated quantitative results are shown in
+Fig. 9(c). The results show that our DUNE distance still has the
+smallest error. In addition, the cd_d and sd_d errors increase
+compared with the result in KITTI. This is due to the lack
+of the generalizability of the learning-based object detector. In
+contrast, our DUNE block of NeuPAN can be directly applied
+across different datasets. Finally, one may wonder whether we
+can reduce this distance error by replacing Pointpillars with other
+highly accurate object detectors. To this end, we conduct another
+experiment of considering a perfect object detector with 100%
+accuracy, i.e., we directly use the ground truth bounding boxes
+labeled by human experts as its outputs. The computations based
+on this detector can be denoted by cd_g and sd_g. It can be seen
+from Fig. 9(c) that the errors of cd_g, sd_g are smaller than that
+of cd_d and sd_d due to the improvement in object detection.
+However, these errors are still much larger than the dd error. This
+is because there exist a gap between the shapes of a box and a
+nonconvex object.
+The inference latencies of DUNE block of NeuPAN and
+Pointpillars on two datasets (tested using the same computer
+platform) are shown in Fig. 9(d). It can be seen that the inference
+time of DUNE achieves 4 ms in KITTI dataset and 10 ms in
+SUSCAPE dataset, respectively, which is much faster than the
+16 and 23 ms inference time of Pointpillars. This is because
+DUNE is a fully explainable lightweight neural network with
+only six fully connected layers, which is much more efficient
+than Pointpillars network with deep convolution layers.
+Fig. 10. 	Inference time comparison of DUNE and the optimization solver
+ECOS with varying number of input points.
+To analyze the scalability of DUNE block of NeuPAN, its
+computation time over the number of points is shown in Fig. 10.
+For comparison, we also implement a benchmark scheme
+ECOS [40], which is an off-the-shelf optimization solver for
+solving problem (12). All the tests are performed on a computer
+equipped with an AMD Ryzen 9 CPU. It can be seen that the
+proposed DUNE is able to handle 1 million points within 0.2 s.
+In contrast, the baseline approach ECOS requires more than
+650 s for handling 1 million points, which is significantly higher
+than that of DUNE. This demonstrates that DUNE reduces the
+computation time by over 1000x when the number of input
+points is in the range of thousands or more. Such significant
+acceleration is due to the model-based learning nature of DUNE,
+which corroborates the theory and methodology in Section V-A.
+C. Experiment 3: Ground Mobile Robot Navigation
+1) Dynamic Environment: We adopt Gazebo [49], a widely
+recognized open-source 3-D robotics simulator, to demonstrate
+the dynamic collision avoidance capability of our approach by
+using onboard 2-D LiDAR. The experimental setup is illustrated
+in Fig. 11(a) and (b), where the robot, operating in differential
+steering mode, must patrol between two given checkpoints as
+fast as possible while preventing itself from being surrounded
+and collided by massive adversarial moving obstacles. The
+obstacles with cylinder and nonconvex shapes are randomly
+placed within a region of interest and exhibit reciprocal col-
+lision avoidance behavior with speed adjustments (max speed:
+0.1 m/s). We compare our method with the RL-based method
+AEMCARL [24] and optimization-based method RDA [20]. All
+these methods adopt a desired speed of 0.3 m/s.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 15 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2819
+TABLE V
+PERFORMANCE C OMPARISON OF NEU PAN, RDA, AND AEMCARL IN GAZEBO
+Fig. 11. 	Trajectory and speed profile comparisons of NeuPAN, RDA,
+and AEMCARL in Gazebo with cylinder and nonconvex moving obstacles.
+(a) Cylinder moving obstacles. (b) Nonconvex moving obstacles. (c) AEMCARL
+(cylinder obstacles). (d) NeuPAN (cylinder obstacles). (e) NeuPAN (nonconvex
+obstacles). (f) RDA (cylinder obstacles). (g) RDA (nonconvex obstacles).
+Experimental results based on 50 trials with the number
+of cylinder and nonconvex obstacles ranging from 15 to 20
+are presented in Table V. It can be seen that for scenarios
+with cylinder obstacles, NeuPAN improves the success rates
+by 4.69% and 11.60% compared with RDA and AEMCARL.
+Moreover, NeuPAN reduces the navigation time by 12.53%
+and 35.80%, and improves the mobility speed by 5.07% and
+12.36%, relative to RDA and AEMCARL, respectively. On the
+other hand, for scenarios with nonconvex obstacles, NeuPAN
+improves the success rate by 38.19%, reduces the navigation
+time by 16.33%, and improves the mobility speed by 5.08%,
+compared to RDA. Note that AEMCARL fails in this situation,
+since AEMCARL is developed based on the point-mass model
+(point with inflated radius), which is not applicable to nonconvex
+obstacles.
+It can be seen that none of the simulated schemes achieves
+100 % success rate. These failures happen due to two reasons.
+First, the robot’s laser scanner has a limited field of view, which
+may fail to detect moving obstacles outside its coverage area.
+Consequently, the robot might collide with these undetected
+obstacles before it can react. Second, obstacles are densely
+packed and moving within a confined area. Their behaviors are
+randomized and they do not actively avoid the ego robot, as
+demonstrated in [6]. As a result, there are scenarios where the
+robot has no viable escape path. For example, if the robot is
+completely surrounded by obstacles, a collision is inevitable
+even if the robot remains stationary, as the obstacles would
+converge toward it.
+The robot trajectories and speed profiles of the three schemes
+are shown in Fig. 11. It can be seen that AEMCARL tends to
+take detours in front of crowded obstacles due to its conservative
+neural policy and its over-simplified model treating obstacles as
+balls, resulting in longer navigation times [see Fig. 11(c)]. On
+the other hand, RDA tends to collide with obstacles since it
+computes inexact robot-obstacle distances based on the poly-
+gons converted from laser scans, which introduces inevitable
+errors in representing nonconvex obstacles, leading to higher
+failure rates [see Fig. 11(f) and (g)]. Lastly, NeuPAN utilizes the
+raw points to represent obstacles, which gets rid of the distance
+errors involved in AEMCARL and RDA. By directly mapping
+the raw points to actions, NeuPAN achieves better navigation
+performance in complex environments with arbitrarily shaped
+obstacles [see Fig. 11(d) and (e)].
+2) Structured Real-World Testbed: We conduct the experi-
+ments in the structured real-world testbed (i.e., a sandbox with
+size 4 m ×4 m) to demonstrate the high accuracy of NeuPAN, as
+shown in Fig. 12. The robot is tasked to race within the track as
+fast as possible without any collision. We set up challenges 1–3
+with different DoN s, by varying the positions of 20 cm×20 cm
+cubes. The narrowest spaces in challenges 1–3 are 32, 30, and
+25 cm, respectively. Taking the robot width into account, the re-
+maining margins are 10, 8, and 3 cm, respectively, corresponding
+to the DoN of 0.52, 0.58, and 0.79. These challenges represent
+different passing difficulties and are used to evaluate the limit of
+navigation accuracy. We also set up challenge 4 with a dynamic
+obstacle, where we adopt another mobile robot to challenge the
+ego robot inside the track.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 16 of 21 --
+
+2820 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+TABLE VI
+PERFORMANCE C OMPARISON OF NEU PAN, TEB, AND MANUAL C ONTROL IN THE STRUCTURED R EAL-WORLD TESTBED
+Fig. 12. 	Trajectory comparison of TEB, manual, and NeuPAN control in a
+structured real-world testbed. (a) Configurations in the structured real-world
+testbed. (b) TEB control. (c) Manual control. (d) NeuPAN control.
+We compare the performance of our approach NeuPAN with
+the celebrated motion planner TEB [3] and manual control in
+terms of route completion, navigation time, and average speed.
+From Fig. 12, it is also observed that the TEB method requires
+a prebuilt occupancy grid map. In contrast, our approach only
+requires the goal state information, i.e., four checkpoints at the
+corners. The desired speed is set to be 1 m/s. Quantitative results
+are listed in Table VI.
+It can be seen that NeuPAN successfully passes all challenges
+and finishes the track with the shortest time of 12.49 s and highest
+speed of 0.788 m/s, approaching the maximum speed 1 m/s of
+the robot. This indicates that NeuPAN achieves a limit of 3 cm
+control accuracy in this task. In contrast, TEB gets stuck in front
+of challenge 3 (3 cm-margin passage), failing in completing
+the trip. This is because TEB relies on occupancy grid maps
+and the grid representation of obstacles leads to degradation of
+navigation accuracy, making it inadequate for highly accurate
+navigation. By incrementally varying the margin in challenge
+3, the TEB method passes challenge 3 at a margin of 7 cm,
+which represents its navigation accuracy limit. It can be seen
+that our method improves the accuracy by over 2× compared to
+Fig. 13. 	Robot navigation in an unstructured cluttered environment. Green
+straight line is the naive straight path. Purple points are the raw 2-D LiDAR
+data. Red line is the optimal receding path. Red points are the input obstacle
+points. 3-D LiDAR is used for localization. The narrowest space [e.g., (5)] has
+only about 3-cm tolerance with DoN = 0.88.
+TEB. Lastly, by adopting manual control, it is also possible to
+control the robot through all these challenges. But due to the need
+to carefully avoid collision at narrow spaces, manual control
+leads to longer navigation time (23.95 s) and lower moving
+speed (0.396 m/s / 0.165), compared to our method. The results
+corroborate to the effectiveness of our explainable end-to-end
+framework in the real-world experiment with ubiquitous uncer-
+tainties.
+3) Unstructured Real-World Environment: The above exper-
+iments have considered structured environments, where the ob-
+stacles are easy to be detected (e.g., box and wall) and classified.
+However, for extensive real-life applications (e.g., housekeeper
+machine), the target scenarios are highly unstructured and disor-
+dered. To this end, we further test NeuPAN in a highly cluttered
+laboratory as shown in Fig. 13. The laboratory is filled with
+sundries, such as chairs, sandboxes, water bottles, and equip-
+ment, which are unrecognizable objects with arbitrary shapes.
+The robot needs to patrol in this environment at a desired speed
+of 0.5 m/s without a pre-established map. First, we invite ten
+human pilots to manually control the robot. But unfortunately,
+all of them fail, resulting in either robot collisions or time out
+due to insufficient speed. Then, we adopt NeuPAN to handle this
+situation. This time, the task is accomplished, with the associated
+trajectories (marked as blue lines) illustrated in Fig. 13. The
+narrowest place has only about 3-centimeters tolerance with
+DoN = 0.88 [see Fig. 13 (5)]. But owing to the exact distance
+perception from DUNE and high accurate motion from NRMP,
+our NeuPAN method is able to navigate the robot through this
+challenging scenario with only onboard LiDAR in real time.
+The trajectories and speed profiles of NeuPAN and TEB
+during this task are shown in Fig. 14. We build the occupancy
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 17 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2821
+Fig. 14. 	Trajectory, linear, and angular speed profiles of the agile mobile
+robot during the laboratory navigation task. (a) Trajectories in the grip map.
+(b) Trajectory with speed. (c) Linear speed. (d) Angular speed.
+Fig. 15. 	Wheel-legged mapless navigation in the office. (a) Doorway. (b) Gap.
+(c) Blocker. (d) Return.
+grid map by Cartographer [50], which is a celebrated SLAM
+algorithm, for TEB to plan its trajectory, as shown in Fig. 14(a).
+The TEB trajectory (marked in yellow) fails in the narrow space
+because of the inevitable errors caused by the limited resolution
+of grid map. Fig. 14(b)–(d) illustrates the successful trajectory
+of NeuPAN and its associated linear and angular speed profiles.
+It can be seen that the linear speed fluctuates around the target
+speed 0.5 m/s and the angular speed is rigorously constrained
+within the range [−3.14, 3.14] rad/s, which achieves a stable and
+bounded control policy.
+D. Experiment 4: Wheel-Legged Robot Mapless Navigation
+In this section, we validate NeuPAN on a medium-size robot
+platform, i.e., the wheel-legged robot as mentioned in Fig. 1,
+to conduct autonomous mapless navigation and dense mapping
+tasks in an unknown office building, as illustrated in Fig. 15.
+The naive path is generated by connecting the straight line
+between the manually set goal states without consideration of
+the obstacles in the environment. Fast-lio2 [44] is employed for
+real-time mapping of the environment and localization of the ego
+robot. Note that the narrowest space has a DoN value of 0.92. It
+can be seen from Fig. 15 that there exist 3 challenges between
+the starting and end points [the same position in Fig. 15(d)]: 1)
+passing a narrow doorway [see Fig. 15(a)]; 2) avoiding arbitrary
+obstacles [the potted plant in Fig. 15(b)]; 3) circumventing
+adversarial humans who suddenly rush over to block the way [see
+Fig. 15(c)]. Due to the precise actions afforded by NeuPAN, the
+wheel-legged robot successfully conquers all these challenges.
+This experiment demonstrates the efficacy and robustness of our
+approach in enhancing operational capabilities of wheel-legged
+robots. The changes over time including the trajectory, linear
+speed, and angular speed, are shown in Fig. 16. It is clear that
+Fig. 16. 	Trajectory, linear, and angular speed change of the wheel-legged robot
+during the mapless navigation task. (a) Trajectory with linear speed change.
+(b) Linear speed. (c) Angular speed.
+Fig. 17. 	Trajectory comparison of NeuPAN and Falco in the real-world
+confined space.
+the wheel-legged robot succeeds in following the goal states and
+returning to the starting point. The linear speed fluctuates around
+the desired speed 0.6 m/s, but is rigorously controlled below
+1 m/s (the maximum speed requested by the user). Similarly,
+the angular speed is rigorously controlled between −3.14 and
++3.14 rad. This result show that our approach is constraints
+guaranteed due to the interpretability and hard-bounded con-
+straints in NRMP block of NeuPAN, which is in contrast to
+learning-based solutions that may output uncertain motions.
+To further demonstrate the effectiveness of our approach
+operating in the real world, we conduct a quantitative experiment
+to compare the performance of NeuPAN and Falco [19]. The
+task is to navigate the wheel-legged robot along a straight
+trajectory in a highly confined space (DoN=0.89), as shown
+in Fig. 17. It can be seen that NeuPAN successfully navigates
+the robot through the narrow space, reaching the goal smoothly.
+In contrast, the Falco method gets stuck in front of the narrow
+passage. This is because Falco converts the LiDAR points into
+voxels for collision avoidance and determines the trajectories
+by maximizing the probability to reach the goal. The point vox-
+elization and probabilistic sampling operations result in degra-
+dation of navigation accuracy. Quantitative results are shown in
+Table VII. It can be seen that NeuPAN improves the DoN (i.e.,
+navigation accuracy) from 0.79 to 0.89, corresponding to over
+12.6% DoN gain and 2x accuracy improvement compared with
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 18 of 21 --
+
+2822 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+TABLE VII
+PERFORMANCE C OMPARISON OF NEU PAN AND FALCO IN THE R EAL-WORLD C ONFINED SPACE
+Fig. 18. 	Passenger vehicle navigation in Carla. (a)–(c) Illegally parked vehi-
+cles block the road, leaving only a narrow passable space (DoN = 0.97). (d)–(f)
+Randomly generated traffic flow. (g)–(i) Challenging cases in the traffic flow.
+Fig. 19. 	Real-world experiment of passenger vehicle navigation in the parking
+lot with static obstacles. (a) Start point. (b) Avoid boxes. (c) Avoid mannequins.
+Falco. Furthermore, compared to Falco under the same challenge
+(DoN=0.79), NeuPAN achieves higher moving speed (32.5%
+improvement) and shorter navigation time (29.9% reduction).
+E. Experiment 5: Passenger Vehicle Navigation
+In this subsection, we validate NeuPAN on a large-size
+passenger vehicle platform. Compared to the aforementioned
+robots, the vehicle has a larger value of speed (e.g., 10–50 km/h)
+and minimum turning radius (i.e., 6 m). Therefore, existing
+solutions for passenger vehicles adopt a larger safety distance
+(e.g. 1 m), and vehicles often stop in front of confined spaces.
+In the following experiments, we will show that NeuPAN can
+overcome the above drawbacks.
+1) Simulated Environment: We employ 	CARLA [51], a
+high-fidelity simulator powered by unreal engine, to create a
+virtual parking lot scenario in Fig. 18. A 128-line 3-D LiDAR
+mounted on top of the vehicle provides real-time measurements
+of the environment. The task is to navigate the vehicle from
+zone A to zone B, and consists of two phases. In the first phase,
+as shown in Fig. 18(c), illegally parked vehicles block the way
+with DoN = 0.95. But due to the end-to-end feature, NeuPAN
+successfully finds the optimal actions under the kinematics
+constraints in real time, and the successful trajectory is shown in
+Fig. 18(a)–(c). In the second phase, as shown in Fig. 18(d)–(f),
+an adversarial dynamic traffic flow is generated to simulate the
+real world adversarial or even accidental traffics. For instance,
+in Fig. 18(e), a dangerous obstacle vehicle crash into our ego
+vehicle. After the crash moment, NeuPAN generates an expert-
+driver-like steering and accelerating action, which rehabilitates
+the vehicle from a crash and makes a timely turn. Fig. 18(g)–(i)
+illustrates other challenging cases under the dynamic traffic
+flows. Interestingly, Fig. 18(h) presents an extreme case where
+the gap is too narrow for any existing methods to pass. This
+is because the detected boxes are slightly bigger than the actual
+objects, making the width of the remaining drivable area smaller
+than the width of ego vehicle. However, our methodology makes
+impassable passable, by maneuvering the vehicle pass through
+this challenging case successfully, as shown in Fig. 18(h). This
+already exceeds human-level driving, as tested by our volunteer
+human drivers.
+2) Real World Environment: In existing works, numerous
+methodologies, such as end-to-end RL, have demonstrated great
+potential in simulated environments. Nevertheless, these ap-
+proaches face difficulties when applied to real-world scenarios
+due to the sim-to-real gap. Real-world testing can also verify
+the robustness of NeuPAN since hardware uncertainties (e.g.,
+noises, impairments) are now considered.
+First, we test the vehicle with a 128-line LiDAR in the parking
+lot, as shown in Fig. 19. Unlike the wide-open environment on
+the road, the parking lot leaves less space for the vehicle to
+pass (DoN=0.93). Existing solutions that adopt object detection
+or occupancy grids are prone to take a detour or get stuck.
+In contrast, NeuPAN successfully controls the vehicle to move
+with an S-shaped trajectory to avoid boxes and mannequins as
+illustrated in Fig. 19(a)–(c).
+Second, we conduct a simple yet specially designed experi-
+ment to validate the performance of NeuPAN. In this challenge,
+the vehicle needs to pass an extremely narrow passage with a
+width of 1.82 m within a certain time budget (corresponding to
+an average speed of 5 km/h). As the vehicle width is already
+1.77 m, there is only about 5 cm tolerance (DoN=0.97). We
+compare our NeuPAN with: 1) hybrid A star implemented by
+Autoware [52], [53], a state-of-the-art open-source autonomous
+driving solution, and 2) human driving. First, it can be seen that
+even under a DoN close to 1, our NeuPAN solution successfully
+navigates the vehicle through the gap at a speed of 7 km/h, as
+shown in Fig. 20(a). Second, the human driver is very likely to
+fail given a speed of 5 km/h. Only when we reduce the speed
+to a lower value (e.g., 2 km/h) can the human driver tackle
+this situation by careful observations, as shown in Fig. 20(b).
+Lastly, the Autoware solution, i.e., hybrid A star, converts the
+LiDAR scans into occupancy grids, as shown in Fig. 20(c). This
+approach treats the narrow gap as impassable, thereby generating
+alternative directions for detouring. In contrast, our NeuPAN
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 19 of 21 --
+
+HAN et al.: NEUPAN: DIRECT POINT ROBOT NAVIGATION WITH END-TO-END MODEL-BASED LEARNING 	2823
+Fig. 20. 	Real-world experiment of passenger vehicle navigation through a
+narrow passage (DoN = 0.97). (a) NeuPAN succeeds at 7 km/h. (b) Human
+driver fails at 5 km/h. (c) Trajectory, linear speed, and steering angle of the
+Hybrid A star guided passenger vehicle. (d) Trajectory, linear speed, and steering
+angle of the NeuPAN guided passenger vehicle. (a) NeuPAN control (success).
+(b) Human driving (collision). (c) Hybrid a star (Grid map). (d) NeuPAN (Point
+cloud).
+solution directly utilizes the LiDAR points as input, achieving
+higher accuracy and successfully finding the optimal path, as
+illustrated in Fig. 20(d). The above experiments demonstrate the
+advantage of the proposed framework in extremely cluttered en-
+vironments. This advantage makes our approach very promising
+in handling various difficult cases.
+VII. CONCLUSION
+This article proposes NeuPAN, an end-to-end model-based
+learning approach for direct point robot navigation. A novel
+tightly coupled perception-to-control framework, including
+DUNE and NRMP, is developed to directly map the raw obstacle
+points to the robot actions without error propagation. Owing to
+the interpretable deep unfolding neural network, DUNE can be
+trained to convert obstacle points to LDFs rapidly. The output
+distance features are embedded as neural regularizers to gen-
+erate collision-free and time-efficient robot actions by NRMP,
+represented by differentiable convex optimization layers. Ex-
+haustive experiments on multiple robot platforms in diverse
+scenarios are conducted to validate NeuPAN, which show that
+NeuPAN outperforms existing state-of-the-art approaches with
+over 2x accuracy improvement, reduced navigation time, higher
+average speed, better robustness and generalization capabilities.
+Since NeuPAN generates perception-aware and physically inter-
+pretable motions in real-time, it empowers autonomous systems
+to work in cluttered environments that are previously considered
+impassable, triggering new applications, such as cluttered-room
+housekeeping and limited-space operating.
+REFERENCES
+[1] X. Zhang, A. Liniger, and F. Borrelli, “Optimization-based collision avoid-
+ance,” IEEE Trans. Control Syst. Technol., vol. 29, no. 3, pp. 972–983,
+May 2021.
+[2] S. Kousik, B. Zhang, P. Zhao, and R. Vasudevan, “Safe, optimal, real-time
+trajectory planning with a parallel constrained Bernstein algorithm,” IEEE
+Trans. Robot., vol. 37, no. 3, pp. 815–830, Jun. 2021.
+[3] C. Rösmann, F. Hoffmann, and T. Bertram, “Kinodynamic trajectory
+optimization and control for car-like robots,” in Proc. IEEE/RSJ Int. Conf.
+Intell. Robots Syst., 2017, pp. 5681–5686.
+[4] B. Zhou, J. Pan, F. Gao, and S. Shen, “Raptor: Robust and perception-aware
+trajectory replanning for quadrotor fast flight,” IEEE Trans. Robot., vol. 37,
+no. 6, pp. 1992–2009, Dec. 2021.
+[5] R. Han et al., “Reinforcement learned distributed multi-robot navigation
+with reciprocal velocity obstacle shaped rewards,” IEEE Robot. Automat.
+Lett., vol. 7, no. 3, pp. 5896–5903, Jul. 2022.
+[6] C. Chen, Y. Liu, S. Kreiss, and A. Alahi, “Crowd-robot interaction: Crowd-
+aware robot navigation with attention-based deep reinforcement learning,”
+in Proc. Int. Conf. Robot. Automat., 2019, pp. 6015–6022.
+[7] T. Fan, P. Long, W. Liu, and J. Pan, “Distributed multi-robot collision
+avoidance via deep reinforcement learning for navigation in complex
+scenarios,” Int. J. Robot. Res., vol. 39, no. 7, pp. 856–892, 2020.
+[8] R. Han, S. Chen, and Q. Hao, “Cooperative multi-robot navigation in
+dynamic environment with deep reinforcement learning,” in Proc. IEEE
+Int. Conf. Robot. Automat., 2020, pp. 448–454.
+[9] J. Tordesillas, B. T. Lopez, M. Everett, and J. P. How, “Faster: Fast and
+safe trajectory planner for navigation in unknown environments,” IEEE
+Trans. Robot., vol. 38, no. 2, pp. 922–938, Apr. 2022.
+[10] Z. Zhang, Y. Zhang, R. Han, L. Zhang, and J. Pan, “A generalized
+continuous collision detection framework of polynomial trajectory for
+mobile robots in cluttered environments,” IEEE Robot. Automat. Lett.,
+vol. 7, no. 4, pp. 9810–9817, Oct. 2022.
+[11] A. Devo, G. Mezzetti, G. Costante, M. L. Fravolini, and P. Valigi, “To-
+wards generalization in target-driven visual navigation by using deep re-
+inforcement learning,” IEEE Trans. Robot., vol. 36, no. 5, pp. 1546–1561,
+Oct. 2020.
+[12] W. Xiao et al., “BarrierNet: Differentiable control barrier functions for
+learning of safe robot control,” IEEE Trans. Robot., vol. 39, no. 3,
+pp. 2289–2307, Jun. 2023.
+[13] Y. Hu et al., “Planning-oriented autonomous driving,” in Proc. IEEE/CVF
+Conf. Comput. Vis. Pattern Recognit., 2023, pp. 17853–17862.
+[14] Z. Li et al., “BEVFormer: Learning bird’s-eye-view representation from
+multi-camera images via spatiotemporal transformers,” in Proc. Eur. Conf.
+Comput. Vis., 2022, pp. 1–18.
+[15] L. Mescheder, M. Oechsle, M. Niemeyer, S. Nowozin, and A. Geiger,
+“Occupancy networks: Learning 3D reconstruction in function space,”
+in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit., 2019,
+pp. 4460–4470.
+[16] A. H. Qureshi, Y. Miao, A. Simeonov, and M. C. Yip, “Motion planning
+networks: Bridging the gap between learning-based and classical motion
+planners,” IEEE Trans. Robot., vol. 37, no. 1, pp. 48–66, Feb. 2021.
+[17] M. Montemerlo et al., “Junior: The stanford entry in the urban challenge,”
+J. Field Robot., vol. 25, no. 9, pp. 569–597, 2008.
+[18] O. Salzman and D. Halperin, “Asymptotically near-optimal RRT for
+fast, high-quality motion planning,” IEEE Trans. Robot., vol. 32, no. 3,
+pp. 473–483, Jun. 2016.
+[19] J. Zhang, C. Hu, R. G. Chadha, and S. Singh, “Falco: Fast likelihood-based
+collision avoidance with extension to human-guided navigation,” J. Field
+Robot., vol. 37, no. 8, pp. 1300–1313, 2020.
+[20] R. Han et al., “RDA: An accelerated collision free motion planner for
+autonomous navigation in cluttered environments,” IEEE Robot. Automat.
+Lett., vol. 8, no. 3, pp. 1715–1722, Mar. 2023.
+[21] W. Ding, L. Zhang, J. Chen, and S. Shen, “EPSILON: An efficient planning
+system for automated vehicles in highly interactive environments,” IEEE
+Trans. Robot., vol. 38, no. 2, pp. 1118–1138, Apr. 2022.
+[22] Z. Han et al., “An efficient spatial-temporal trajectory planner for au-
+tonomous vehicles in unstructured environments,” IEEE Trans. Intell.
+Transp. Syst., vol. 25, no. 2, pp. 1797–1814, Feb. 2024.
+[23] X. Zhou, Z. Wang, H. Ye, C. Xu, and F. Gao, “EGO-planner: An ESDF-free
+gradient-based local planner for quadrotors,” IEEE Robot. Automat. Lett.,
+vol. 6, no. 2, pp. 478–485, Apr. 2021.
+[24] S. Wang, R. Gao, R. Han, S. Chen, C. Li, and Q. Hao, “Adaptive envi-
+ronment modeling based reinforcement learning for collision avoidance in
+complex scenes,” in Proc. IEEE/RSJ Int. Conf. Intell. Robots Syst., 2022,
+pp. 9011–9018.
+[25] L. Li, Y. Miao, A. H. Qureshi, and M. C. Yip, “MPC-MPNet: Model-
+predictive motion planning networks for fast, near-optimal planning under
+kinodynamic constraints,” IEEE Robot. Automat. Lett., vol. 6, no. 3,
+pp. 4496–4503, Jul. 2021.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 20 of 21 --
+
+2824 	IEEE TRANSACTIONS ON ROBOTICS, VOL. 41, 2025
+[26] A. Tampuu, T. Matiisen, M. Semikin, D. Fishman, and N. Muhammad, “A
+survey of end-to-end driving: Architectures and training methods,” IEEE
+Trans. Neural Netw. Learn. Syst., vol. 33, no. 4, pp. 1364–1384, Apr. 2022.
+[27] A. Francis et al., “Long-range indoor navigation with PRM-RL,” IEEE
+Trans. Robot., vol. 36, no. 4, pp. 1115–1134, Aug. 2020.
+[28] Y. F. Chen, M. Liu, M. Everett, and J. P. How, “Decentralized non-
+communicating multiagent collision avoidance with deep reinforcement
+learning,” in Proc. IEEE Int. Conf. Robot. Automat., 2017, pp. 285–292.
+[29] M. Everett, Y. F. Chen, and J. P. How, “Motion planning among dy-
+namic, decision-making agents with deep reinforcement learning,” in Proc.
+IEEE/RSJ Int. Conf. Intell. Robots Syst., 2018, pp. 3052–3059.
+[30] C. Chen, S. Hu, P. Nikdel, G. Mori, and M. Savva, “Relational graph
+learning for crowd navigation,” in Proc. IEEE/RSJ Int. Conf. Intell. Robots
+Syst., 2020, pp. 10007–10013.
+[31] J. Lin, L. Wang, F. Gao, S. Shen, and F. Zhang, “Flying through a narrow
+gap using neural network: An end-to-end planning and control approach,”
+in Proc. IEEE/RSJ Int. Conf. Intell. Robots Syst., 2019, pp. 3526–3533.
+[32] T. Salzmann, E. Kaufmann, J. Arrizabalaga, M. Pavone, D. Scaramuzza,
+and M. Ryll, “Real-time neural MPC: Deep learning model predictive
+control for quadrotors and agile robotic platforms,” IEEE Robot. Automat.
+Lett., vol. 8, no. 4, pp. 2397–2404, Apr. 2023.
+[33] J. Sacks and B. Boots, “Learning sampling distributions for model predic-
+tive control,” in Proc. Conf. Robot Learn., 2023, pp. 1733–1742.
+[34] G. Williams, P. Drews, B. Goldfain, J. M. Rehg, and E. A. Theodorou,
+“Information-theoretic model predictive control: Theory and applications
+to autonomous driving,” IEEE Trans. Robot., vol. 34, no. 6, pp. 1603–1622,
+Dec. 2018.
+[35] B. Amos, I. Jimenez, J. Sacks, B. Boots, and J. Z. Kolter, “Differentiable
+MPC for end-to-end planning and control,” in Proc. Int. Conf. Adv. Neural
+Inf. Process. Syst., 2018, vol. 31, pp. 8299–8310.
+[36] A. Agrawal, S. Barratt, and S. Boyd, “Learning convex optimization
+models,” IEEE/CAA J. Automatica Sinica, vol. 8, no. 8, pp. 1355–1364,
+Aug. 2021.
+[37] S. P. Boyd and L. Vandenberghe, Convex Optimization. Cambridge, U.K.:
+Cambridge Univ. Press, 2004.
+[38] J. Schulman et al., “Motion planning with sequential convex optimiza-
+tion and convex collision checking,” Int. J. Robot. Res., vol. 33, no. 9,
+pp. 1251–1270, 2014.
+[39] Z. Liu, A. Amini, S. Zhu, S. Karaman, S. Han, and D. L. Rus, “Efficient
+and robust Lidar-based end-to-end navigation,” in Proc. IEEE Int. Conf.
+Robot. Automat., 2021, pp. 13247–13254.
+[40] A. Domahidi, E. Chu, and S. Boyd, “ECOS: An SOCP solver for embedded
+systems,” in Proc. Eur. Control Conf., 2013, pp. 3071–3076.
+[41] Y. Yang, M. Pesavento, Z.-Q. Luo, and B. Ottersten, “Inexact block
+coordinate descent algorithms for nonsmooth nonconvex optimization,”
+IEEE Trans. Signal Process., vol. 68, pp. 947–961, Dec. 2020.
+[42] A. Agrawal, B. Amos, S. Barratt, S. Boyd, S. Diamond, and J. Z. Kolter,
+“Differentiable convex optimization layers,” in Proc. Int. Conf. Adv. Neural
+Inf. Process. Syst., 2019, vol. 32, pp. 9562–9574.
+[43] R. Han, “IR-SIM: An open-source lightweight simulator for robot naviga-
+tion, control, and learning,” 2024. [Online]. Available: https://github.com/
+hanruihua/ir-sim
+[44] W. Xu, Y. Cai, D. He, J. Lin, and F. Zhang, “FAST-LIO2: Fast di-
+rect LiDAR-inertial odometry,” IEEE Trans. Robot., vol. 38, no. 4,
+pp. 2053–2073, Aug. 2022.
+[45] T. Shan and B. Englot, “LEGO-LOAM: Lightweight and ground-
+optimized LiDAR odometry and mapping on variable terrain,” in Proc.
+IEEE/RSJ Int. Conf. Intell. Robots Syst., 2018, pp. 4758–4765.
+[46] G. Kim and A. Kim, “Scan context: Egocentric spatial descriptor for place
+recognition within 3D point cloud map,” in Proc. IEEE/RSJ Int. Conf.
+Intell. Robots Syst., Oct. 2018, pp. 4802–4809.
+[47] A. Geiger, P. Lenz, and R. Urtasun, “Are we ready for autonomous driving?
+The KITTI vision benchmark suite,” in Proc. Conf. Comput. Vis. Pattern
+Recognit., 2012, pp. 3354–3361.
+[48] A. H. Lang, S. Vora, H. Caesar, L. Zhou, J. Yang, and O. Bei-
+jbom, “PointPillars: Fast encoders for object detection from point
+clouds,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit., 2019,
+pp. 12697–12705.
+[49] N. Koenig and A. Howard, “Design and use paradigms for gazebo, an
+open-source multi-robot simulator,” in Proc. IEEE/RSJ Int. Conf. Intell.
+Robots Syst., 2004, pp. 2149–2154.
+[50] W. Hess, D. Kohler, H. Rapp, and D. Andor, “Real-time loop closure
+in 2D LiDAR SLAM,” in Proc. IEEE Int. Conf. Robot. Automat., 2016,
+pp. 1271–1278.
+[51] A. Dosovitskiy, G. Ros, F. Codevilla, A. Lopez, and V. Koltun, “CARLA:
+An open urban driving simulator,” in Proc. Conf. Robot Learn., 2017,
+pp. 1–16.
+[52] K. Kurzer, “Path planning in unstructured environments: A real-time
+hybrid A* implementation for fast and deterministic path generation for
+the kth research concept vehicle,” Master Theis, KTH Royal Institute of
+Technology,, 2016.
+[53] S. Kato et al., “Autoware on board: Enabling autonomous vehicles with
+embedded systems,” in Proc. ACM/IEEE 9th Int. Conf. Cyber- Phys. Syst.,
+2018, pp. 287–296.
+Authorized licensed use limited to: Univ of Science and Tech Beijing. Downloaded on April 22,2026 at 05:42:51 UTC from IEEE Xplore. Restrictions apply.
+
+-- 21 of 21 --
+
