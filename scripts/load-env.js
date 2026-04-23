@@ -32,10 +32,10 @@ if (fs.existsSync(envPath)) {
   }
 }
 
-hexo.extend.filter.register('after_init', function() {
+hexo.once('generateBefore', function() {
   const secret = process.env.GITALK_CLIENT_SECRET;
   if (secret && secret.trim()) {
-    hexo.theme.config.gitalk = hexo.theme.config.gitalk || {};
-    hexo.theme.config.gitalk.client_secret = secret.trim();
+    this.theme.config.gitalk = this.theme.config.gitalk || {};
+    this.theme.config.gitalk.client_secret = secret.trim();
   }
 });
