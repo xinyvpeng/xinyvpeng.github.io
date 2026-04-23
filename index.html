@@ -183,18 +183,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -219,6 +219,107 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://xinyvpeng.github.io/2026/04/23/2026-04-23-hamer-paper-interpretation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Raniy">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Raniy">
+      <meta itemprop="description" content="个人技术博客，记录项目介绍、工作内容、论文阅读、笔记和个人介绍">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Raniy">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2026/04/23/2026-04-23-hamer-paper-interpretation/" class="post-title-link" itemprop="url">HaMeR论文深度解析：用Transformer实现3D手部网格重建</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-04-23 12:00:00" itemprop="dateCreated datePublished" datetime="2026-04-23T12:00:00+08:00">2026-04-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" itemprop="url" rel="index"><span itemprop="name">计算机视觉</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/3D%E9%87%8D%E5%BB%BA/" itemprop="url" rel="index"><span itemprop="name">3D重建</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/3D%E9%87%8D%E5%BB%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="HaMeR论文深度解析：用Transformer实现3D手部网格重建"><a href="#HaMeR论文深度解析：用Transformer实现3D手部网格重建" class="headerlink" title="HaMeR论文深度解析：用Transformer实现3D手部网格重建"></a>HaMeR论文深度解析：用Transformer实现3D手部网格重建</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>2024年，CVPR收录了UC Berkeley等机构发表的论文《Reconstructing Hands in 3D with Transformers》（HaMeR）。这项工作在3D手部重建领域提出了一种简洁而强大的范式——<strong>用Vision Transformer（ViT）替代传统CNN骨干，在大规模数据上进行训练，实现了在自然场景中前所未有精度的3D手部网格恢复</strong>。</p>
+<p><strong>核心问题</strong>：从单张RGB图像中恢复3D手部网格面临三大挑战：</p>
+<ol>
+<li><strong>严重遮挡</strong>：手部常与物体或其他手交互，存在大量自遮挡和外部遮挡</li>
+<li><strong>姿态多样性</strong>：手指关节自由度极高（&gt;20 DoF），姿态空间巨大</li>
+<li><strong>数据不足</strong>：3D标注数据获取困难，主要集中在受控室内环境</li>
+</ol>
+<p><strong>HaMeR的核心创新</strong>：遵循”规模带来能力”（Scaling Up）的范式——将数据扩展到270万训练样本（此前最大数据集的4倍），模型升级为ViT-Huge（6.3亿参数），以全Transformer架构实现SOTA精度。</p>
+<p><strong>关键成果</strong>：在FreiHAND上PA-MPVPE达5.7mm、F@15达0.990；在HO3D上PA-MPJPE达7.7mm、AUCJ达0.846。更难能可贵的是，在全新的自然场景HInt测试集上，PCK精度是此前最佳方法的约3倍。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/04/23/2026-04-23-hamer-paper-interpretation/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -662,7 +763,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-23 19:28:23" itemprop="dateModified" datetime="2026-04-23T19:28:23+08:00">2026-04-23</time>
+      <time title="修改时间：2026-04-23 19:55:20" itemprop="dateModified" datetime="2026-04-23T19:55:20+08:00">2026-04-23</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -761,7 +862,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-23 19:28:23" itemprop="dateModified" datetime="2026-04-23T19:28:23+08:00">2026-04-23</time>
+      <time title="修改时间：2026-04-23 19:55:20" itemprop="dateModified" datetime="2026-04-23T19:55:20+08:00">2026-04-23</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
