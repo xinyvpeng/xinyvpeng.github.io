@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"xinyvpeng.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":{"enable":false,"chat":"auto"},"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":5,"unescape":true,"preload":true,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航引言2025年，IEEE Transactions on Robotics（TRO）发表了论文《NeuPAN: Direct Point Robot Navigation With End-to-End Model-Based Learning》。这项工作在机器人导航领域提出了一种全新的范式——直接从原始LiDAR点云到控制指令的端到端导">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航">
+<meta property="og:url" content="https://xinyvpeng.github.io/2026/04/23/2026-04-23-neupan-paper-interpretation/index.html">
+<meta property="og:site_name" content="Raniy">
+<meta property="og:description" content="NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航引言2025年，IEEE Transactions on Robotics（TRO）发表了论文《NeuPAN: Direct Point Robot Navigation With End-to-End Model-Based Learning》。这项工作在机器人导航领域提出了一种全新的范式——直接从原始LiDAR点云到控制指令的端到端导">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-23T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-23T02:00:00.000Z">
+<meta property="article:author" content="Raniy">
+<meta property="article:tag" content="NeuPAN">
+<meta property="article:tag" content="模型预测控制">
+<meta property="article:tag" content="点云">
+<meta property="article:tag" content="碰撞避免">
+<meta property="article:tag" content="端到端学习">
+<meta property="article:tag" content="论文解读">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://xinyvpeng.github.io/2026/04/23/2026-04-23-neupan-paper-interpretation/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://xinyvpeng.github.io/2026/04/23/2026-04-23-neupan-paper-interpretation/","path":"2026/04/23/2026-04-23-neupan-paper-interpretation/","title":"NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航 | Raniy</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"all","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Raniy</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录项目、工作、论文、笔记</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#NeuPAN%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%EF%BC%9A%E7%AB%AF%E5%88%B0%E7%AB%AF%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%9A%84%E7%9B%B4%E6%8E%A5%E7%82%B9%E4%BA%91%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%AF%BC%E8%88%AA"><span class="nav-number">1.</span> <span class="nav-text">NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E8%8C%83%E5%BC%8F%E8%BD%AC%E7%A7%BB%EF%BC%9A%E4%BB%8E%E2%80%9D%E6%A8%A1%E5%9D%97%E5%8C%96%E6%B5%81%E6%B0%B4%E7%BA%BF%E2%80%9D%E5%88%B0%E2%80%9D%E7%AB%AF%E5%88%B0%E7%AB%AF%E6%84%9F%E7%9F%A5-%E6%8E%A7%E5%88%B6%E9%97%AD%E7%8E%AF%E2%80%9D"><span class="nav-number">1.2.</span> <span class="nav-text">核心范式转移：从”模块化流水线”到”端到端感知-控制闭环”</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%B3%95%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">1.2.1.</span> <span class="nav-text">传统模块化方法的局限性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AB%AF%E5%88%B0%E7%AB%AF%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%9D%A9%E5%91%BD"><span class="nav-number">1.2.2.</span> <span class="nav-text">端到端模型学习的革命</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88"><span class="nav-number">1.2.3.</span> <span class="nav-text">架构总览</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DUNE%EF%BC%9A%E6%B7%B1%E5%BA%A6%E5%B1%95%E5%BC%80%E7%A5%9E%E7%BB%8F%E7%BC%96%E7%A0%81%E5%99%A8"><span class="nav-number">1.3.</span> <span class="nav-text">DUNE：深度展开神经编码器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E5%B1%95%E5%BC%80%E6%80%9D%E6%83%B3"><span class="nav-number">1.3.1.</span> <span class="nav-text">算法展开思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.2.</span> <span class="nav-text">网络结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.3.</span> <span class="nav-text">训练方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%95%B0%E6%8D%AE"><span class="nav-number">1.3.4.</span> <span class="nav-text">性能数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NRMP%EF%BC%9A%E7%A5%9E%E7%BB%8F%E6%AD%A3%E5%88%99%E5%8C%96%E8%BF%90%E5%8A%A8%E8%A7%84%E5%88%92%E5%99%A8"><span class="nav-number">1.4.</span> <span class="nav-text">NRMP：神经正则化运动规划器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%A1%AC%E7%BA%A6%E6%9D%9F%E5%88%B0%E8%BD%AF%E6%AD%A3%E5%88%99"><span class="nav-number">1.4.1.</span> <span class="nav-text">从硬约束到软正则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E5%BE%AE%E5%88%86%E5%87%B8%E4%BC%98%E5%8C%96%E5%B1%82"><span class="nav-number">1.4.2.</span> <span class="nav-text">可微分凸优化层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%85%AC%E5%BC%8F%E5%8C%96%E4%B8%8E%E6%94%B6%E6%95%9B%E6%80%A7%E4%BF%9D%E8%AF%81"><span class="nav-number">1.5.</span> <span class="nav-text">问题公式化与收敛性保证</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E6%A1%86%E6%9E%B6"><span class="nav-number">1.5.1.</span> <span class="nav-text">数学框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B6%E6%95%9B%E6%80%A7%E4%BF%9D%E8%AF%81"><span class="nav-number">1.5.2.</span> <span class="nav-text">收敛性保证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.6.</span> <span class="nav-text">实验结果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BF%E7%9C%9F%E5%AE%9E%E9%AA%8C"><span class="nav-number">1.6.1.</span> <span class="nav-text">仿真实验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E5%AE%9E%E4%B8%96%E7%95%8C%E5%AE%9E%E9%AA%8C"><span class="nav-number">1.6.2.</span> <span class="nav-text">真实世界实验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%80%A7%E8%83%BD"><span class="nav-number">1.6.3.</span> <span class="nav-text">计算性能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%88%9B%E6%96%B0%E7%82%B9%E6%80%BB%E7%BB%93"><span class="nav-number">1.7.</span> <span class="nav-text">关键创新点总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">1.8.</span> <span class="nav-text">局限性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AA%E4%BA%BA%E6%80%9D%E8%80%83"><span class="nav-number">1.9.</span> <span class="nav-text">个人思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">1.10.</span> <span class="nav-text">结语</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Raniy"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Raniy</p>
+  <div class="site-description" itemprop="description">个人技术博客，记录项目介绍、工作内容、论文阅读、笔记和个人介绍</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/xinyvpeng" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;xinyvpeng" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:xinyvpeng@163.com" title="Email → mailto:xinyvpeng@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>Email</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xinyvpeng.github.io/2026/04/23/2026-04-23-neupan-paper-interpretation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Raniy">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Raniy">
+      <meta itemprop="description" content="个人技术博客，记录项目介绍、工作内容、论文阅读、笔记和个人介绍">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航 | Raniy">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-04-23 10:00:00" itemprop="dateCreated datePublished" datetime="2026-04-23T10:00:00+08:00">2026-04-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9C%BA%E5%99%A8%E4%BA%BA/" itemprop="url" rel="index"><span itemprop="name">机器人</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9C%BA%E5%99%A8%E4%BA%BA/%E5%AF%BC%E8%88%AA/" itemprop="url" rel="index"><span itemprop="name">导航</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9C%BA%E5%99%A8%E4%BA%BA/%E5%AF%BC%E8%88%AA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航"><a href="#NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航" class="headerlink" title="NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航"></a>NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>2025年，IEEE Transactions on Robotics（TRO）发表了论文《NeuPAN: Direct Point Robot Navigation With End-to-End Model-Based Learning》。这项工作在机器人导航领域提出了一种全新的范式——直接从原始LiDAR点云到控制指令的端到端导航，无需建图、无需物体检测、无需显式碰撞避免约束求解。</p>
+<p><strong>核心问题</strong>：传统的机器人导航采用模块化流水线（感知→规划→控制），存在三大根本性问题：</p>
+<ol>
+<li><strong>误差传播</strong>：感知模块的检测误差被后续模块逐级放大</li>
+<li><strong>信息丢失</strong>：点云被简化为网格或边界框，丢失了丰富的形状细节</li>
+<li><strong>计算负担重</strong>：障碍物数量多时，碰撞避免约束条件数量爆炸</li>
+</ol>
+<p><strong>NeuPAN的核心创新</strong>：将优化算法”展开”为神经网络（DUNE），再将网络输出作为软正则项嵌入模型预测控制（NRMP），形成端到端的感知-控制闭环。</p>
+<p><strong>革命性意义</strong>：NeuPAN首次实现了从原始点云到控制指令的可解释端到端导航，在精度和成功率上大幅超越传统方法。</p>
+<span id="more"></span>
+
+<h2 id="核心范式转移：从”模块化流水线”到”端到端感知-控制闭环”"><a href="#核心范式转移：从”模块化流水线”到”端到端感知-控制闭环”" class="headerlink" title="核心范式转移：从”模块化流水线”到”端到端感知-控制闭环”"></a>核心范式转移：从”模块化流水线”到”端到端感知-控制闭环”</h2><h3 id="传统模块化方法的局限性"><a href="#传统模块化方法的局限性" class="headerlink" title="传统模块化方法的局限性"></a>传统模块化方法的局限性</h3><p>传统机器人导航流水线：</p>
+<ol>
+<li><strong>感知模块</strong>：将点云转换为占据网格、代价地图或障碍物边界框</li>
+<li><strong>规划模块</strong>：在简化后的表示上进行路径规划</li>
+<li><strong>控制模块</strong>：跟踪规划路径并执行碰撞避免</li>
+</ol>
+<p>问题在于：</p>
+<ul>
+<li>每一步简化都会丢失信息</li>
+<li>感知误差在后续模块中被放大</li>
+<li>碰撞避免约束数量随障碍物数量线性增长</li>
+</ul>
+<h3 id="端到端模型学习的革命"><a href="#端到端模型学习的革命" class="headerlink" title="端到端模型学习的革命"></a>端到端模型学习的革命</h3><p>NeuPAN完全颠覆了这一范式：</p>
+<ol>
+<li><strong>直接输入</strong>：原始LiDAR点云直接输入系统</li>
+<li><strong>无信息丢失</strong>：所有点云信息都被保留和利用</li>
+<li><strong>紧密耦合</strong>：感知和控制通过可微分优化层形成闭环</li>
+<li><strong>可解释性</strong>：基于模型驱动（优化算法展开），而非黑箱神经网络</li>
+</ol>
+<h3 id="架构总览"><a href="#架构总览" class="headerlink" title="架构总览"></a>架构总览</h3><p>NeuPAN由两个核心模块构成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">原始点云 → 点流预处理 → DUNE（编码为LDF） → NRMP（生成控制指令） → 反馈回预处理</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>DUNE</strong>（Deep Unfolded Neural Encoder）：将PIBCD优化算法展开为神经网络，将点云映射到潜在距离特征（LDF）空间</li>
+<li><strong>NRMP</strong>（Neural Regularized Motion Planner）：将LDF作为软正则项嵌入MPC优化目标</li>
+</ul>
+<h2 id="DUNE：深度展开神经编码器"><a href="#DUNE：深度展开神经编码器" class="headerlink" title="DUNE：深度展开神经编码器"></a>DUNE：深度展开神经编码器</h2><h3 id="算法展开思想"><a href="#算法展开思想" class="headerlink" title="算法展开思想"></a>算法展开思想</h3><p>DUNE的核心创新在于将<strong>PIBCD</strong>（Penalty Inexact Block Coordinate Descent）优化算法”展开”为神经网络。这是NeuPAN最精彩的设计：</p>
+<ol>
+<li><strong>原始优化算法</strong>：PIBCD迭代求解点到凸多边形的距离</li>
+<li><strong>展开为网络</strong>：将每次迭代映射为一层神经网络</li>
+<li><strong>可学习参数</strong>：网络权重从PIBCD算法中继承初始化，可通过训练微调</li>
+</ol>
+<h3 id="网络结构"><a href="#网络结构" class="headerlink" title="网络结构"></a>网络结构</h3><p>DUNE的网络结构简洁而高效：</p>
+<ul>
+<li>6层全连接层</li>
+<li>第1层：n×32 FC + LayerNorm + Tanh</li>
+<li>第2层：32×32 FC + ReLU</li>
+<li>交替重复3次</li>
+</ul>
+<h3 id="训练方式"><a href="#训练方式" class="headerlink" title="训练方式"></a>训练方式</h3><ul>
+<li><strong>数据生成</strong>：使用PIBCD算法生成标注数据集</li>
+<li><strong>训练时间</strong>：约1小时</li>
+<li><strong>关键优势</strong>：对于固定形状的机器人，DUNE无需重新训练即可部署到不同环境</li>
+</ul>
+<h3 id="性能数据"><a href="#性能数据" class="headerlink" title="性能数据"></a>性能数据</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推理时间</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>KITTI数据集</td>
+<td>4ms</td>
+</tr>
+<tr>
+<td>SUSCAPE数据集</td>
+<td>10ms</td>
+</tr>
+<tr>
+<td>100万个点</td>
+<td>0.2秒（vs ECOS求解器650秒，加速&gt;1000倍）</td>
+</tr>
+</tbody></table>
+<h2 id="NRMP：神经正则化运动规划器"><a href="#NRMP：神经正则化运动规划器" class="headerlink" title="NRMP：神经正则化运动规划器"></a>NRMP：神经正则化运动规划器</h2><h3 id="从硬约束到软正则"><a href="#从硬约束到软正则" class="headerlink" title="从硬约束到软正则"></a>从硬约束到软正则</h3><p>传统MPC的碰撞避免使用硬约束：</p>
+<ul>
+<li>约束条件数 &#x3D; 障碍物点数 × 预测步数</li>
+<li>数千个约束导致求解极其缓慢</li>
+</ul>
+<p>NRMP的创新：将LDF作为软正则项嵌入优化目标：</p>
+<ul>
+<li>总损失 &#x3D; 路径跟踪代价 + 避障惩罚（LDF正则项）+ 近端项</li>
+<li>无需显式碰撞约束</li>
+<li>约束数量与障碍物数量无关</li>
+</ul>
+<h3 id="可微分凸优化层"><a href="#可微分凸优化层" class="headerlink" title="可微分凸优化层"></a>可微分凸优化层</h3><p>NRMP使用<strong>cvxpylayers</strong>实现可微分凸优化层：</p>
+<ol>
+<li><strong>前向传播</strong>：求解凸优化问题，生成控制指令</li>
+<li><strong>反向传播</strong>：通过优化问题的KKT条件计算梯度</li>
+<li><strong>参数学习</strong>：从失败中学习，自动调整权重参数</li>
+</ol>
+<h2 id="问题公式化与收敛性保证"><a href="#问题公式化与收敛性保证" class="headerlink" title="问题公式化与收敛性保证"></a>问题公式化与收敛性保证</h2><h3 id="数学框架"><a href="#数学框架" class="headerlink" title="数学框架"></a>数学框架</h3><p>NeuPAN的端到端问题被形式化为：</p>
+<ol>
+<li><p><strong>原始问题P</strong>：模型预测感知与控制（MPPC）优化问题</p>
+<ul>
+<li>目标：最小化路径跟踪代价</li>
+<li>约束：点级碰撞避免约束（数千个）</li>
+<li>挑战：双层优化，非凸，不可微</li>
+</ul>
+</li>
+<li><p><strong>对偶变换</strong>：将最小距离计算的对偶问题展开，得到LDF</p>
+</li>
+<li><p><strong>问题分解Q</strong>：分解为Q1（DUNE）和Q2（NRMP），交替求解</p>
+</li>
+</ol>
+<h3 id="收敛性保证"><a href="#收敛性保证" class="headerlink" title="收敛性保证"></a>收敛性保证</h3><p><strong>定理1</strong>：NeuPAN生成的序列单调递减且收敛到Q的临界点</p>
+<p>实际中迭代K&#x3D;3次即可获得满意结果，确保了实时性。</p>
+<h2 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h2><h3 id="仿真实验"><a href="#仿真实验" class="headerlink" title="仿真实验"></a>仿真实验</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>指标</th>
+<th>NeuPAN</th>
+<th>对比方法</th>
+<th>提升</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IR-SIM凸障碍物</td>
+<td>成功率</td>
+<td>~95%</td>
+<td>RDA ~90%</td>
+<td>+5%</td>
+</tr>
+<tr>
+<td>IR-SIM非凸障碍物</td>
+<td>成功率</td>
+<td>73-82%</td>
+<td>RDA 59-71%</td>
+<td>+19-38%</td>
+</tr>
+<tr>
+<td>Gazebo圆柱障碍物</td>
+<td>成功率</td>
+<td>92.62%</td>
+<td>RDA 87.93%</td>
+<td>+4.69%</td>
+</tr>
+<tr>
+<td>Gazebo非凸障碍物</td>
+<td>成功率</td>
+<td>92.97%</td>
+<td>RDA 54.78%</td>
+<td>+38.19%</td>
+</tr>
+</tbody></table>
+<h3 id="真实世界实验"><a href="#真实世界实验" class="headerlink" title="真实世界实验"></a>真实世界实验</h3><p>NeuPAN在多个真实场景中展现了惊人的能力：</p>
+<p><strong>通过狭窄通道（精度测试）</strong>：</p>
+<ul>
+<li>NeuPAN能通过仅3cm余量的通道（DoN&#x3D;0.97）</li>
+<li>传统方法TEB的极限为7cm余量</li>
+<li><strong>精度提升超过2倍</strong></li>
+</ul>
+<p><strong>杂乱实验室环境</strong>：</p>
+<ul>
+<li>10名人类驾驶员全部失败</li>
+<li>NeuPAN成功导航</li>
+</ul>
+<p><strong>轮腿机器人</strong>：</p>
+<ul>
+<li>通过狭窄门道（DoN&#x3D;0.92）</li>
+</ul>
+<p><strong>乘用车</strong>：</p>
+<ul>
+<li>通过5cm余量通道（DoN&#x3D;0.97）</li>
+<li>人类驾驶员在5km&#x2F;h失败</li>
+<li>Autoware视为不可通行</li>
+</ul>
+<h3 id="计算性能"><a href="#计算性能" class="headerlink" title="计算性能"></a>计算性能</h3><ul>
+<li><strong>推理延迟</strong>：4-10ms（毫秒级）</li>
+<li><strong>控制频率</strong>：实时</li>
+<li><strong>DUNE vs ECOS</strong>：处理100万个点，0.2秒 vs 650秒</li>
+</ul>
+<h2 id="关键创新点总结"><a href="#关键创新点总结" class="headerlink" title="关键创新点总结"></a>关键创新点总结</h2><ol>
+<li><strong>算法展开</strong>：首次将PIBCD优化算法展开为可解释的轻量级神经网络（DUNE），兼顾速度和可解释性</li>
+<li><strong>软正则化避障</strong>：通过LDF软正则项替代硬碰撞约束，彻底解决约束爆炸问题</li>
+<li><strong>端到端可微分</strong>：通过cvxpylayers实现从感知到控制的完整反向传播训练</li>
+<li><strong>零迁移成本</strong>：无需建图、无需检测、无需重新训练即可部署到新环境</li>
+<li><strong>可解释性</strong>：基于模型驱动方法，避免了纯黑箱学习的泛化问题</li>
+</ol>
+<h2 id="局限性"><a href="#局限性" class="headerlink" title="局限性"></a>局限性</h2><ol>
+<li><strong>有限视野</strong>：激光扫描仪的有限FOV可能导致未检测到的移动障碍物碰撞，需要多传感器融合</li>
+<li><strong>密集场景</strong>：当机器人被完全包围时，即使保持静止也无法避免碰撞</li>
+<li><strong>超高速障碍物</strong>：对&gt;4m&#x2F;s的动态障碍物性能下降，需要结合点速度信息（NeuPAN-vel）</li>
+</ol>
+<h2 id="个人思考"><a href="#个人思考" class="headerlink" title="个人思考"></a>个人思考</h2><p>NeuPAN的”模型驱动+数据驱动”融合思路非常有价值，代表了机器人学习的一个重要方向：</p>
+<ol>
+<li><strong>算法展开的通用性</strong>：DUNE的算法展开思想值得在其他机器人任务（如抓取、操作）中推广</li>
+<li><strong>从优化到学习的桥梁</strong>：NeuPAN展示了如何优雅地将经典优化理论与现代深度学习结合</li>
+<li><strong>实用价值</strong>：精度提升2倍、无需重新训练的特性使其具有极高的实际部署价值</li>
+<li><strong>未来方向</strong>：多传感器融合、动态障碍物速度估计、更复杂场景的泛化</li>
+</ol>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>NeuPAN论文是机器人导航领域的里程碑工作。它不仅仅提出了一种新方法，更重要的是展示了一种新的研究范式：<strong>用模型驱动的可解释神经网络替代纯数据驱动的黑箱，同时保持端到端优化的能力</strong>。</p>
+<p>通过将经典优化算法展开为神经网络，NeuPAN在精度、速度和泛化性上都达到了新的高度。这项工作为机器人导航的未来发展指明了方向——让机器人在复杂环境中像人类一样灵活、高效、安全地移动。</p>
+<blockquote>
+<p><strong>参考文献</strong></p>
+<ol>
+<li>Han, R., et al. (2025). NeuPAN: Direct Point Robot Navigation With End-to-End Model-Based Learning. <em>IEEE Transactions on Robotics (TRO)</em>.</li>
+<li>Zhou, X., et al. (2022). Optimization-Based Collision Avoidance (OBCA). <em>IEEE TRO</em>.</li>
+<li>Agrawal, A., et al. (2019). Differentiable Convex Optimization Layers. <em>NeurIPS 2019</em>.</li>
+</ol>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/" rel="tag"># 论文解读</a>
+              <a href="/tags/NeuPAN/" rel="tag"># NeuPAN</a>
+              <a href="/tags/%E7%AB%AF%E5%88%B0%E7%AB%AF%E5%AD%A6%E4%B9%A0/" rel="tag"># 端到端学习</a>
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%A2%84%E6%B5%8B%E6%8E%A7%E5%88%B6/" rel="tag"># 模型预测控制</a>
+              <a href="/tags/%E7%A2%B0%E6%92%9E%E9%81%BF%E5%85%8D/" rel="tag"># 碰撞避免</a>
+              <a href="/tags/%E7%82%B9%E4%BA%91/" rel="tag"># 点云</a>
+          </div>
+
+        
+          <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+            <span class="post-meta-item-icon">
+              <i class="far fa-eye"></i>
+            </span>
+            <span class="post-meta-item-text">阅读次数：</span>
+            <span id="busuanzi_value_page_pv"></span>
+          </span>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/04/05/2026-04-05-clip-paper-interpretation/" rel="prev" title="CLIP论文深度解析：视觉-语言预训练的范式转移">
+                  <i class="fa fa-angle-left"></i> CLIP论文深度解析：视觉-语言预训练的范式转移
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Raniy</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"xinyvpeng","repo":"xinyvpeng.github.io","client_id":"Ov23liLS30z0cOBFIY2x","client_secret":"201bb6a2793dd7ba5ec147623eca7d9828c411b4","admin_user":"xinyvpeng","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"zh-CN","body":null,"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"6b252b3f3d1f91426571fe0257743f93"}</script>
+<script src="/js/third-party/comments/gitalk.js" defer></script>
+<!-- 森林图书馆主题脚本注入 -->
+
+  <!-- 森林主题核心脚本 -->
+  <script src="/js/forest/forest-theme.js" defer></script>
+  
+  
+    
+      
+    
+      
+        <script src="/js/forest/forest-interactions.js" defer></script>
+      
+    
+      
+        <script src="/js/forest/forest-audio.js" defer></script>
+      
+    
+      
+        <script src="/js/forest/forest-achievements.js" defer></script>
+      
+    
+  
+  
+  <!-- 主题初始化脚本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof window.ForestTheme !== 'undefined') {
+        // 主题管理器会自动初始化
+        console.log('🌲 森林主题加载完成');
+      } else {
+        console.warn('🌲 森林主题脚本未正确加载');
+      }
+    });
+  </script>
+  
+  <!-- 音频系统配置注入 -->
+  <script>
+    // 音频系统配置
+    window.FOREST_AUDIO_CONFIG = {
+      enabled: false,
+      default_preset: "morning"
+    };
+  </script>
+  
+  <!-- 成就系统配置注入 -->
+  <script>
+    // 成就系统配置
+    window.FOREST_ACHIEVEMENTS_CONFIG = {
+      enabled: true,
+      show_notifications: true,
+      show_progress_indicator: true,
+      max_plants: 12,
+      achievement_sound: true
+    };
+  </script>
+  
+  <!-- 森林主题脚本初始化 -->
+  <!-- 功能配置注入 -->
+  <script>
+    window.FOREST_THEME_FEATURES = {
+      audio: true,
+      achievements: true,
+      hidden_animals: true
+    };
+  </script>
+  
+  <script>
+    // 等待DOM加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化主题系统
+      if (typeof window.ForestTheme !== 'undefined') {
+        window.ForestTheme.init();
+      }
+      
+      // 初始化交互系统（延迟确保主题已加载）
+      setTimeout(function() {
+        if (typeof window.ForestInteractions !== 'undefined' && 
+            window.FOREST_THEME_FEATURES.hidden_animals) {
+          window.ForestInteractions.init();
+        }
+        
+        // 初始化音频系统
+        if (typeof window.ForestAudio !== 'undefined' && 
+            window.FOREST_THEME_FEATURES.audio) {
+          window.ForestAudio.init();
+        }
+        
+        // 初始化成就系统
+        if (typeof window.ForestAchievements !== 'undefined' && 
+            window.FOREST_THEME_FEATURES.achievements) {
+          window.ForestAchievements.init();
+        }
+      }, 300);
+    });
+  </script>
+
+</body>
+</html>

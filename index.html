@@ -183,18 +183,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-count">30</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -219,6 +219,107 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://xinyvpeng.github.io/2026/04/23/2026-04-23-neupan-paper-interpretation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Raniy">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Raniy">
+      <meta itemprop="description" content="个人技术博客，记录项目介绍、工作内容、论文阅读、笔记和个人介绍">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Raniy">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2026/04/23/2026-04-23-neupan-paper-interpretation/" class="post-title-link" itemprop="url">NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-04-23 10:00:00" itemprop="dateCreated datePublished" datetime="2026-04-23T10:00:00+08:00">2026-04-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9C%BA%E5%99%A8%E4%BA%BA/" itemprop="url" rel="index"><span itemprop="name">机器人</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9C%BA%E5%99%A8%E4%BA%BA/%E5%AF%BC%E8%88%AA/" itemprop="url" rel="index"><span itemprop="name">导航</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9C%BA%E5%99%A8%E4%BA%BA/%E5%AF%BC%E8%88%AA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航"><a href="#NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航" class="headerlink" title="NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航"></a>NeuPAN论文深度解析：端到端模型学习的直接点云机器人导航</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>2025年，IEEE Transactions on Robotics（TRO）发表了论文《NeuPAN: Direct Point Robot Navigation With End-to-End Model-Based Learning》。这项工作在机器人导航领域提出了一种全新的范式——直接从原始LiDAR点云到控制指令的端到端导航，无需建图、无需物体检测、无需显式碰撞避免约束求解。</p>
+<p><strong>核心问题</strong>：传统的机器人导航采用模块化流水线（感知→规划→控制），存在三大根本性问题：</p>
+<ol>
+<li><strong>误差传播</strong>：感知模块的检测误差被后续模块逐级放大</li>
+<li><strong>信息丢失</strong>：点云被简化为网格或边界框，丢失了丰富的形状细节</li>
+<li><strong>计算负担重</strong>：障碍物数量多时，碰撞避免约束条件数量爆炸</li>
+</ol>
+<p><strong>NeuPAN的核心创新</strong>：将优化算法”展开”为神经网络（DUNE），再将网络输出作为软正则项嵌入模型预测控制（NRMP），形成端到端的感知-控制闭环。</p>
+<p><strong>革命性意义</strong>：NeuPAN首次实现了从原始点云到控制指令的可解释端到端导航，在精度和成功率上大幅超越传统方法。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/04/23/2026-04-23-neupan-paper-interpretation/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
