@@ -1,16 +1,25 @@
 const fs = require('fs');
+const path = require('path');
 const { PDFParse } = require('pdf-parse');
 
 async function extractTextFromPDF(pdfPath) {
+  if (typeof pdfPath !== 'string' || !pdfPath) {
+    throw new Error('pdfPath must be a non-empty string');
+  }
+
+  const resolvedPath = path.resolve(pdfPath);
+
+  if (!fs.existsSync(resolvedPath)) {
+    throw new Error(`PDF file not found: ${resolvedPath}`);
+  }
+
+  const dataBuffer = await fs.promises.readFile(resolvedPath);
+  const parser = new PDFParse({ data: dataBuffer });
   try {
-    const dataBuffer = fs.readFileSync(pdfPath);
-    const parser = new PDFParse({ data: dataBuffer });
     const result = await parser.getText();
-    await parser.destroy();
     return result.text;
-  } catch (error) {
-    console.error(`Error extracting text from PDF: ${pdfPath}`, error);
-    throw error;
+  } finally {
+    await parser.destroy();
   }
 }
 
