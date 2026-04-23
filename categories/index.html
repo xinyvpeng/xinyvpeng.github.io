@@ -28,7 +28,7 @@
 <meta property="og:description" content="个人技术博客，记录项目介绍、工作内容、论文阅读、笔记和个人介绍">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-04-02T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-04-23T10:28:21.628Z">
+<meta property="article:modified_time" content="2026-04-23T11:28:23.076Z">
 <meta property="article:author" content="Raniy">
 <meta property="article:tag" content="个人介绍">
 <meta property="article:tag" content="学习笔记">
@@ -373,7 +373,6 @@
     };
   </script>
   
-  <!-- 森林主题脚本初始化 -->
   <!-- 功能配置注入 -->
   <script>
     window.FOREST_THEME_FEATURES = {
@@ -381,36 +380,6 @@
       achievements: true,
       hidden_animals: true
     };
-  </script>
-  
-  <script>
-    // 等待DOM加载完成
-    document.addEventListener('DOMContentLoaded', function() {
-      // 初始化主题系统
-      if (typeof window.ForestTheme !== 'undefined') {
-        window.ForestTheme.init();
-      }
-      
-      // 初始化交互系统（延迟确保主题已加载）
-      setTimeout(function() {
-        if (typeof window.ForestInteractions !== 'undefined' && 
-            window.FOREST_THEME_FEATURES.hidden_animals) {
-          window.ForestInteractions.init();
-        }
-        
-        // 初始化音频系统
-        if (typeof window.ForestAudio !== 'undefined' && 
-            window.FOREST_THEME_FEATURES.audio) {
-          window.ForestAudio.init();
-        }
-        
-        // 初始化成就系统
-        if (typeof window.ForestAchievements !== 'undefined' && 
-            window.FOREST_THEME_FEATURES.achievements) {
-          window.ForestAchievements.init();
-        }
-      }, 300);
-    });
   </script>
 
 </body>

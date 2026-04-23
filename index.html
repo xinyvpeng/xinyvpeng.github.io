@@ -662,7 +662,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-23 18:28:21" itemprop="dateModified" datetime="2026-04-23T18:28:21+08:00">2026-04-23</time>
+      <time title="修改时间：2026-04-23 19:28:23" itemprop="dateModified" datetime="2026-04-23T19:28:23+08:00">2026-04-23</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -761,7 +761,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-23 18:28:21" itemprop="dateModified" datetime="2026-04-23T18:28:21+08:00">2026-04-23</time>
+      <time title="修改时间：2026-04-23 19:28:23" itemprop="dateModified" datetime="2026-04-23T19:28:23+08:00">2026-04-23</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -923,7 +923,6 @@
     };
   </script>
   
-  <!-- 森林主题脚本初始化 -->
   <!-- 功能配置注入 -->
   <script>
     window.FOREST_THEME_FEATURES = {
@@ -931,36 +930,6 @@
       achievements: true,
       hidden_animals: true
     };
-  </script>
-  
-  <script>
-    // 等待DOM加载完成
-    document.addEventListener('DOMContentLoaded', function() {
-      // 初始化主题系统
-      if (typeof window.ForestTheme !== 'undefined') {
-        window.ForestTheme.init();
-      }
-      
-      // 初始化交互系统（延迟确保主题已加载）
-      setTimeout(function() {
-        if (typeof window.ForestInteractions !== 'undefined' && 
-            window.FOREST_THEME_FEATURES.hidden_animals) {
-          window.ForestInteractions.init();
-        }
-        
-        // 初始化音频系统
-        if (typeof window.ForestAudio !== 'undefined' && 
-            window.FOREST_THEME_FEATURES.audio) {
-          window.ForestAudio.init();
-        }
-        
-        // 初始化成就系统
-        if (typeof window.ForestAchievements !== 'undefined' && 
-            window.FOREST_THEME_FEATURES.achievements) {
-          window.ForestAchievements.init();
-        }
-      }, 300);
-    });
   </script>
 
 </body>

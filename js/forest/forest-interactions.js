@@ -1062,9 +1062,18 @@ const ForestInteractions = {
   }
 };
 
-// 自动初始化
+// 导出到全局
 if (typeof window !== 'undefined') {
+  window.ForestInteractions = ForestInteractions;
+
+  // 自动初始化（仅在功能开启时）
   document.addEventListener('DOMContentLoaded', () => {
+    const featureEnabled = window.FOREST_THEME_FEATURES && window.FOREST_THEME_FEATURES.hidden_animals;
+    if (!featureEnabled) {
+      console.log('🖱️ 交互功能未开启，跳过初始化');
+      return;
+    }
+
     // 等待主题系统初始化
     const initInteractions = () => {
       if (typeof window.ForestTheme !== 'undefined' && 

@@ -293,40 +293,46 @@ if (typeof Promise === 'undefined') {
 
   // 防抖的滚动检测
   setupReadingDetector() {
-    // 初始化滚动统计
     this.currentScrollTotal = 0;
     this.scrollHandler = null;
     this.animalHandler = null;
+    this.articleReadFired = false;
     
-    // 防抖的滚动检测函数
+    // 检查当前页面是否为文章页
+    const isArticlePage = !!document.querySelector('.post-block');
+    
     const checkReadingDebounced = this.debounce(() => {
-      this.checkReadingAchievements();
+      if (isArticlePage) {
+        this.checkReadingAchievements();
+        // 当滚动超过 80% 且尚未触发时，标记文章已读
+        if (!this.articleReadFired && this.currentScrollTotal > 0.8) {
+          this.articleReadFired = true;
+          this.incrementStat('articles_read', 1);
+          const event = new CustomEvent('forest-article-read', {
+            detail: { count: 1, scrollDepth: this.currentScrollTotal }
+          });
+          document.dispatchEvent(event);
+        }
+      }
     }, 500);
     
-    // 滚动事件处理
     this.scrollHandler = () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       
       if (scrollHeight > 0) {
         const scrollProgress = scrollTop / scrollHeight;
-        // 累积滚动距离（用于阅读成就检测）
         this.currentScrollTotal = Math.max(this.currentScrollTotal, scrollProgress);
-        
-        // 触发防抖检测
         checkReadingDebounced();
       }
     };
     
-    // 监听滚动事件
     window.addEventListener('scroll', this.scrollHandler);
     
-    // 监听动物发现事件（用于探索成就）
     this.animalHandler = (e) => {
       const animalType = e.detail?.animalType;
       if (animalType) {
-        // 更新滚动统计并检查成就
-        this.currentScrollTotal += 0.1; // 每次动物发现增加阅读进度
+        this.currentScrollTotal += 0.1;
         this.checkReadingAchievements();
       }
     };
@@ -651,7 +657,7 @@ if (typeof Promise === 'undefined') {
     });
     
     // 监听日夜切换事件
-    document.addEventListener('forest-theme-changed', (e) => {
+    document.addEventListener('forest-theme-change', (e) => {
       const theme = e.detail?.theme;
       if (theme) {
         // 更新图鉴主题样式（如果需要）
@@ -976,6 +982,26 @@ if (typeof Promise === 'undefined') {
   // 导出到全局
   if (typeof window !== 'undefined') {
     window.ForestAchievements = ForestAchievements;
+
+    // 自动初始化（仅在功能开启时）
+    document.addEventListener('DOMContentLoaded', () => {
+      const featureEnabled = window.FOREST_THEME_FEATURES && window.FOREST_THEME_FEATURES.achievements;
+      if (!featureEnabled) {
+        console.log('🏆 成就功能未开启，跳过初始化');
+        return;
+      }
+
+      // 等待主题系统初始化
+      const initAchievements = () => {
+        if (typeof window.ForestTheme !== 'undefined' && 
+            typeof window.ForestTheme.getCurrentTheme === 'function') {
+          window.ForestAchievements.init();
+        } else {
+          setTimeout(initAchievements, 100);
+        }
+      };
+      setTimeout(initAchievements, 100);
+    });
   }
 }
 

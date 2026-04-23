@@ -584,7 +584,6 @@
     };
   </script>
   
-  <!-- 森林主题脚本初始化 -->
   <!-- 功能配置注入 -->
   <script>
     window.FOREST_THEME_FEATURES = {
@@ -592,36 +591,6 @@
       achievements: true,
       hidden_animals: true
     };
-  </script>
-  
-  <script>
-    // 等待DOM加载完成
-    document.addEventListener('DOMContentLoaded', function() {
-      // 初始化主题系统
-      if (typeof window.ForestTheme !== 'undefined') {
-        window.ForestTheme.init();
-      }
-      
-      // 初始化交互系统（延迟确保主题已加载）
-      setTimeout(function() {
-        if (typeof window.ForestInteractions !== 'undefined' && 
-            window.FOREST_THEME_FEATURES.hidden_animals) {
-          window.ForestInteractions.init();
-        }
-        
-        // 初始化音频系统
-        if (typeof window.ForestAudio !== 'undefined' && 
-            window.FOREST_THEME_FEATURES.audio) {
-          window.ForestAudio.init();
-        }
-        
-        // 初始化成就系统
-        if (typeof window.ForestAchievements !== 'undefined' && 
-            window.FOREST_THEME_FEATURES.achievements) {
-          window.ForestAchievements.init();
-        }
-      }, 300);
-    });
   </script>
 
 </body>
