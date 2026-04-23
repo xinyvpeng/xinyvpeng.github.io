@@ -1,2 +1,34 @@
 node_modules
 /.worktrees/
+.env
+.env.*
+*.log
+.DS_Store
+public/
+db.json
+scripts.backup/
+test-*.html
+source/_data/styles.styl
+source/_data/forest-theme.css
+
+# 论文/机密文件
+paper/
+
+# 测试文件与开发文档
+forest-integration-test.html
+test_load_env.js
+test-bookmark-config.js
+docs/superpowers/
+
+# 构建产物（生成在根目录）
+.deploy_git/
+/2026/
+/archives/
+/categories/
+/tags/
+/css/
+/js/
+/search.json
+/index.html
+/baidusitemap.xml
+/sitemap.xml

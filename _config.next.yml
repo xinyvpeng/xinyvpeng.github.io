@@ -88,7 +88,7 @@ gitalk:
   github_id: xinyvpeng  # GitHub repo owner
   repo: xinyvpeng.github.io  # Repository name to store issues
   client_id: Ov23liLS30z0cOBFIY2x  # GitHub Application Client ID
-  client_secret: 201bb6a2793dd7ba5ec147623eca7d9828c411b4  # GitHub Application Client Secret
+  # client_secret: 从 .env 的 GITALK_CLIENT_SECRET 加载
   admin_user: xinyvpeng  # GitHub repo owner and collaborators
   distraction_free_mode: true
   # Language for Gitalk interface (e.g., 'en', 'zh-CN', 'zh-TW')
