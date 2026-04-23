@@ -183,7 +183,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-count">8</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -194,7 +194,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-count">38</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -219,6 +219,106 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://xinyvpeng.github.io/2026/04/23/2026-04-23-hold-paper-interpretation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Raniy">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Raniy">
+      <meta itemprop="description" content="个人技术博客，记录项目介绍、工作内容、论文阅读、笔记和个人介绍">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Raniy">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2026/04/23/2026-04-23-hold-paper-interpretation/" class="post-title-link" itemprop="url">HOLD论文深度解析：无需先验类别的3D手-物交互重建</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-04-23 20:30:00 / 修改时间：20:47:12" itemprop="dateCreated datePublished" datetime="2026-04-23T20:30:00+08:00">2026-04-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" itemprop="url" rel="index"><span itemprop="name">计算机视觉</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/3D%E9%87%8D%E5%BB%BA/" itemprop="url" rel="index"><span itemprop="name">3D重建</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="HOLD论文深度解析：无需先验类别的3D手-物交互重建"><a href="#HOLD论文深度解析：无需先验类别的3D手-物交互重建" class="headerlink" title="HOLD论文深度解析：无需先验类别的3D手-物交互重建"></a>HOLD论文深度解析：无需先验类别的3D手-物交互重建</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>想象一下：你随手拿起手机，拍下一段自己握杯喝咖啡的视频——然后计算机就能从这段视频中重建出你的手和杯子完整的三维模型。不需要提前扫描杯子，不需要告诉计算机”这是一只杯子”，甚至不需要任何3D标注数据。</p>
+<p>这正是CVPR 2024论文《HOLD: Category-agnostic 3D Reconstruction of Interacting Hands and Objects from Video》所实现的目标。</p>
+<p><strong>核心问题</strong>：如何从单目RGB视频中，同时重建出与未知物体交互的3D手部姿态和物体表面？</p>
+<p><strong>为什么重要</strong>：人类每天与上百种不同的物体交互。理解这些交互的3D几何结构，对AR&#x2F;VR、机器人模仿学习、人机交互等领域至关重要。然而，现有方法要么需要预先扫描的物体模板（实际中不可行），要么只能在少数几个训练过的物体类别上工作。</p>
+<p><strong>HOLD的核心贡献</strong>：</p>
+<ol>
+<li>首个<strong>类别无关</strong>的联合手-物3D重建方法</li>
+<li>组合式神经隐式模型（Compositional Implicit Model）实现手和物体的分离重建</li>
+<li>利用手-物交互约束（接触、遮挡）联合优化姿态和形状</li>
+<li><strong>无需任何3D标注数据</strong>，仅从2D视频即可超越全监督基线方法</li>
+</ol>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/04/23/2026-04-23-hold-paper-interpretation/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -763,7 +863,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-23 20:21:40" itemprop="dateModified" datetime="2026-04-23T20:21:40+08:00">2026-04-23</time>
+      <time title="修改时间：2026-04-23 20:47:12" itemprop="dateModified" datetime="2026-04-23T20:47:12+08:00">2026-04-23</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -862,7 +962,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-23 20:21:40" itemprop="dateModified" datetime="2026-04-23T20:21:40+08:00">2026-04-23</time>
+      <time title="修改时间：2026-04-23 20:47:12" itemprop="dateModified" datetime="2026-04-23T20:47:12+08:00">2026-04-23</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
