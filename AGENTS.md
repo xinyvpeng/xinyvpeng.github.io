@@ -49,15 +49,33 @@ npx hexo new draft "草稿标题"
 # 生成静态文件
 npx hexo generate
 
-# 部署到 GitHub Pages
+# 部署到 GitHub Pages (本地部署)
 npx hexo deploy
 
 # 清理缓存
 npx hexo clean
 
-# 推送源码到远程 (远程 main 为构建产物, source 为源码)
+# 推送源码到远程 (触发 GitHub Actions 自动部署)
 git push origin main:source
 ```
+
+## 部署方式
+
+本博客支持两种部署方式：
+
+### 1. GitHub Actions 自动部署（推荐）
+推送源码到 `source` 分支即可自动触发构建和部署到 `main`：
+```bash
+git push origin main:source
+```
+Actions 工作流: `.github/workflows/deploy.yml`
+
+### 2. 本地手动部署
+```bash
+npx hexo deploy
+```
+
+> **注意:** GitHub Actions 需要使用 `GITALK_CLIENT_SECRET` 仓库密钥。请在 GitHub 仓库 Settings → Secrets and variables → Actions 中添加此密钥。
 
 ## 设计主题
 
