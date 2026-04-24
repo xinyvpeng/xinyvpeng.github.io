@@ -239,6 +239,14 @@ forest_theme:
     - /js/forest/forest-achievements.js  # 新成就系统
 
 # ---------------------------------------------------------------
+# Vendors (CDN overrides)
+# ---------------------------------------------------------------
+
+vendors:
+  # 使用本地包装脚本替代原始 busuanzi 脚本，提供多 CDN 容灾和 localStorage 缓存
+  busuanzi: /js/forest/forest-busuanzi.js
+
+# ---------------------------------------------------------------
 # Busuanzi Statistics Settings
 # ---------------------------------------------------------------
 
