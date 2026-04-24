@@ -20,7 +20,7 @@
   </url>
   
   <url>
-    <loc>https://xinyvpeng.github.io/categories/index.html</loc>
+    <loc>https://xinyvpeng.github.io/friends/index.html</loc>
     
     <lastmod>2026-04-24</lastmod>
     
@@ -29,7 +29,7 @@
   </url>
   
   <url>
-    <loc>https://xinyvpeng.github.io/2026/04/02/2026-04-02-blog-setup/</loc>
+    <loc>https://xinyvpeng.github.io/categories/index.html</loc>
     
     <lastmod>2026-04-24</lastmod>
     
@@ -66,6 +66,15 @@
   
   <url>
     <loc>https://xinyvpeng.github.io/archives/index.html</loc>
+    
+    <lastmod>2026-04-24</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://xinyvpeng.github.io/2026/04/02/2026-04-02-blog-setup/</loc>
     
     <lastmod>2026-04-24</lastmod>
     
@@ -172,6 +181,27 @@
   </url>
   
   <url>
+    <loc>https://xinyvpeng.github.io/tags/%E5%8D%9A%E5%AE%A2/</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xinyvpeng.github.io/tags/%E6%8A%80%E6%9C%AF/</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xinyvpeng.github.io/tags/%E4%BB%8B%E7%BB%8D/</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://xinyvpeng.github.io/tags/Transformer/</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
@@ -214,21 +244,42 @@
   </url>
   
   <url>
-    <loc>https://xinyvpeng.github.io/tags/%E5%8D%9A%E5%AE%A2/</loc>
+    <loc>https://xinyvpeng.github.io/tags/Latent-Diffusion-Models/</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xinyvpeng.github.io/tags/%E6%8A%80%E6%9C%AF/</loc>
+    <loc>https://xinyvpeng.github.io/tags/%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90/</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xinyvpeng.github.io/tags/%E4%BB%8B%E7%BB%8D/</loc>
+    <loc>https://xinyvpeng.github.io/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xinyvpeng.github.io/tags/AI%E7%BB%98%E7%94%BB/</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xinyvpeng.github.io/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xinyvpeng.github.io/tags/CompVis/</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -264,48 +315,6 @@
   
   <url>
     <loc>https://xinyvpeng.github.io/tags/OpenAI/</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xinyvpeng.github.io/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xinyvpeng.github.io/tags/Latent-Diffusion-Models/</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xinyvpeng.github.io/tags/%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90/</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xinyvpeng.github.io/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xinyvpeng.github.io/tags/AI%E7%BB%98%E7%94%BB/</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xinyvpeng.github.io/tags/CompVis/</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -468,14 +477,14 @@
   </url>
   
   <url>
-    <loc>https://xinyvpeng.github.io/categories/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/</loc>
+    <loc>https://xinyvpeng.github.io/categories/%E5%85%AC%E5%91%8A/</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xinyvpeng.github.io/categories/%E5%85%AC%E5%91%8A/</loc>
+    <loc>https://xinyvpeng.github.io/categories/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -489,14 +498,14 @@
   </url>
   
   <url>
-    <loc>https://xinyvpeng.github.io/categories/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</loc>
+    <loc>https://xinyvpeng.github.io/categories/%E6%9C%BA%E5%99%A8%E4%BA%BA/</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xinyvpeng.github.io/categories/%E6%9C%BA%E5%99%A8%E4%BA%BA/</loc>
+    <loc>https://xinyvpeng.github.io/categories/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
