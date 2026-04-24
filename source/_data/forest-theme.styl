@@ -1867,3 +1867,180 @@ html {
   }
 }
 
+// ============================================================================
+// 友链页面样式 - 友情之林
+// ============================================================================
+
+.forest-friends-page {
+  padding: 2rem 0;
+}
+
+.forest-friends-subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
+  font-style: italic;
+}
+
+.forest-friends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1.5rem;
+  padding: 0.5rem;
+}
+
+.forest-friend-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.5rem 1rem;
+  background: unquote('rgba(var(--bg-card-light-rgb), 0.8)');
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+  border-left: 3px solid var(--primary-forest-medium);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg,
+      unquote('rgba(var(--primary-forest-medium-rgb), 0.05)') 0%,
+      transparent 50%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  &:hover {
+    transform: translateY(-6px);
+    border-color: unquote('rgba(var(--primary-forest-medium-rgb), 0.4)');
+    border-left-color: var(--accent-sunlight);
+    box-shadow:
+      0 12px 32px unquote('rgba(var(--primary-forest-medium-rgb), 0.2)'),
+      0 4px 12px rgba(0, 0, 0, 0.1);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .forest-friend-avatar img {
+      transform: scale(1.15) rotate(-6deg);
+    }
+  }
+}
+
+.forest-friend-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid unquote('rgba(var(--primary-forest-medium-rgb), 0.3)');
+  box-shadow: 0 0 0 0 transparent;
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+}
+
+.forest-friend-card:hover .forest-friend-avatar {
+  border-color: var(--accent-sunlight);
+  box-shadow: 0 0 16px unquote('rgba(var(--text-accent-rgb), 0.25)');
+}
+
+.forest-friend-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: unquote('rgba(var(--primary-forest-medium-rgb), 0.2)');
+  color: var(--primary-forest-medium);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.forest-friend-name {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  line-height: 1.3;
+}
+
+// 夜间模式
+[data-theme="dark"],
+[data-theme="night"] {
+  .forest-friend-card {
+    background: unquote('rgba(var(--bg-card-rgb), 0.9)');
+    border-color: unquote('rgba(var(--text-link-rgb), 0.2)');
+    border-left-color: var(--text-accent);
+
+    &:hover {
+      border-color: unquote('rgba(var(--text-accent-rgb), 0.4)');
+      border-left-color: var(--text-accent);
+      box-shadow:
+        0 12px 32px unquote('rgba(var(--text-accent-rgb), 0.15)'),
+        0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .forest-friend-avatar {
+    border-color: unquote('rgba(var(--text-accent-rgb), 0.3)');
+  }
+
+  .forest-friend-card:hover .forest-friend-avatar {
+    border-color: var(--text-accent);
+    box-shadow: 0 0 16px unquote('rgba(var(--text-accent-rgb), 0.2)');
+  }
+
+  .forest-friend-name {
+    color: var(--text-primary);
+  }
+}
+
+// 移动端适配
+@media (max-width: 768px) {
+  .forest-friends-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+
+  .forest-friend-card {
+    padding: 1.2rem 0.8rem;
+  }
+
+  .forest-friend-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .forest-friend-name {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .forest-friends-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+}
