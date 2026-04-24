@@ -2,7 +2,7 @@
 # 添加新朋友只需在末尾新增条目
 # 格式：
 # - name: 昵称
-#   avatar: 头像图片URL
+#   avatar: 头像图片URL（建议正方形图片，任意尺寸均可）
 #   url: 个人网站URL
 
 - name: hekaiyu
@@ -13,6 +13,6 @@
   avatar: http://zhangshun.top/wp-content/uploads/2025/01/1736523585-000.webp
   url: http://zhangshun.top/
 
-- name: zhangshun
-  avatar: http://zhangshun.top/wp-content/uploads/2025/01/1736523585-000.webp
-  url: http://zhangshun.top/
+# - name: zhangshun
+#   avatar: http://zhangshun.top/wp-content/uploads/2025/01/1736523585-000.webp
+#   url: http://zhangshun.top/
