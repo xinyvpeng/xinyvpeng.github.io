@@ -70,6 +70,7 @@ menu:
 social:
   GitHub: https://github.com/xinyvpeng || fab fa-github
   Email: mailto:xinyvpeng@163.com || fa fa-envelope
+  Friends: /friends/ || fa fa-link
 
 # 社交链接显示设置
 social_icons:
