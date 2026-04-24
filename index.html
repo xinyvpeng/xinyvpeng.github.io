@@ -183,18 +183,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-count">46</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -219,6 +219,116 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://xinyvpeng.github.io/2026/04/24/2026-04-24-maniptrans-paper-interpretation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Raniy">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Raniy">
+      <meta itemprop="description" content="个人技术博客，记录项目介绍、工作内容、论文阅读、笔记和个人介绍">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Raniy">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2026/04/24/2026-04-24-maniptrans-paper-interpretation/" class="post-title-link" itemprop="url">ManipTrans论文深度解析：两阶段残差学习实现高效双手灵巧操作迁移</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-04-24 15:00:00" itemprop="dateCreated datePublished" datetime="2026-04-24T15:00:00+08:00">2026-04-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" itemprop="url" rel="index"><span itemprop="name">计算机视觉</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%9C%BA%E5%99%A8%E4%BA%BA/" itemprop="url" rel="index"><span itemprop="name">机器人</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%9C%BA%E5%99%A8%E4%BA%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="ManipTrans论文深度解析：两阶段残差学习实现高效双手灵巧操作迁移"><a href="#ManipTrans论文深度解析：两阶段残差学习实现高效双手灵巧操作迁移" class="headerlink" title="ManipTrans论文深度解析：两阶段残差学习实现高效双手灵巧操作迁移"></a>ManipTrans论文深度解析：两阶段残差学习实现高效双手灵巧操作迁移</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>想象一下这样的场景：你录下一段自己双手操作物体的视频——拧开瓶盖、挤牙膏、用螺丝刀拧螺丝——然后这段视频就能在短短<strong>15分钟</strong>内教会机器人用它的机械手做出完全相同的操作。</p>
+<p>这听起来像是科幻电影中的情节。但CVPR 2025论文《ManipTrans: Efficient Dexterous Bimanual Manipulation Transfer via Residual Learning》将这个梦想极大地向前推进了一步。</p>
+<p><strong>核心问题</strong>：人类双手操作技能如何高效迁移到灵巧机器人手上？</p>
+<p>这个问题的挑战在于：</p>
+<ol>
+<li><strong>形态差异</strong>：人手和机器手的关节数、运动范围、自由度完全不同</li>
+<li><strong>物理约束</strong>：MoCap记录的人手运动在物理世界中不可行（穿插、悬空）</li>
+<li><strong>物体交互</strong>：操作物体需要精确的接触力控制</li>
+<li><strong>双手协调</strong>：两只手的协同操作难度远超单手</li>
+</ol>
+<p><strong>MANIPTRANS的核心贡献</strong>：</p>
+<ul>
+<li>提出<strong>两阶段残差学习框架</strong>，将手部模仿与物体交互解耦</li>
+<li><strong>训练效率革命</strong>：60帧操作仅需15分钟，比此前优化方法快160倍</li>
+<li>生成<strong>DEXMANIPNET数据集</strong>：61任务、3.3K episodes、134万帧</li>
+<li>跨本体（4种灵巧手）+ 真实世界部署验证</li>
+</ul>
+<p><strong>关键成果</strong>：单手成功率58.1%，双手成功率39.5%，全面超越所有基线方法。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/04/24/2026-04-24-maniptrans-paper-interpretation/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -256,9 +366,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2026-04-23 20:30:00 / 修改时间：20:47:12" itemprop="dateCreated datePublished" datetime="2026-04-23T20:30:00+08:00">2026-04-23</time>
+      <time title="创建时间：2026-04-23 20:30:00" itemprop="dateCreated datePublished" datetime="2026-04-23T20:30:00+08:00">2026-04-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-04-24 16:33:06" itemprop="dateModified" datetime="2026-04-24T16:33:06+08:00">2026-04-24</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -863,7 +979,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-23 20:47:12" itemprop="dateModified" datetime="2026-04-23T20:47:12+08:00">2026-04-23</time>
+      <time title="修改时间：2026-04-24 16:33:06" itemprop="dateModified" datetime="2026-04-24T16:33:06+08:00">2026-04-24</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -962,7 +1078,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-23 20:47:12" itemprop="dateModified" datetime="2026-04-23T20:47:12+08:00">2026-04-23</time>
+      <time title="修改时间：2026-04-24 16:33:06" itemprop="dateModified" datetime="2026-04-24T16:33:06+08:00">2026-04-24</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
