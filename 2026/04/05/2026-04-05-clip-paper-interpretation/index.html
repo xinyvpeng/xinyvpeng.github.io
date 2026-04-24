@@ -367,7 +367,9 @@
 <li><strong>ResNet变体</strong>：包括ResNet-50、ResNet-101等，经过修改适配</li>
 <li><strong>Vision Transformer（ViT）</strong>：包括ViT-B&#x2F;32、ViT-B&#x2F;16、ViT-L&#x2F;14等</li>
 </ul>
-<p>两种编码器都将输入图像转换为固定维度的特征向量：<br>$$<br>f_{\text{image}}: \mathbb{R}^{H \times W \times 3} \rightarrow \mathbb{R}^d<br>$$</p>
+<p>两种编码器都将输入图像转换为固定维度的特征向量：<br>$$
+f_{\text{image}}: \mathbb{R}^{H \times W \times 3} \rightarrow \mathbb{R}^d
+$$</p>
 <h3 id="文本编码器"><a href="#文本编码器" class="headerlink" title="文本编码器"></a>文本编码器</h3><p>文本编码器基于标准的Transformer架构：</p>
 <ol>
 <li><strong>输入处理</strong>：文本通过BPE分词，添加[CLS]和[SEP]标记</li>
@@ -375,7 +377,9 @@
 <li><strong>Transformer编码</strong>：12层Transformer块，隐藏维度512</li>
 <li><strong>特征提取</strong>：使用[CLS]标记的表示作为文本特征</li>
 </ol>
-<p>$$<br>f_{\text{text}}: \text{Token序列} \rightarrow \mathbb{R}^d<br>$$</p>
+<p>$$
+f_{\text{text}}: \text{Token序列} \rightarrow \mathbb{R}^d
+$$</p>
 <h3 id="双塔结构的关键设计"><a href="#双塔结构的关键设计" class="headerlink" title="双塔结构的关键设计"></a>双塔结构的关键设计</h3><ol>
 <li><strong>参数独立</strong>：图像编码器和文本编码器参数不共享</li>
 <li><strong>特征维度对齐</strong>：两者输出相同维度$d$的特征向量</li>
@@ -387,8 +391,15 @@
 <li>构建$N \times N$的相似度矩阵$S$，其中$s_{ij} &#x3D; \text{cosine_similarity}(I_i, T_j)$</li>
 <li>目标是最大化对角线上的相似度（正确配对），最小化非对角线上的相似度（错误配对）</li>
 </ol>
-<p><strong>余弦相似度计算</strong>：<br>$$<br>\text{cosine_similarity}(u, v) &#x3D; \frac{u \cdot v}{|u| |v|}<br>$$</p>
-<p><strong>对比损失函数</strong>（InfoNCE损失）：<br>$$<br>\begin{aligned}<br>\mathcal{L}_{\text{contrastive}} &#x3D; &amp;-\frac{1}{N} \sum_{i&#x3D;1}^N \Bigg[ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ij}&#x2F;\tau)} \<br>&amp;+ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ji}&#x2F;\tau)} \Bigg]<br>\end{aligned}<br>$$</p>
+<p><strong>余弦相似度计算</strong>：<br>$$
+\text{cosine\_similarity}(u, v) = \frac{u \cdot v}{\|u\| \|v\|}
+$$</p>
+<p><strong>对比损失函数</strong>（InfoNCE损失）：<br>$$
+\begin{aligned}
+\mathcal{L}\_{\text{contrastive}} = &-\frac{1}{N} \sum_{i=1}^N \Bigg[ \log \frac{\exp(s_{ii}/\tau)}{\sum_{j=1}^N \exp(s_{ij}/\tau)} \\
+&+ \log \frac{\exp(s_{ii}/\tau)}{\sum_{j=1}^N \exp(s_{ji}/\tau)} \Bigg]
+\end{aligned}
+$$</p>
 <p>其中$\tau$是温度参数，控制相似度分布的尖锐程度。</p>
 <h3 id="温度参数-tau-的作用"><a href="#温度参数-tau-的作用" class="headerlink" title="温度参数$\tau$的作用"></a>温度参数$\tau$的作用</h3><ul>
 <li><strong>小$\tau$</strong>：相似度分布更尖锐，模型更关注困难负样本</li>
@@ -476,14 +487,18 @@
 <p><strong>基本模板</strong>：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">templates = [</span><br><span class="line">    <span class="string">&quot;a photo of a &#123;&#125;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;a bad photo of a &#123;&#125;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;a photo of many &#123;&#125;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;a sculpture of a &#123;&#125;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;a photo of the hard to see &#123;&#125;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;a low resolution photo of the &#123;&#125;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;a rendering of a &#123;&#125;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;graffiti of a &#123;&#125;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;a drawing of a &#123;&#125;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;a photo of a &#123;&#125;&quot;</span>,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
 
-<p><strong>数学表达</strong>：<br>给定类别集合$\mathcal{Y} &#x3D; {y_1, y_2, \dots, y_K}$，对于每个类别$y_k$，生成多个提示文本：<br>$$<br>T(y_k) &#x3D; {\text{template}_1(y_k), \text{template}_2(y_k), \dots, \text{template}_M(y_k)}<br>$$</p>
+<p><strong>数学表达</strong>：<br>给定类别集合$\mathcal{Y} &#x3D; {y_1, y_2, \dots, y_K}$，对于每个类别$y_k$，生成多个提示文本：<br>$$
+T(y_k) = \{\text{template}_1(y_k), \text{template}_2(y_k), \dots, \text{template}_M(y_k)\}
+$$</p>
 <h3 id="推理过程"><a href="#推理过程" class="headerlink" title="推理过程"></a>推理过程</h3><ol>
 <li><strong>图像编码</strong>：输入图像通过图像编码器得到特征向量$I$</li>
 <li><strong>文本编码</strong>：所有类别的提示文本通过文本编码器得到特征矩阵$T$</li>
 <li><strong>相似度计算</strong>：计算$I$与$T$中每个文本特征的余弦相似度</li>
 <li><strong>类别决策</strong>：选择相似度最高的类别</li>
 </ol>
-<p><strong>数学表达</strong>：<br>$$<br>y^* &#x3D; \underset{y \in \mathcal{Y}}{\text{argmax}} \cos(f_{\text{image}}(x), f_{\text{text}}(T(y)))<br>$$</p>
+<p><strong>数学表达</strong>：<br>$$
+y^* = \underset{y \in \mathcal{Y}}{\text{argmax}} \cos(f_{\text{image}}(x), f_{\text{text}}(T(y)))
+$$</p>
 <h3 id="实际应用案例"><a href="#实际应用案例" class="headerlink" title="实际应用案例"></a>实际应用案例</h3><h4 id="ImageNet分类"><a href="#ImageNet分类" class="headerlink" title="ImageNet分类"></a>ImageNet分类</h4><ul>
 <li><strong>传统方法</strong>：需要1000类的标注数据训练专用模型</li>
 <li><strong>CLIP方法</strong>：直接使用”a photo of a {类别}”模板进行零样本分类</li>
@@ -647,7 +662,12 @@
 </tbody></table>
 <p> <strong>结论</strong>：CLIP在保持强大能力的同时，具有合理的计算开销。</p>
 <h2 id="面试问题集锦"><a href="#面试问题集锦" class="headerlink" title="面试问题集锦"></a>面试问题集锦</h2><h3 id="技术实现细节"><a href="#技术实现细节" class="headerlink" title="技术实现细节"></a>技术实现细节</h3><p><strong>Q1: CLIP的对比损失函数具体形式是什么？温度参数τ的作用？</strong></p>
-<p><strong>A1:</strong> CLIP使用对称的InfoNCE损失：<br>$$<br>\begin{aligned}<br>\mathcal{L}_{\text{contrastive}} &#x3D; &amp;-\frac{1}{N} \sum_{i&#x3D;1}^N \Bigg[ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ij}&#x2F;\tau)} \<br>&amp;+ \log \frac{\exp(s_{ii}&#x2F;\tau)}{\sum_{j&#x3D;1}^N \exp(s_{ji}&#x2F;\tau)} \Bigg]<br>\end{aligned}<br>$$<br>温度参数τ控制相似度分布的尖锐程度：小τ使分布尖锐，强调困难负样本；大τ使分布平滑，训练更稳定。CLIP将τ设为可学习参数，初始化为0.07。</p>
+<p><strong>A1:</strong> CLIP使用对称的InfoNCE损失：<br>$$
+\begin{aligned}
+\mathcal{L}\_{\text{contrastive}} = &-\frac{1}{N} \sum_{i=1}^N \Bigg[ \log \frac{\exp(s_{ii}/\tau)}{\sum_{j=1}^N \exp(s_{ij}/\tau)} \\
+&+ \log \frac{\exp(s_{ii}/\tau)}{\sum_{j=1}^N \exp(s_{ji}/\tau)} \Bigg]
+\end{aligned}
+$$<br>温度参数τ控制相似度分布的尖锐程度：小τ使分布尖锐，强调困难负样本；大τ使分布平滑，训练更稳定。CLIP将τ设为可学习参数，初始化为0.07。</p>
 <p><strong>Q2: 图像编码器和文本编码器为什么采用独立参数而不是共享参数？</strong></p>
 <p><strong>A2:</strong> 独立参数的设计基于以下考虑：</p>
 <ol>
@@ -804,12 +824,12 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/" rel="tag"># 论文解读</a>
               <a href="/tags/CLIP/" rel="tag"># CLIP</a>
               <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%AD%A6%E4%B9%A0/" rel="tag"># 多模态学习</a>
               <a href="/tags/%E5%AF%B9%E6%AF%94%E5%AD%A6%E4%B9%A0/" rel="tag"># 对比学习</a>
               <a href="/tags/%E9%9B%B6%E6%A0%B7%E6%9C%AC%E5%AD%A6%E4%B9%A0/" rel="tag"># 零样本学习</a>
               <a href="/tags/OpenAI/" rel="tag"># OpenAI</a>
+              <a href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/" rel="tag"># 论文解读</a>
           </div>
 
         
