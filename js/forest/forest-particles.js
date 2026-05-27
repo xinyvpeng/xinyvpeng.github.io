@@ -696,12 +696,17 @@ const ForestParticles = {
   }
 };
 
-// 自动初始化
+// 自动初始化（可通过 FOREST_THEME_FEATURES.particles 关闭）
 if (typeof window !== 'undefined') {
+  window.ForestParticles = ForestParticles;
+
   document.addEventListener('DOMContentLoaded', () => {
-    // 等待主题系统初始化
+    const featureEnabled = !window.FOREST_THEME_FEATURES ||
+      window.FOREST_THEME_FEATURES.particles !== false;
+    if (!featureEnabled) return;
+
     const initParticles = () => {
-      if (typeof window.ForestTheme !== 'undefined' && 
+      if (typeof window.ForestTheme !== 'undefined' &&
           typeof window.ForestTheme.getCurrentTheme === 'function') {
         ForestParticles.init();
       } else {
