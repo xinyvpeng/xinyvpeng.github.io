@@ -75,13 +75,13 @@ Actions 工作流: `.github/workflows/deploy.yml`
 npx hexo deploy
 ```
 
-> **注意:** GitHub Actions 需要使用 `GITALK_CLIENT_SECRET` 仓库密钥。请在 GitHub 仓库 Settings → Secrets and variables → Actions 中添加此密钥。
+> **注意:** GitHub Actions 需要使用 `GITALK_CLIENT_SECRET` 仓库密钥。请在 GitHub 仓库 Settings → Secrets and variables → Actions 中添加此密钥。切勿将 `.env`、`.env.*` 或构建产物 HTML 提交到仓库；若密钥曾泄露，请在 GitHub OAuth App 中轮换 `client_secret`。
 
 ## 设计主题
 
 "森林图书馆"主题特色:
 - 森林绿色系配色方案 (日间/夜间模式)
-- 粒子动画背景 (落叶、萤火虫)
+- 粒子动画背景 (落叶 canvas，`forest-particles.js`，可在 `_config.next.yml` 的 `forest_theme.features.particles` 关闭)
 - 植物图鉴系统 (自定义页面)
 - 音频控制系统 (背景音乐)
 - 成就系统

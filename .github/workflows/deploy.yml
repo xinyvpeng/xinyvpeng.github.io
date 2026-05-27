@@ -14,7 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
           fetch-depth: 1
 
       - uses: actions/setup-node@v4
@@ -28,9 +27,11 @@ jobs:
         run: |
           if [ -n "${{ secrets.GITALK_CLIENT_SECRET }}" ]; then
             echo "GITALK_CLIENT_SECRET=${{ secrets.GITALK_CLIENT_SECRET }}" > .env
+          else
+            echo "::warning::GITALK_CLIENT_SECRET is not set; Gitalk comment login will not work on the deployed site."
           fi
 
-      - run: npx hexo generate
+      - run: npx hexo clean && npx hexo generate
 
       - uses: peaceiris/actions-gh-pages@v4
         with:

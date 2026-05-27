@@ -20,7 +20,9 @@ test_load_env.js
 test-bookmark-config.js
 docs/superpowers/
 
-# 构建产物（生成在根目录）
+# 构建产物（生成在根目录，勿与 source/ 混淆）
+/about/
+/images/
 .deploy_git/
 /2026/
 /archives/

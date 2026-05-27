@@ -4,6 +4,24 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function isSafeHttpUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 hexo.extend.generator.register('friends', function() {
   const friendsPath = path.join(hexo.source_dir, '_data', 'friends.yml');
   if (!fs.existsSync(friendsPath)) {
@@ -15,19 +33,24 @@ hexo.extend.generator.register('friends', function() {
     return;
   }
 
-  const cards = friends.filter(f => f.name && f.url).map(f => {
-    const avatar = f.avatar || '';
-    const avatarHtml = avatar
-      ? `<img src="${avatar}" alt="${f.name}">`
-      : `<div class="forest-friend-avatar-placeholder">${f.name[0]}</div>`;
-    return `
-    <a href="${f.url}" class="forest-friend-card" target="_blank" rel="noopener">
+  const cards = friends
+    .filter(f => f.name && f.url && isSafeHttpUrl(f.url))
+    .map(f => {
+      const name = escapeHtml(f.name);
+      const url = escapeHtml(f.url);
+      const avatar = f.avatar && isSafeHttpUrl(f.avatar) ? escapeHtml(f.avatar) : '';
+      const avatarHtml = avatar
+        ? `<img src="${avatar}" alt="${name}">`
+        : `<div class="forest-friend-avatar-placeholder">${escapeHtml(f.name[0])}</div>`;
+      return `
+    <a href="${url}" class="forest-friend-card" target="_blank" rel="noopener noreferrer">
       <div class="forest-friend-avatar">
         ${avatarHtml}
       </div>
-      <span class="forest-friend-name">${f.name}</span>
+      <span class="forest-friend-name">${name}</span>
     </a>`;
-  }).join('\n');
+    })
+    .join('\n');
 
   return {
     path: 'friends/index.html',

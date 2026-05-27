@@ -34,8 +34,13 @@ if (fs.existsSync(envPath)) {
 
 hexo.once('generateBefore', function() {
   const secret = process.env.GITALK_CLIENT_SECRET;
-  if (secret && secret.trim()) {
-    this.theme.config.gitalk = this.theme.config.gitalk || {};
-    this.theme.config.gitalk.client_secret = secret.trim();
+  if (!secret || !secret.trim()) {
+    hexo.log.warn(
+      'GITALK_CLIENT_SECRET is not set; Gitalk comment login will not work. ' +
+      'Add it to .env locally or GitHub Actions secrets for CI builds.'
+    );
+    return;
   }
+  this.theme.config.gitalk = this.theme.config.gitalk || {};
+  this.theme.config.gitalk.client_secret = secret.trim();
 });
